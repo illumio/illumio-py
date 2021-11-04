@@ -1,0 +1,17 @@
+# pyenv
+.python-version
+
+# vscode
+.vscode/
+
+# virtual environments
+venv/
+
+# pyc files
+__pycache__/
+*.pyc
+
+# build files
+build/
+dist/
+*.egg-info/
