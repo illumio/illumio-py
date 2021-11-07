@@ -1,17 +1,21 @@
-from dataclasses import asdict, dataclass
+from dataclasses import dataclass
 
-from .policyobject import PolicyObject
-
-from illumio import ignore_empty_keys
+from .jsonobject import JsonObject
 
 
 @dataclass
-class ServicePort(PolicyObject):
+class ServicePort(JsonObject):
     port: int
     proto: int
     to_port: int = None
     icmp_type: int = None
     icmp_code: int = None
 
-    def to_json(self) -> dict:
-        return asdict(self, dict_factory=ignore_empty_keys)
+    def _decode_complex_types(self) -> None:
+        pass  # noop
+
+
+@dataclass
+class WindowsServicePort(ServicePort):
+    service_name: str = None
+    process_name: str = None
