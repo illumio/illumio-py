@@ -15,3 +15,6 @@ __pycache__/
 build/
 dist/
 *.egg-info/
+
+# setuptools_scm local dev version file
+_version.py
