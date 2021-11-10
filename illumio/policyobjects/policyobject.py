@@ -37,3 +37,4 @@ class PolicyObject(JsonObject):
     updated_at: str = None
     deleted_at: str = None
     update_type: str = None
+    delete_type: str = None
