@@ -1,3 +1,5 @@
+import re
+import socket
 from dataclasses import dataclass, field
 from typing import List
 
@@ -13,6 +15,8 @@ from . import (
     VirtualServer,
     VirtualService
 )
+
+FQDN_REGEX = re.compile('(?=^.{4,253}$)(^((?!-)[a-zA-Z0-9-]{1,63}(?<!-)\.)+[a-zA-Z]{2,63}$)')
 
 AND = 'and'
 OR = 'or'
@@ -56,7 +60,7 @@ class TrafficQueryFilter(JsonObject):
     transmission: str = None
 
     def _validate(self):
-        if self.transmission and not Transmission.has_value(self.transmission):
+        if self.transmission and not Transmission.has_value(self.transmission.lower()):
             raise IllumioException("Invalid transmission: {}".format(self.transmission))
 
     def _decode_complex_types(self):
@@ -100,15 +104,70 @@ class TrafficQuery(JsonObject):
     max_results: int = 100000
     query_name: str = None  # required for async traffic queries
 
+    @staticmethod
+    def build(start_date: str = None, end_date: str = None,
+            include_sources=[], exclude_sources=[],
+            include_destinations=[], exclude_destinations=[],
+            include_services=[], exclude_services=[], policy_decisions=[],
+            exclude_workloads_from_ip_list_query=True, max_results=100000,
+            query_name=None) -> 'TrafficQuery':
+        return TrafficQuery(
+            start_date=start_date, end_date=end_date,
+            sources={
+                'include': _parse_traffic_filters(include_sources, include=True),
+                'exclude': _parse_traffic_filters(exclude_sources)
+            },
+            destinations={
+                'include': _parse_traffic_filters(include_destinations, include=True),
+                'exclude': _parse_traffic_filters(exclude_destinations)
+            },
+            services={
+                'include': include_services,
+                'exclude': exclude_services
+            },
+            policy_decisions=policy_decisions,
+            exclude_workloads_from_ip_list_query=exclude_workloads_from_ip_list_query,
+            max_results=max_results, query_name=query_name
+        )
+
     def _validate(self):
         for policy_decision in self.policy_decisions:
-            if not PolicyDecision.has_value(policy_decision):
+            if not PolicyDecision.has_value(policy_decision.lower()):
                 raise IllumioException("Invalid policy_decision: {}".format(policy_decision))
+        if self.sources_destinations_query_op.lower() not in {AND, OR}:
+            raise IllumioException("sources_destinations_query_op must be one of 'and' or 'or', was {}".format(self.sources_destinations_query_op))
 
     def _decode_complex_types(self):
         self.sources = TrafficQueryFilterBlock.from_json(self.sources)
         self.destinations = TrafficQueryFilterBlock.from_json(self.destinations)
         self.services = TrafficQueryServiceBlock.from_json(self.services)
+
+
+def _parse_traffic_filters(refs: List[str], include=False) -> List[object]:
+    traffic_objects = []
+    for ref in refs:
+        if re.match(FQDN_REGEX, ref):
+            if include:
+                raise IllumioException("Cannot specify consumer FQDN filter")
+            o = {'fqdn': ref}
+        elif 'label' in ref:
+            o = {'label': {'href': ref}}
+        elif 'workload' in ref:
+            o = {'workload': {'href': ref}}
+        elif 'iplist' in ref:
+            o = {'ip_list': {'href': ref}}
+        elif Transmission.has_value(ref.lower()):
+            if include:
+                raise IllumioException("Cannot specify consumer transmission filter")
+            o = {'transmission': ref}
+        else:
+            try:
+                socket.inet_aton(ref)  # check if the reference is an IP address
+                o = {'ip_address': ref}
+            except socket.error:
+                raise IllumioException('Invalid traffic filter type: {}').format(ref)
+        traffic_objects.append([o] if include else o)
+    return traffic_objects
 
 
 @dataclass
@@ -152,11 +211,11 @@ class TrafficFlow(JsonObject):
     network: Network = None
 
     def _validate(self):
-        if self.flow_direction and not FlowDirection.has_value(self.flow_direction):
+        if self.flow_direction and not FlowDirection.has_value(self.flow_direction.lower()):
             raise IllumioException("Invalid flow_direction: {}".format(self.flow_direction))
-        if self.policy_decision and not PolicyDecision.has_value(self.policy_decision):
+        if self.policy_decision and not PolicyDecision.has_value(self.policy_decision.lower()):
             raise IllumioException("Invalid policy_decision: {}".format(self.policy_decision))
-        if self.transmission and not Transmission.has_value(self.transmission):
+        if self.transmission and not Transmission.has_value(self.transmission.lower()):
             raise IllumioException("Invalid transmission: {}".format(self.transmission))
 
     def _decode_complex_types(self):

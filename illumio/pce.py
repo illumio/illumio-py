@@ -1,10 +1,11 @@
+import json
 import time
 from typing import List
 
 from requests import Session, Response
 
 from .exceptions import IllumioApiException
-from .policyobjects import VirtualService, TrafficFlow
+from .policyobjects import VirtualService, TrafficQuery, TrafficFlow
 
 
 class PolicyComputeEngine:
@@ -20,9 +21,7 @@ class PolicyComputeEngine:
 
     def _request(self, method: str, endpoint: str, include_org=True, **kwargs) -> Response:
         try:
-            if 'data' in kwargs or 'json' in kwargs:
-                headers = kwargs.get('headers', {})
-                kwargs['headers'] = {**headers, **{'Content-Type': 'application/json'}}
+            self._set_request_headers(**kwargs)
             url = self._build_url(endpoint, include_org)
             response = self._session.request(method, url, **kwargs)
             response.raise_for_status()
@@ -30,14 +29,20 @@ class PolicyComputeEngine:
         except Exception as e:
             raise IllumioApiException from e
 
+    def _set_request_headers(self, is_async=False, **kwargs):
+        headers = kwargs.get('headers', {})
+        if 'data' in kwargs or 'json' in kwargs:
+            kwargs['headers'] = {**headers, **{'Content-Type': 'application/json'}}
+        if is_async:
+            kwargs['headers'] = {**headers, **{'Prefer': 'respond-async'}}
+
     def _build_url(self, endpoint: str, include_org=True) -> str:
         org_str = '/orgs/{}'.format(self.org_id) if include_org else ''
         return '{}{}{}'.format(self.base_url, org_str, endpoint)
 
     def get_collection(self, endpoint: str, **kwargs) -> Response:
         try:
-            headers = kwargs.get('headers', {})
-            kwargs['headers'] = {**headers, **{'Prefer': 'respond-async'}}
+            self._set_request_headers(is_async=True, **kwargs)
             response = self._session.get(self._build_url(endpoint), **kwargs)
             response.raise_for_status()
             location = response.headers['Location']
@@ -46,6 +51,7 @@ class PolicyComputeEngine:
             while True:
                 time.sleep(retry_after)
                 response = self.get(location, include_org=False)
+                response.raise_for_status()
                 poll_result = response.json()
                 poll_status = poll_result['status']
 
@@ -54,7 +60,10 @@ class PolicyComputeEngine:
                 elif poll_status == 'done':
                     collection_href = poll_result['result']['href']
                     break
-            return self.get(collection_href, include_org=False)
+
+            response = self.get(collection_href, include_org=False)
+            response.raise_for_status()
+            return response
         except Exception as e:
             raise IllumioApiException from e
 
@@ -80,20 +89,40 @@ class PolicyComputeEngine:
         response = self.post('/sec_policy/draft/virtual_services', **kwargs)
         return VirtualService.from_json(response.json())
 
-    def get_traffic_flows(self, start_date: str = None, end_date: str = None,
-            include_sources=[], exclude_sources=[],
-            include_destinations=[], exclude_destinations=[],
-            include_services=[], exclude_services=[],
-            policy_decisions=[],
-            exclude_workloads_from_ip_list_query=True, **kwargs) -> List[TrafficFlow]:
-        TrafficFlow._validate_policy_decisions(policy_decisions)
-        kwargs['json'] = {
-            'start_date': start_date, 'end_date': end_date,
-            'sources': {'include': include_sources, 'exclude': exclude_sources},
-            'destinations': {'include': include_destinations, 'exclude': exclude_destinations},
-            'services': {'include': include_services, 'exclude': exclude_services},
-            'policy_decisions': policy_decisions,
-            'exclude_workloads_from_ip_list_query': exclude_workloads_from_ip_list_query
-        }
+    def get_traffic_flows(self, traffic_query: TrafficQuery, **kwargs) -> List[TrafficFlow]:
+        kwargs['json'] = traffic_query.to_json()
         response = self.post('/traffic_flows/traffic_analysis_queries', **kwargs)
+        print(response.json())
         return [TrafficFlow.from_json(flow) for flow in response.json()]
+
+    def get_traffic_flows_async(self, query_name: str, traffic_query: TrafficQuery, **kwargs) -> List[TrafficFlow]:
+        try:
+            traffic_query.query_name = query_name
+            # bafflingly, the async API doesn't accept a JSON string, so we must convert back to an object
+            kwargs['json'] = json.loads(traffic_query.to_json())
+            self._set_request_headers(is_async=True, **kwargs)
+            response = self._session.post(self._build_url('/traffic_flows/async_queries'), **kwargs)
+            response.raise_for_status()
+            query_status = response.json()
+            location = query_status['href']
+            backoff = 0.1
+
+            while True:
+                backoff *= 2
+                time.sleep(backoff)
+                response = self.get(location, include_org=False)
+                response.raise_for_status()
+                poll_result = response.json()
+                poll_status = poll_result['status']
+
+                if poll_status == 'failed':
+                    raise Exception('Async collection job failed: ' + poll_result['result']['message'])
+                elif poll_status == 'completed':
+                    collection_href = poll_result['result']
+                    break
+
+            response = self.get(collection_href, include_org=False)
+            response.raise_for_status()
+            return [TrafficFlow.from_json(flow) for flow in response.json()]
+        except Exception as e:
+            raise IllumioApiException from e

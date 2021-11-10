@@ -30,13 +30,19 @@ def mock_traffic_response() -> List[TrafficFlow]:
 
 
 @pytest.fixture(autouse=True)
-def mock_requests(requests_mock, mock_traffic_query):
+def mock_requests(requests_mock, mock_traffic_response):
     matcher = re.compile('/traffic_flows/traffic_analysis_queries')
-    requests_mock.register_uri(ANY, matcher, json=mock_traffic_query.to_json())
+    traffic_response_json = [flow.to_json() for flow in mock_traffic_response]
+    requests_mock.register_uri(ANY, matcher, json=traffic_response_json)
 
 
 def test_query_structure(mock_traffic_query):
     assert type(mock_traffic_query.sources) is TrafficQueryFilterBlock
+
+
+def test_traffic_query(pce, mock_traffic_query):
+    traffic_flows = pce.get_traffic_flows(mock_traffic_query)
+    assert len(traffic_flows) > 1
 
 
 def test_invalid_policy_decision():
