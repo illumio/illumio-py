@@ -1,4 +1,5 @@
 from dataclasses import dataclass, field
+from datetime import datetime
 from typing import List
 
 from illumio import IllumioException
@@ -74,6 +75,7 @@ class TrafficQuery(JsonObject):
     exclude_workloads_from_ip_list_query: bool = True
     sources_destinations_query_op: str = AND
     max_results: int = 100000
+    query_name: str = None  # required for async traffic queries
 
     def __post_init__(self):
         self._validate_start_end_dates()
@@ -85,7 +87,15 @@ class TrafficQuery(JsonObject):
         self.services = TrafficQueryServiceBlock.from_json(self.services)
 
     def _validate_start_end_dates(self):
-        pass
+        try:
+            start_date = datetime.strptime(self.start_date, "%Y-%m-%dT%H:%M:%S.%fZ")
+            end_date = datetime.strptime(self.end_date, "%Y-%m-%dT%H:%M:%S.%fZ")
+        except Exception as e:
+            raise IllumioException("Invalid start/end dates: must be valid ISO-8601 format") from e
+        if start_date >= datetime.now():
+            raise IllumioException("Invalid date range: start date {} occurs after current time".format(self.start_date))
+        if start_date >= end_date:
+            raise IllumioException("Invalid date range: start date {} occurs after end date {}".format(self.start_date, self.end_date))
 
     def _validate_policy_decisions(self):
         for policy_decision in self.policy_decisions:
