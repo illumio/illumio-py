@@ -7,7 +7,7 @@ from requests_mock import ANY
 from illumio import (
     IllumioException,
     VirtualService,
-    ServicePort,
+    Service,
     ServiceAddress,
     Label
 )
@@ -28,7 +28,7 @@ def mock_requests(requests_mock, mock_virtual_service):
 
 
 def test_decoded_service_ports(mock_virtual_service):
-    assert type(mock_virtual_service.service_ports[0]) is ServicePort
+    assert type(mock_virtual_service.service_ports[0]) is Service
 
 
 def test_decoded_service_addresses(mock_virtual_service):
