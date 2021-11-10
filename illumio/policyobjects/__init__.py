@@ -7,5 +7,8 @@ from .network import *
 from .virtualserver import *
 from .virtualservice import *
 from .vulnerability import *
+from .vulnerabilityreport import *
+from .ven import *
+from .containercluster import *
 from .workload import *
 from .trafficanalysis import *
