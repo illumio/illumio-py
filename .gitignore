@@ -10,6 +10,7 @@ venv/
 # pyc files
 __pycache__/
 *.pyc
+.pytest_cache/
 
 # build files
 build/
