@@ -1,0 +1,416 @@
+[
+    {
+        "dst": {
+            "ip": "10.0.9.226",
+            "workload": {
+                "hostname": "centos7",
+                "href": "/orgs/1/workloads/d56a451c-08c2-4b34-a6ae-d7af441a1335",
+                "labels": [
+                    {
+                        "href": "/orgs/1/labels/27157",
+                        "key": "app",
+                        "value": "A-TEST"
+                    },
+                    {
+                        "href": "/orgs/1/labels/27158",
+                        "key": "env",
+                        "value": "E-DEV"
+                    },
+                    {
+                        "href": "/orgs/1/labels/27159",
+                        "key": "loc",
+                        "value": "L-TEST"
+                    },
+                    {
+                        "href": "/orgs/1/labels/27156",
+                        "key": "role",
+                        "value": "R-TEST"
+                    }
+                ],
+                "name": "centos7",
+                "os_type": "linux"
+            }
+        },
+        "dst_bi": 0,
+        "dst_bo": 0,
+        "flow_direction": "inbound",
+        "num_connections": 1,
+        "policy_decision": "potentially_blocked",
+        "service": {
+            "port": 1234,
+            "proto": 6
+        },
+        "src": {
+            "ip": "10.0.6.63",
+            "workload": {
+                "hostname": "centos7",
+                "href": "/orgs/1/workloads/b27eb7b5-b51c-4d4e-9a68-592150060a45",
+                "labels": [
+                    {
+                        "href": "/orgs/1/labels/3089",
+                        "key": "app",
+                        "value": "A-APP"
+                    },
+                    {
+                        "href": "/orgs/1/labels/10",
+                        "key": "env",
+                        "value": "E-TEST"
+                    },
+                    {
+                        "href": "/orgs/1/labels/27148",
+                        "key": "loc",
+                        "value": "L-ILLUMIO"
+                    },
+                    {
+                        "href": "/orgs/1/labels/5",
+                        "key": "role",
+                        "value": "R-DB"
+                    }
+                ],
+                "name": "centos7",
+                "os_type": "linux"
+            }
+        },
+        "state": "closed",
+        "timestamp_range": {
+            "first_detected": "2021-09-29T09:50:17Z",
+            "last_detected": "2021-09-29T09:50:17Z"
+        }
+    },
+    {
+        "dst": {
+            "ip": "10.0.9.226",
+            "workload": {
+                "hostname": "centos7",
+                "href": "/orgs/1/workloads/d56a451c-08c2-4b34-a6ae-d7af441a1335",
+                "labels": [
+                    {
+                        "href": "/orgs/1/labels/27157",
+                        "key": "app",
+                        "value": "A-TEST"
+                    },
+                    {
+                        "href": "/orgs/1/labels/27158",
+                        "key": "env",
+                        "value": "E-DEV"
+                    },
+                    {
+                        "href": "/orgs/1/labels/27159",
+                        "key": "loc",
+                        "value": "L-TEST"
+                    },
+                    {
+                        "href": "/orgs/1/labels/27156",
+                        "key": "role",
+                        "value": "R-TEST"
+                    }
+                ],
+                "name": "centos7",
+                "os_type": "linux"
+            }
+        },
+        "dst_bi": 0,
+        "dst_bo": 0,
+        "flow_direction": "outbound",
+        "num_connections": 1,
+        "policy_decision": "potentially_blocked",
+        "service": {
+            "port": 1234,
+            "proto": 6,
+            "user_name": "root"
+        },
+        "src": {
+            "ip": "10.0.6.63",
+            "workload": {
+                "hostname": "centos7",
+                "href": "/orgs/1/workloads/b27eb7b5-b51c-4d4e-9a68-592150060a45",
+                "labels": [
+                    {
+                        "href": "/orgs/1/labels/3089",
+                        "key": "app",
+                        "value": "A-APP"
+                    },
+                    {
+                        "href": "/orgs/1/labels/10",
+                        "key": "env",
+                        "value": "E-TEST"
+                    },
+                    {
+                        "href": "/orgs/1/labels/27148",
+                        "key": "loc",
+                        "value": "L-ILLUMIO"
+                    },
+                    {
+                        "href": "/orgs/1/labels/5",
+                        "key": "role",
+                        "value": "R-DB"
+                    }
+                ],
+                "name": "centos7",
+                "os_type": "linux"
+            }
+        },
+        "state": "closed",
+        "timestamp_range": {
+            "first_detected": "2021-09-29T09:50:17Z",
+            "last_detected": "2021-09-29T09:50:17Z"
+        }
+    },
+    {
+        "dst": {
+            "ip": "10.8.4.233",
+            "workload": {
+                "hostname": "test-workload-2",
+                "href": "/orgs/1/workloads/a1a2bd2f-b74b-4068-a177-11b0cb1c92c4",
+                "labels": [
+                    {
+                        "href": "/orgs/1/labels/3089",
+                        "key": "app",
+                        "value": "A-APP"
+                    },
+                    {
+                        "href": "/orgs/1/labels/10",
+                        "key": "env",
+                        "value": "E-TEST"
+                    },
+                    {
+                        "href": "/orgs/1/labels/27148",
+                        "key": "loc",
+                        "value": "L-ILLUMIO"
+                    },
+                    {
+                        "href": "/orgs/1/labels/27153",
+                        "key": "role",
+                        "value": "R-WEB"
+                    }
+                ],
+                "name": "test-workload-2",
+                "os_type": "linux"
+            }
+        },
+        "dst_bi": 0,
+        "dst_bo": 0,
+        "flow_direction": "inbound",
+        "num_connections": 1,
+        "policy_decision": "potentially_blocked",
+        "service": {
+            "port": 1234,
+            "proto": 6
+        },
+        "src": {
+            "ip": "10.2.8.183"
+        },
+        "state": "closed",
+        "timestamp_range": {
+            "first_detected": "2021-10-02T14:48:39Z",
+            "last_detected": "2021-10-02T14:48:39Z"
+        }
+    },
+    {
+        "dst": {
+            "ip": "10.0.6.63",
+            "workload": {
+                "hostname": "centos7",
+                "href": "/orgs/1/workloads/b27eb7b5-b51c-4d4e-9a68-592150060a45",
+                "labels": [
+                    {
+                        "href": "/orgs/1/labels/3089",
+                        "key": "app",
+                        "value": "A-APP"
+                    },
+                    {
+                        "href": "/orgs/1/labels/10",
+                        "key": "env",
+                        "value": "E-TEST"
+                    },
+                    {
+                        "href": "/orgs/1/labels/27148",
+                        "key": "loc",
+                        "value": "L-ILLUMIO"
+                    },
+                    {
+                        "href": "/orgs/1/labels/5",
+                        "key": "role",
+                        "value": "R-DB"
+                    }
+                ],
+                "name": "centos7",
+                "os_type": "linux"
+            }
+        },
+        "dst_bi": 0,
+        "dst_bo": 0,
+        "flow_direction": "outbound",
+        "num_connections": 2,
+        "policy_decision": "potentially_blocked",
+        "service": {
+            "port": 1234,
+            "proto": 6,
+            "user_name": "root"
+        },
+        "src": {
+            "ip": "10.0.9.226",
+            "workload": {
+                "hostname": "centos7",
+                "href": "/orgs/1/workloads/d56a451c-08c2-4b34-a6ae-d7af441a1335",
+                "labels": [
+                    {
+                        "href": "/orgs/1/labels/27157",
+                        "key": "app",
+                        "value": "A-TEST"
+                    },
+                    {
+                        "href": "/orgs/1/labels/27158",
+                        "key": "env",
+                        "value": "E-DEV"
+                    },
+                    {
+                        "href": "/orgs/1/labels/27159",
+                        "key": "loc",
+                        "value": "L-TEST"
+                    },
+                    {
+                        "href": "/orgs/1/labels/27156",
+                        "key": "role",
+                        "value": "R-TEST"
+                    }
+                ],
+                "name": "centos7",
+                "os_type": "linux"
+            }
+        },
+        "state": "closed",
+        "timestamp_range": {
+            "first_detected": "2021-09-29T09:48:59Z",
+            "last_detected": "2021-09-29T09:49:19Z"
+        }
+    },
+    {
+        "dst": {
+            "ip": "10.0.6.63",
+            "workload": {
+                "hostname": "centos7",
+                "href": "/orgs/1/workloads/b27eb7b5-b51c-4d4e-9a68-592150060a45",
+                "labels": [
+                    {
+                        "href": "/orgs/1/labels/3089",
+                        "key": "app",
+                        "value": "A-APP"
+                    },
+                    {
+                        "href": "/orgs/1/labels/10",
+                        "key": "env",
+                        "value": "E-TEST"
+                    },
+                    {
+                        "href": "/orgs/1/labels/27148",
+                        "key": "loc",
+                        "value": "L-ILLUMIO"
+                    },
+                    {
+                        "href": "/orgs/1/labels/5",
+                        "key": "role",
+                        "value": "R-DB"
+                    }
+                ],
+                "name": "centos7",
+                "os_type": "linux"
+            }
+        },
+        "dst_bi": 0,
+        "dst_bo": 0,
+        "flow_direction": "inbound",
+        "num_connections": 1,
+        "policy_decision": "potentially_blocked",
+        "service": {
+            "port": 1234,
+            "proto": 6
+        },
+        "src": {
+            "ip": "10.0.9.226",
+            "workload": {
+                "hostname": "centos7",
+                "href": "/orgs/1/workloads/d56a451c-08c2-4b34-a6ae-d7af441a1335",
+                "labels": [
+                    {
+                        "href": "/orgs/1/labels/27157",
+                        "key": "app",
+                        "value": "A-TEST"
+                    },
+                    {
+                        "href": "/orgs/1/labels/27158",
+                        "key": "env",
+                        "value": "E-DEV"
+                    },
+                    {
+                        "href": "/orgs/1/labels/27159",
+                        "key": "loc",
+                        "value": "L-TEST"
+                    },
+                    {
+                        "href": "/orgs/1/labels/27156",
+                        "key": "role",
+                        "value": "R-TEST"
+                    }
+                ],
+                "name": "centos7",
+                "os_type": "linux"
+            }
+        },
+        "state": "closed",
+        "timestamp_range": {
+            "first_detected": "2021-09-29T09:49:19Z",
+            "last_detected": "2021-09-29T09:49:19Z"
+        }
+    },
+    {
+        "dst": {
+            "ip": "10.8.4.216",
+            "workload": {
+                "hostname": "test-workload-1",
+                "href": "/orgs/1/workloads/1f28c4e8-64ec-48b9-aa25-27611b7210f6",
+                "labels": [
+                    {
+                        "href": "/orgs/1/labels/3089",
+                        "key": "app",
+                        "value": "A-APP"
+                    },
+                    {
+                        "href": "/orgs/1/labels/10",
+                        "key": "env",
+                        "value": "E-TEST"
+                    },
+                    {
+                        "href": "/orgs/1/labels/27148",
+                        "key": "loc",
+                        "value": "L-ILLUMIO"
+                    },
+                    {
+                        "href": "/orgs/1/labels/27151",
+                        "key": "role",
+                        "value": "R-LB"
+                    }
+                ],
+                "name": "test-workload-1",
+                "os_type": "linux"
+            }
+        },
+        "dst_bi": 0,
+        "dst_bo": 0,
+        "flow_direction": "inbound",
+        "num_connections": 1,
+        "policy_decision": "potentially_blocked",
+        "service": {
+            "port": 1234,
+            "proto": 6
+        },
+        "src": {
+            "ip": "10.2.8.183"
+        },
+        "state": "closed",
+        "timestamp_range": {
+            "first_detected": "2021-10-02T15:20:27Z",
+            "last_detected": "2021-10-02T15:20:27Z"
+        }
+    }
+]

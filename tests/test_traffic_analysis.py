@@ -1,15 +1,20 @@
+import json
 import os
 import re
+from typing import List
 
 import pytest
 from requests_mock import ANY
 
 from illumio import (
+    IllumioException,
     TrafficQuery,
-    TrafficQueryFilterBlock
+    TrafficQueryFilterBlock,
+    TrafficFlow
 )
 
 MOCK_TRAFFIC_QUERY = os.path.join(pytest.DATA_DIR, 'traffic_query.json')
+MOCK_TRAFFIC_RESPONSE = os.path.join(pytest.DATA_DIR, 'traffic_query_response.json')
 
 
 @pytest.fixture(scope='module')
@@ -18,11 +23,27 @@ def mock_traffic_query() -> TrafficQuery:
         yield TrafficQuery.from_json(f.read())
 
 
+@pytest.fixture(scope='module')
+def mock_traffic_response() -> List[TrafficFlow]:
+    with open(MOCK_TRAFFIC_RESPONSE, 'r') as f:
+        yield [TrafficFlow.from_json(o) for o in json.loads(f.read())]
+
+
 @pytest.fixture(autouse=True)
 def mock_requests(requests_mock, mock_traffic_query):
     matcher = re.compile('/traffic_flows/traffic_analysis_queries')
     requests_mock.register_uri(ANY, matcher, json=mock_traffic_query.to_json())
 
 
-def test_decoded_structure(mock_traffic_query):
+def test_query_structure(mock_traffic_query):
     assert type(mock_traffic_query.sources) is TrafficQueryFilterBlock
+
+
+def test_invalid_policy_decision():
+    with pytest.raises(IllumioException):
+        TrafficQuery(start_date='2021-11-05', end_date='2021-11-12', policy_decisions=["invalid_policy_decision"])
+
+
+def test_response_structure(mock_traffic_response):
+    assert len(mock_traffic_response) > 1
+    assert mock_traffic_response[0].src is not None
