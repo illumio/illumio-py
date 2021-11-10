@@ -1,11 +1,25 @@
-from dataclasses import dataclass
+import json
+from abc import ABC
+from dataclasses import dataclass, asdict
 
-from .jsonobject import JsonObject
+from illumio import ignore_empty_keys
 
 
 @dataclass
-class Reference:
-    href: str
+class JsonObject(ABC):
+
+    def to_json(self) -> dict:
+        return json.dumps(asdict(self, dict_factory=ignore_empty_keys))
+
+    def _decode_complex_types(self) -> None:
+        pass
+
+    @classmethod
+    def from_json(cls, data) -> 'JsonObject':
+        data = json.loads(data) if type(data) is str else data
+        o = cls(**data)
+        o._decode_complex_types()
+        return o
 
 
 @dataclass
@@ -17,11 +31,3 @@ class PolicyObject(JsonObject):
     updated_at: str = None
     deleted_at: str = None
     update_type: str = None
-    created_by: Reference = None
-    updated_by: Reference = None
-    deleted_by: Reference = None
-
-    def _decode_complex_types(self) -> None:
-        self.created_by = Reference(**self.created_by) if self.created_by else None
-        self.updated_by = Reference(**self.updated_by) if self.updated_by else None
-        self.deleted_by = Reference(**self.deleted_by) if self.deleted_by else None
