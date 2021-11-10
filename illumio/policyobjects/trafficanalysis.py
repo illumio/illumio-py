@@ -46,8 +46,8 @@ class TrafficQueryFilter(JsonObject):
 class TrafficQueryFilterBlock(JsonObject):
     # bafflingly, the include parameter is specified as a list of lists
     # of object references or key-value pairs.
-    include: List[List[TrafficQueryFilter]]
-    exclude: List[TrafficQueryFilter]
+    include: List[List[TrafficQueryFilter]] = field(default_factory=list)
+    exclude: List[TrafficQueryFilter] = field(default_factory=list)
 
     def _decode_complex_types(self):
         self.include = [[TrafficQueryFilter.from_json(o) for o in block] for block in self.include]
@@ -56,8 +56,8 @@ class TrafficQueryFilterBlock(JsonObject):
 
 @dataclass
 class TrafficQueryServiceBlock(JsonObject):
-    include: List[Service]
-    exclude: List[Service]
+    include: List[Service] = field(default_factory=list)
+    exclude: List[Service] = field(default_factory=list)
 
     def _decode_complex_types(self):
         self.include = [Service.from_json(o) for o in self.include]
@@ -68,9 +68,9 @@ class TrafficQueryServiceBlock(JsonObject):
 class TrafficQuery(JsonObject):
     start_date: str
     end_date: str
-    sources: TrafficQueryFilterBlock
-    destinations: TrafficQueryFilterBlock
-    services: TrafficQueryServiceBlock
+    sources: TrafficQueryFilterBlock = field(default_factory=TrafficQueryFilterBlock)
+    destinations: TrafficQueryFilterBlock = field(default_factory=TrafficQueryFilterBlock)
+    services: TrafficQueryServiceBlock = field(default_factory=TrafficQueryServiceBlock)
     policy_decisions: List[str] = field(default_factory=list)
     exclude_workloads_from_ip_list_query: bool = True
     sources_destinations_query_op: str = AND
