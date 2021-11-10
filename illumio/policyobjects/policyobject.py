@@ -8,6 +8,12 @@ from illumio import ignore_empty_keys
 @dataclass
 class JsonObject(ABC):
 
+    def __post_init__(self):
+        self._validate()
+
+    def _validate(self):
+        pass
+
     def to_json(self) -> dict:
         return json.dumps(asdict(self, dict_factory=ignore_empty_keys))
 

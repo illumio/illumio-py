@@ -21,7 +21,7 @@ class VirtualService(UserObject):
     labels: List[Label] = None
     caps: List[str] = None
 
-    def __post_init__(self):
+    def _validate(self):
         if not self.name:
             raise IllumioException("No name specified for Virtual Service")
         if self.apply_to not in {HOST_ONLY, INTERNAL_BRIDGE_NETWORK}:
