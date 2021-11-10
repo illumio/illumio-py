@@ -1,9 +1,12 @@
 from dataclasses import dataclass
 from typing import List
 
-from .user import UserObject
-from .label import Label
-from .service import ServiceAddress, Service
+from . import (
+    UserObject,
+    Label,
+    ServiceAddress,
+    Service
+)
 
 from illumio import IllumioException
 
