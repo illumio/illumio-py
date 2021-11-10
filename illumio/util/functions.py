@@ -1,16 +1,8 @@
-from typing import Union
-
-from .constants import Protocol
-
-from illumio import IllumioException
+import socket
 
 
-def convert_protocol(protocol: Union[str, int]) -> int:
-    try:
-        proto = Protocol(protocol) if type(protocol) is int else Protocol[protocol.upper()]
-        return proto.value
-    except:
-        raise IllumioException("Unknown or invalid protocol: {0}".format(protocol))
+def convert_protocol(protocol: str) -> int:
+    return socket.getprotobyname(protocol)
 
 
 def ignore_empty_keys(o):
