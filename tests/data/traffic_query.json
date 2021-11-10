@@ -1,0 +1,66 @@
+{
+    "start_date": "2021-07-31",
+    "end_date": "2021-07-31",
+    "sources_destinations_query_op": "and",
+    "sources": {
+      "include": [
+        [
+          {
+            "label": {
+              "href": "string"
+            }
+          }
+        ]
+      ],
+      "exclude": [
+        {
+          "label": {
+            "href": "string"
+          }
+        }
+      ]
+    },
+    "destinations": {
+      "include": [
+        [
+          {
+            "label": {
+              "href": "string"
+            }
+          }
+        ]
+      ],
+      "exclude": [
+        {
+          "label": {
+            "href": "string"
+          }
+        }
+      ]
+    },
+    "services": {
+      "include": [
+        {
+          "port": 0,
+          "to_port": 0,
+          "proto": 0,
+          "process_name": "string",
+          "windows_service_name": "string"
+        }
+      ],
+      "exclude": [
+        {
+          "port": 0,
+          "to_port": 0,
+          "proto": 0,
+          "process_name": "string",
+          "windows_service_name": "string"
+        }
+      ]
+    },
+    "policy_decisions": [
+      "allowed"
+    ],
+    "max_results": 0,
+    "exclude_workloads_from_ip_list_query": true
+}

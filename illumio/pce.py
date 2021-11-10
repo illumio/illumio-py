@@ -1,9 +1,10 @@
 import time
+from typing import List
 
 from requests import Session, Response
 
 from .exceptions import IllumioApiException
-from .policyobjects import VirtualService
+from .policyobjects import VirtualService, TrafficFlow
 
 
 class PolicyComputeEngine:
@@ -78,3 +79,21 @@ class PolicyComputeEngine:
         kwargs['json'] = virtual_service.to_json()
         response = self.post('/sec_policy/draft/virtual_services', **kwargs)
         return VirtualService.from_json(response.json())
+
+    def get_traffic_flows(self, start_date: str = None, end_date: str = None,
+            include_sources=[], exclude_sources=[],
+            include_destinations=[], exclude_destinations=[],
+            include_services=[], exclude_services=[],
+            policy_decisions=[],
+            exclude_workloads_from_ip_list_query=True, **kwargs) -> List[TrafficFlow]:
+        TrafficFlow._validate_policy_decisions(policy_decisions)
+        kwargs['json'] = {
+            'start_date': start_date, 'end_date': end_date,
+            'sources': {'include': include_sources, 'exclude': exclude_sources},
+            'destinations': {'include': include_destinations, 'exclude': exclude_destinations},
+            'services': {'include': include_services, 'exclude': exclude_services},
+            'policy_decisions': policy_decisions,
+            'exclude_workloads_from_ip_list_query': exclude_workloads_from_ip_list_query
+        }
+        response = self.post('/traffic_flows/traffic_analysis_queries', **kwargs)
+        return [TrafficFlow.from_json(flow) for flow in response.json()]
