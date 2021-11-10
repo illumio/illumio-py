@@ -14,6 +14,10 @@ class Service(JsonObject):
     process_name: str = None
     windows_service_name: str = None
     user_name: str = None
+    # additional custom fields from Workload services definition. baffling
+    address: str = None
+    package: str = None
+    win_service_name: str = None
 
 
 @dataclass
