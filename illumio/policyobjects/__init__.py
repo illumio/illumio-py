@@ -3,7 +3,9 @@ from .user import *
 from .service import *
 from .iplist import *
 from .label import *
-from .workload import *
+from .network import *
 from .virtualserver import *
 from .virtualservice import *
+from .vulnerability import *
+from .workload import *
 from .trafficanalysis import *
