@@ -1,10 +1,9 @@
 from dataclasses import dataclass
 from typing import List
 
-from illumio import IllumioException, IllumioEnum
+from illumio import JsonObject, IllumioException, IllumioEnum
 
 from . import (
-    JsonObject,
     UserObject,
     ContainerCluster,
     Label,
@@ -146,23 +145,14 @@ class Workload(UserObject):
             raise IllumioException("Invalid enforcement_mode: {}".format(self.enforcement_mode))
 
     def _decode_complex_types(self):
-        if self.interfaces:
-            self.interfaces = [Interface.from_json(o) for o in self.interfaces]
-        if self.labels:
-            self.labels = [Label.from_json(o) for o in self.labels]
-        if self.services:
-            self.services = [WorkloadService.from_json(o) for o in self.services]
-        if self.vulnerabilities_summary:
-            self.vulnerabilities_summary = VulnerabilitiesSummary.from_json(self.vulnerabilities_summary)
-        if self.detected_vulnerabilities:
-            self.detected_vulnerabilities = [DetectedVulnerability.from_json(o) for o in self.detected_vulnerabilities]
-        if self.agent:
-            self.agent = VENAgent.from_json(self.agent)
-        if self.ven:
-            self.ven = VEN.from_json(self.ven)
-        if self.selectively_enforced_services:
-            self.selectively_enforced_services = [Service.from_json(o) for o in self.selectively_enforced_services]
-        if self.container_cluster:
-            self.container_cluster = ContainerCluster.from_json(self.container_cluster)
-        if self.ike_authentication_certificate:
-            self.ike_authentication_certificate = IKEAuthenticationCertificate.from_json(self.ike_authentication_certificate)
+        super()._decode_complex_types()
+        self.interfaces = [Interface.from_json(o) for o in self.interfaces] if self.interfaces else None
+        self.labels = [Label.from_json(o) for o in self.labels] if self.labels else None
+        self.services = [WorkloadService.from_json(o) for o in self.services] if self.services else None
+        self.vulnerabilities_summary = VulnerabilitiesSummary.from_json(self.vulnerabilities_summary) if self.vulnerabilities_summary else None
+        self.detected_vulnerabilities = [DetectedVulnerability.from_json(o) for o in self.detected_vulnerabilities] if self.detected_vulnerabilities else None
+        self.agent = VENAgent.from_json(self.agent) if self.agent else None
+        self.ven = VEN.from_json(self.ven) if self.ven else None
+        self.selectively_enforced_services = [Service.from_json(o) for o in self.selectively_enforced_services] if self.selectively_enforced_services else None
+        self.container_cluster = ContainerCluster.from_json(self.container_cluster) if self.container_cluster else None
+        self.ike_authentication_certificate = IKEAuthenticationCertificate.from_json(self.ike_authentication_certificate) if self.ike_authentication_certificate else None

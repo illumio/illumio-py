@@ -32,6 +32,6 @@ class VirtualService(UserObject):
 
     def _decode_complex_types(self):
         super()._decode_complex_types()
-        self.service_ports = [Service.from_json(o) for o in self.service_ports]
-        self.service_addresses = [ServiceAddress.from_json(o) for o in self.service_addresses]
-        self.labels = [Label.from_json(o) for o in self.labels]
+        self.service_ports = [Service.from_json(o) for o in self.service_ports] if self.service_ports else None
+        self.service_addresses = [ServiceAddress.from_json(o) for o in self.service_addresses] if self.service_addresses else None
+        self.labels = [Label.from_json(o) for o in self.labels] if self.labels else None
