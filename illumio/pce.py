@@ -6,6 +6,7 @@ from requests import Session, Response
 
 from .exceptions import IllumioApiException
 from .policyobjects import VirtualService, TrafficQuery, TrafficFlow
+from .util import IllumioEncoder
 
 
 class PolicyComputeEngine:
@@ -85,12 +86,12 @@ class PolicyComputeEngine:
         return VirtualService.from_json(response.json())
 
     def create_virtual_service(self, virtual_service: VirtualService, **kwargs) -> VirtualService:
-        kwargs['json'] = virtual_service.to_json()
+        kwargs['json'] = json.dumps(virtual_service, cls=IllumioEncoder)
         response = self.post('/sec_policy/draft/virtual_services', **kwargs)
         return VirtualService.from_json(response.json())
 
     def get_traffic_flows(self, traffic_query: TrafficQuery, **kwargs) -> List[TrafficFlow]:
-        kwargs['json'] = traffic_query.to_json()
+        kwargs['json'] = json.dumps(traffic_query, cls=IllumioEncoder)
         response = self.post('/traffic_flows/traffic_analysis_queries', **kwargs)
         print(response.json())
         return [TrafficFlow.from_json(flow) for flow in response.json()]
@@ -98,8 +99,7 @@ class PolicyComputeEngine:
     def get_traffic_flows_async(self, query_name: str, traffic_query: TrafficQuery, **kwargs) -> List[TrafficFlow]:
         try:
             traffic_query.query_name = query_name
-            # bafflingly, the async API doesn't accept a JSON string, so we must convert back to an object
-            kwargs['json'] = json.loads(traffic_query.to_json())
+            kwargs['json'] = json.dumps(traffic_query, cls=IllumioEncoder)
             self._set_request_headers(is_async=True, **kwargs)
             response = self._session.post(self._build_url('/traffic_flows/async_queries'), **kwargs)
             response.raise_for_status()
