@@ -1,9 +1,7 @@
 from dataclasses import dataclass, field
 from typing import List
 
-from illumio import JsonObject
-
-from .user import UserObject
+from illumio import JsonObject, UserObject
 
 
 @dataclass
@@ -33,24 +31,24 @@ class AgentHealth(JsonObject):
 
 @dataclass
 class AgentStatus(JsonObject):
-        uid: str = None
-        last_heartbeat_on: str = None
-        uptime_seconds: int = None
-        agent_version: str = None
-        managed_since: str = None
-        fw_config_current: bool = None
-        firewall_rule_count: int = None
-        security_policy_refresh_at: str = None
-        security_policy_applied_at: str = None
-        security_policy_received_at: str = None
-        agent_health_errors: AgentHealthErrors = None
-        agent_health: List[AgentHealth] = None
-        security_policy_sync_state: str = None
+    uid: str = None
+    last_heartbeat_on: str = None
+    uptime_seconds: int = None
+    agent_version: str = None
+    managed_since: str = None
+    fw_config_current: bool = None
+    firewall_rule_count: int = None
+    security_policy_refresh_at: str = None
+    security_policy_applied_at: str = None
+    security_policy_received_at: str = None
+    agent_health_errors: AgentHealthErrors = None
+    agent_health: List[AgentHealth] = None
+    security_policy_sync_state: str = None
 
-        def _decode_complex_types(self) -> None:
-            if self.agent_health_errors:
-                self.agent_health_errors = AgentHealthErrors.from_json(self.agent_health_errors)
-            self.agent_health = [AgentHealth.from_json(o) for o in self.agent_health] if self.agent_health else None
+    def _decode_complex_types(self) -> None:
+        if self.agent_health_errors:
+            self.agent_health_errors = AgentHealthErrors.from_json(self.agent_health_errors)
+        self.agent_health = [AgentHealth.from_json(o) for o in self.agent_health] if self.agent_health else None
 
 
 @dataclass

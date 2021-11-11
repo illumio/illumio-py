@@ -5,15 +5,15 @@ from typing import List
 
 from illumio import JsonObject, IllumioException, IllumioEnum
 
-from . import (
+from illumio.infrastructure import Network
+from illumio.policyobjects import (
     IPList,
     Label,
-    Network,
-    Service,
-    Workload,
+    ServicePort,
     VirtualServer,
     VirtualService
 )
+from illumio.workloads import Workload
 
 FQDN_REGEX = re.compile('(?=^.{4,253}$)(^((?!-)[a-zA-Z0-9-]{1,63}(?<!-)\.)+[a-zA-Z]{2,63}$)')
 
@@ -82,12 +82,12 @@ class TrafficQueryFilterBlock(JsonObject):
 
 @dataclass
 class TrafficQueryServiceBlock(JsonObject):
-    include: List[Service] = field(default_factory=list)
-    exclude: List[Service] = field(default_factory=list)
+    include: List[ServicePort] = field(default_factory=list)
+    exclude: List[ServicePort] = field(default_factory=list)
 
     def _decode_complex_types(self):
-        self.include = [Service.from_json(o) for o in self.include]
-        self.exclude = [Service.from_json(o) for o in self.exclude]
+        self.include = [ServicePort.from_json(o) for o in self.include]
+        self.exclude = [ServicePort.from_json(o) for o in self.exclude]
 
 
 @dataclass
@@ -196,7 +196,7 @@ class TimestampRange(JsonObject):
 class TrafficFlow(JsonObject):
     src: TrafficNode
     dst: TrafficNode
-    service: Service = None
+    service: ServicePort = None
     num_connections: int = None
     state: str = None
     timestamp_range: TimestampRange = None
@@ -221,4 +221,4 @@ class TrafficFlow(JsonObject):
         self.src = TrafficNode.from_json(self.src)
         self.dst = TrafficNode.from_json(self.dst)
         self.timestamp_range = TimestampRange.from_json(self.timestamp_range) if self.timestamp_range else None
-        self.service = Service.from_json(self.service) if self.service else None
+        self.service = ServicePort.from_json(self.service) if self.service else None

@@ -3,17 +3,12 @@ from typing import List
 
 from illumio import JsonObject, IllumioException, IllumioEnum
 
-from . import (
-    UserObject,
-    ContainerCluster,
-    Label,
-    Network,
-    Service,
-    VENAgent,
-    VEN,
-    Vulnerability,
-    VulnerabilityReport
-)
+from illumio.accessmanagement import UserObject
+from illumio.infrastructure import ContainerCluster, Network
+from illumio.policyobjects import Label, Service, ServicePort
+from illumio.vulnerabilities import Vulnerability, VulnerabilityReport
+
+from . import VEN, VENAgent
 
 
 class LinkState(IllumioEnum):
@@ -58,10 +53,10 @@ class Interface(JsonObject):
 class WorkloadService(JsonObject):
     uptime_seconds: int = None
     created_at: int = None
-    open_service_ports: List[Service] = None
+    open_service_ports: List[ServicePort] = None
 
     def _decode_complex_types(self):
-        self.open_service_ports = [Service.from_json(o) for o in self.open_service_ports]
+        self.open_service_ports = [ServicePort.from_json(o) for o in self.open_service_ports]
 
 
 @dataclass

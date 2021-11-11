@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from typing import List
 
-from .user import UserObject
+from illumio.accessmanagement import UserObject
 
 
 @dataclass

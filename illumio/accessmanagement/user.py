@@ -1,10 +1,10 @@
 from dataclasses import dataclass
 
-from .policyobject import PolicyObject
+from illumio import IllumioObject
 
 
 @dataclass
-class User(PolicyObject):
+class User(IllumioObject):
     username: str = None
     last_login_on: str = None
     last_login_ip_address: str = None
@@ -19,7 +19,7 @@ class User(PolicyObject):
 
 
 @dataclass
-class UserObject(PolicyObject):
+class UserObject(IllumioObject):
     created_by: User = None
     updated_by: User = None
     deleted_by: User = None

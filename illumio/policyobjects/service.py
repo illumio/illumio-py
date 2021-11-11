@@ -2,9 +2,11 @@ from dataclasses import dataclass
 
 from illumio import JsonObject
 
+from illumio.accessmanagement import UserObject
+
 
 @dataclass
-class Service(JsonObject):
+class ServicePort(JsonObject):
     port: int = None
     proto: int = None
     to_port: int = None
@@ -27,3 +29,8 @@ class ServiceAddress(JsonObject):
     proto: int = None
     fqdn: str = None
     description: str = None
+
+
+@dataclass
+class Service(UserObject):
+    pass

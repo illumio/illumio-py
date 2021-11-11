@@ -5,7 +5,8 @@ from typing import List
 from requests import Session, Response
 
 from .exceptions import IllumioApiException
-from .policyobjects import VirtualService, TrafficQuery, TrafficFlow
+from .policyobjects import VirtualService
+from .explorer import TrafficQuery, TrafficFlow
 from .util import IllumioEncoder
 
 
