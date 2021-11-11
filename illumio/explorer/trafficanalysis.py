@@ -12,10 +12,14 @@ from illumio.policyobjects import (
     VirtualServer,
     VirtualService
 )
-from illumio.util import Transmission, PolicyDecision, FlowDirection, TrafficState
+from illumio.util import (
+    FQDN_REGEX,
+    Transmission,
+    PolicyDecision,
+    FlowDirection,
+    TrafficState
+)
 from illumio.workloads import Workload
-
-FQDN_REGEX = re.compile('(?=^.{4,253}$)(^((?!-)[a-zA-Z0-9-]{1,63}(?<!-)\.)+[a-zA-Z]{2,63}$)')
 
 AND = 'and'
 OR = 'or'

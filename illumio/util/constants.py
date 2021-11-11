@@ -1,7 +1,10 @@
+import re
 from dataclasses import dataclass
 from enum import Enum
 
 from .jsonutils import JsonObject
+
+FQDN_REGEX = re.compile('(?=^.{4,253}$)(^((?!-)[a-zA-Z0-9-]{1,63}(?<!-)\.)+[a-zA-Z]{2,63}$)')
 
 
 @dataclass
