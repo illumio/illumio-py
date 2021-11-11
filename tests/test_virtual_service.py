@@ -1,3 +1,4 @@
+import json
 import os
 import re
 
@@ -6,8 +7,9 @@ from requests_mock import ANY
 
 from illumio import (
     IllumioException,
+    IllumioEncoder,
     VirtualService,
-    Service,
+    ServicePort,
     ServiceAddress,
     Label
 )
@@ -24,11 +26,11 @@ def mock_virtual_service() -> VirtualService:
 @pytest.fixture(autouse=True)
 def mock_requests(requests_mock, mock_virtual_service):
     matcher = re.compile('/sec_policy/draft/virtual_services')
-    requests_mock.register_uri(ANY, matcher, json=mock_virtual_service.to_json())
+    requests_mock.register_uri(ANY, matcher, json=json.dumps(mock_virtual_service, cls=IllumioEncoder))
 
 
 def test_decoded_service_ports(mock_virtual_service):
-    assert type(mock_virtual_service.service_ports[0]) is Service
+    assert type(mock_virtual_service.service_ports[0]) is ServicePort
 
 
 def test_decoded_service_addresses(mock_virtual_service):

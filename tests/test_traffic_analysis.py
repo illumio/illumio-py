@@ -8,6 +8,7 @@ from requests_mock import ANY
 
 from illumio import (
     IllumioException,
+    IllumioEncoder,
     TrafficQuery,
     TrafficQueryFilterBlock,
     TrafficFlow
@@ -32,7 +33,7 @@ def mock_traffic_response() -> List[TrafficFlow]:
 @pytest.fixture(autouse=True)
 def mock_requests(requests_mock, mock_traffic_response):
     matcher = re.compile('/traffic_flows/traffic_analysis_queries')
-    traffic_response_json = [flow.to_json() for flow in mock_traffic_response]
+    traffic_response_json = [json.dumps(flow, cls=IllumioEncoder) for flow in mock_traffic_response]
     requests_mock.register_uri(ANY, matcher, json=traffic_response_json)
 
 
