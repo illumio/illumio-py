@@ -3,8 +3,7 @@ import socket
 from dataclasses import dataclass, field
 from typing import List
 
-from illumio import JsonObject, IllumioException, IllumioEnum
-
+from illumio import JsonObject, IllumioException
 from illumio.infrastructure import Network
 from illumio.policyobjects import (
     IPList,
@@ -13,40 +12,13 @@ from illumio.policyobjects import (
     VirtualServer,
     VirtualService
 )
+from illumio.util import Transmission, PolicyDecision, FlowDirection, TrafficState
 from illumio.workloads import Workload
 
 FQDN_REGEX = re.compile('(?=^.{4,253}$)(^((?!-)[a-zA-Z0-9-]{1,63}(?<!-)\.)+[a-zA-Z]{2,63}$)')
 
 AND = 'and'
 OR = 'or'
-
-
-class PolicyDecision(IllumioEnum):
-    ALLOWED = 'allowed'
-    BLOCKED = 'blocked'
-    POTENTIALLY_BLOCKED = 'potentially_blocked'
-    UNKNOWN = 'unknown'
-
-
-class Transmission(IllumioEnum):
-    BROADCAST = 'broadcast'
-    MULTICAST = 'multicast'
-    UNICAST = 'unicast'
-
-
-class FlowDirection(IllumioEnum):
-    INBOUND = 'inbound'
-    OUTBOUND = 'outbound'
-
-
-class TrafficState(IllumioEnum):
-    ACTIVE = 'active'
-    CLOSED = 'closed'
-    TIMED_OUT = 'timed_out'
-    SNAPSHOT = 'snapshot'
-    NEW = 'new'
-    UNKNOWN = 'unknown'
-    INCOMPLETE = 'incomplete'
 
 
 @dataclass
@@ -214,6 +186,8 @@ class TrafficFlow(JsonObject):
             raise IllumioException("Invalid flow_direction: {}".format(self.flow_direction))
         if self.policy_decision and not PolicyDecision.has_value(self.policy_decision.lower()):
             raise IllumioException("Invalid policy_decision: {}".format(self.policy_decision))
+        if self.state and not TrafficState.has_value(self.state.lower()):
+            raise IllumioException("Invalid transmission: {}".format(self.state))
         if self.transmission and not Transmission.has_value(self.transmission.lower()):
             raise IllumioException("Invalid transmission: {}".format(self.transmission))
 

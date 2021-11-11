@@ -1,33 +1,15 @@
 from dataclasses import dataclass
 from typing import List
 
-from illumio import JsonObject, IllumioException, IllumioEnum
+from illumio import JsonObject, IllumioException
 
 from illumio.accessmanagement import UserObject
 from illumio.infrastructure import ContainerCluster, Network
 from illumio.policyobjects import Label, Service, ServicePort
 from illumio.vulnerabilities import Vulnerability, VulnerabilityReport
+from illumio.util import LinkState, Mode, EnforcementMode
 
 from . import VEN, VENAgent
-
-
-class LinkState(IllumioEnum):
-    UP = 'up'
-    DOWN = 'down'
-    UNKNOWN = 'unknown'
-
-
-class Mode(IllumioEnum):
-    IDLE = 'idle'
-    ILLUMINATED = 'illuminated'
-    ENFORCED = 'enforced'
-
-
-class EnforcementMode(IllumioEnum):
-    IDLE = 'idle'
-    VISIBILITY_ONLY = 'visibility_only'
-    FULL = 'full'
-    SELECTIVE = 'selective'
 
 
 @dataclass
@@ -42,7 +24,7 @@ class Interface(JsonObject):
     friendly_name: str = None
 
     def _validate(self):
-        if self.link_state and not LinkState.has_value(self.link_state):
+        if self.link_state and not LinkState.has_value(self.link_state.lower()):
             raise IllumioException("Invalid link_state: {}".format(self.link_state))
 
     def _decode_complex_types(self):
@@ -130,13 +112,16 @@ class Workload(UserObject):
     detected_vulnerabilities: List[DetectedVulnerability] = None
     agent: VENAgent = None
     ven: VEN = None
+    mode: str = None
     enforcement_mode: str = None
     selectively_enforced_services: List[Service] = None
     container_cluster: ContainerCluster = None
     ike_authentication_certificate: IKEAuthenticationCertificate = None
 
     def _validate(self):
-        if self.enforcement_mode and not EnforcementMode.has_value(self.enforcement_mode):
+        if self.mode and not Mode.has_value(self.mode.lower()):
+            raise IllumioException("Invalid mode: {}".format(self.mode))
+        if self.enforcement_mode and not EnforcementMode.has_value(self.enforcement_mode.lower()):
             raise IllumioException("Invalid enforcement_mode: {}".format(self.enforcement_mode))
 
     def _decode_complex_types(self):
