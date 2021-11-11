@@ -3,10 +3,9 @@ import socket
 from dataclasses import dataclass, field
 from typing import List
 
-from illumio import IllumioException, IllumioEnum
+from illumio import JsonObject, IllumioException, IllumioEnum
 
 from . import (
-    JsonObject,
     IPList,
     Label,
     Network,

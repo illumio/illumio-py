@@ -5,4 +5,4 @@ from .user import UserObject
 
 @dataclass
 class ContainerCluster(UserObject):
-    score: int = None
+    pass

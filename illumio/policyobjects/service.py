@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 
-from .policyobject import JsonObject
+from illumio import JsonObject
 
 
 @dataclass
@@ -14,7 +14,7 @@ class Service(JsonObject):
     process_name: str = None
     windows_service_name: str = None
     user_name: str = None
-    # additional custom fields from Workload services definition. baffling
+    # additional custom fields from Workload services definition
     address: str = None
     package: str = None
     win_service_name: str = None

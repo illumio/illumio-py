@@ -1,10 +1,9 @@
 from dataclasses import dataclass, field
 from typing import List
 
-from . import (
-    JsonObject,
-    UserObject
-)
+from illumio import JsonObject
+
+from .user import UserObject
 
 
 @dataclass
