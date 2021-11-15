@@ -4,10 +4,8 @@ from typing import List
 
 from requests import Session, Response
 
-from illumio.policyobjects.secpolicy import PolicyChangeset
-
 from .exceptions import IllumioApiException
-from .policyobjects import VirtualService
+from .policyobjects import VirtualService, PolicyChangeset
 from .explorer import TrafficQuery, TrafficFlow
 from .util import IllumioEncoder
 
