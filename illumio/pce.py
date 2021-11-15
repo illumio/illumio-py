@@ -4,7 +4,12 @@ from typing import List
 from requests import Session, Response
 
 from .exceptions import IllumioApiException
-from .policyobjects import VirtualService, PolicyChangeset
+from .policyobjects import (
+    VirtualService,
+    ServiceBinding,
+    IPList,
+    PolicyChangeset
+)
 from .explorer import TrafficQuery, TrafficFlow
 
 
@@ -21,6 +26,7 @@ class PolicyComputeEngine:
 
     def _request(self, method: str, endpoint: str, include_org=True, **kwargs) -> Response:
         try:
+            response = None  # avoid reference before assignment errors in case of cxn failure
             self._set_request_headers(**kwargs)
             url = self._build_url(endpoint, include_org)
             response = self._session.request(method, url, **kwargs)
@@ -28,10 +34,12 @@ class PolicyComputeEngine:
             return response
         except Exception as e:
             message = str(e)
+            # Response objects are falsy if the request failed so do a null check
             if response is not None and response.content:
                 message = "API call returned error code {}. Errors:".format(response.status_code)
                 for error in response.json():
-                    message += '\n{}: {}'.format(error['token'], error['message'])
+                    if error and 'token' in error and 'message' in error:
+                        message += '\n{}: {}'.format(error['token'], error['message'])
             raise IllumioApiException(message) from e
 
     def _set_request_headers(self, is_async=False, **kwargs):
@@ -93,6 +101,11 @@ class PolicyComputeEngine:
         kwargs['json'] = virtual_service.to_json()
         response = self.post('/sec_policy/draft/virtual_services', **kwargs)
         return VirtualService.from_json(response.json())
+
+    def create_service_binding(self, service_binding: ServiceBinding, **kwargs) -> ServiceBinding:
+        kwargs['json'] = service_binding.to_json()
+        response = self.post('/service_bindings', **kwargs)
+        return ServiceBinding.from_json(response.json())
 
     def get_traffic_flows(self, traffic_query: TrafficQuery, **kwargs) -> List[TrafficFlow]:
         kwargs['json'] = traffic_query.to_json()
