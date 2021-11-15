@@ -10,7 +10,7 @@ from . import (
     VirtualServer
 )
 
-from illumio import JsonObject
+from illumio import JsonObject, IllumioException
 from illumio.accessmanagement import UserObject
 from illumio.rules import Ruleset, EnforcementBoundary
 from illumio.infrastructure import SecureConnectGateway
@@ -52,19 +52,21 @@ class PolicyChangeset(JsonObject):
             if 'label_group' in href:
                 changeset.label_groups.append(LabelGroup(href=href))
             elif 'rule_sets' in href:
-                changeset.ip_lists.append(Ruleset(href=href))
+                changeset.rule_sets.append(Ruleset(href=href))
             elif 'ip_lists' in href:
                 changeset.ip_lists.append(IPList(href=href))
             elif 'virtual_services' in href:
-                changeset.ip_lists.append(VirtualService(href=href))
+                changeset.virtual_services.append(VirtualService(href=href))
             elif 'services' in href:
-                changeset.ip_lists.append(Service(href=href))
+                changeset.services.append(Service(href=href))
             elif 'firewall_settings' in href:
-                changeset.ip_lists.append(FirewallSetting(href=href))
+                changeset.firewall_settings.append(FirewallSetting(href=href))
             elif 'enforcement_boundaries' in href:
-                changeset.ip_lists.append(EnforcementBoundary(href=href))
+                changeset.enforcement_boundaries.append(EnforcementBoundary(href=href))
             elif 'secure_connect_gateways' in href:
-                changeset.ip_lists.append(SecureConnectGateway(href=href))
+                changeset.secure_connect_gateways.append(SecureConnectGateway(href=href))
             elif 'virtual_servers' in href:
-                changeset.ip_lists.append(VirtualServer(href=href))
+                changeset.virtual_servers.append(VirtualServer(href=href))
+            else:
+                raise IllumioException('Invalid HREF in policy provision changeset: {}'.format(href))
         return changeset
