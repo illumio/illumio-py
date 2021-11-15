@@ -3,3 +3,4 @@ from .iplist import *
 from .label import *
 from .virtualserver import *
 from .virtualservice import *
+from .secpolicy import *

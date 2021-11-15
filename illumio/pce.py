@@ -4,6 +4,8 @@ from typing import List
 
 from requests import Session, Response
 
+from illumio.policyobjects.secpolicy import PolicyChangeset
+
 from .exceptions import IllumioApiException
 from .policyobjects import VirtualService
 from .explorer import TrafficQuery, TrafficFlow
@@ -94,7 +96,6 @@ class PolicyComputeEngine:
     def get_traffic_flows(self, traffic_query: TrafficQuery, **kwargs) -> List[TrafficFlow]:
         kwargs['json'] = json.dumps(traffic_query, cls=IllumioEncoder)
         response = self.post('/traffic_flows/traffic_analysis_queries', **kwargs)
-        print(response.json())
         return [TrafficFlow.from_json(flow) for flow in response.json()]
 
     def get_traffic_flows_async(self, query_name: str, traffic_query: TrafficQuery, **kwargs) -> List[TrafficFlow]:
@@ -127,3 +128,9 @@ class PolicyComputeEngine:
             return [TrafficFlow.from_json(flow) for flow in response.json()]
         except Exception as e:
             raise IllumioApiException from e
+
+    def provision_policy_changes(self, change_description: str, hrefs: List[str], **kwargs) -> None:
+        policy_changeset = PolicyChangeset.build(hrefs)
+        policy_json = {'update_description': change_description, 'change_subset': policy_changeset}
+        kwargs['json'] = json.dumps(policy_json, cls=IllumioEncoder)
+        self.post('/sec_policy', **kwargs)
