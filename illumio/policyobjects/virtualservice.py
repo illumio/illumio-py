@@ -16,7 +16,7 @@ INTERNAL_BRIDGE_NETWORK = 'internal_bridge_network'
 
 @dataclass
 class VirtualService(UserObject):
-    apply_to: str = HOST_ONLY
+    apply_to: str = None
     pce_fqdn: str = None
     service_addresses: List[ServiceAddress] = None
     service_ports: List[ServicePort] = None
@@ -25,9 +25,7 @@ class VirtualService(UserObject):
     caps: List[str] = None
 
     def _validate(self):
-        if not self.name:
-            raise IllumioException("No name specified for Virtual Service")
-        if self.apply_to not in {HOST_ONLY, INTERNAL_BRIDGE_NETWORK}:
+        if self.apply_to and self.apply_to not in {HOST_ONLY, INTERNAL_BRIDGE_NETWORK}:
             raise IllumioException("Invalid 'apply_to' value: {}".format(self.apply_to))
 
     def _decode_complex_types(self):

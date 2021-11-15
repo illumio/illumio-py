@@ -54,8 +54,3 @@ def test_create_virtual_service(pce, mock_virtual_service):
 def test_invalid_apply_to_value():
     with pytest.raises(IllumioException):
         VirtualService(href='/test/href', name='VS-TEST', apply_to='invalid_value')
-
-
-def test_missing_name():
-    with pytest.raises(IllumioException):
-        VirtualService(href='/test/href', apply_to='host_only')
