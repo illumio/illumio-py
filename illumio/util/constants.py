@@ -43,6 +43,14 @@ class EnforcementMode(IllumioEnum):
     SELECTIVE = 'selective'
 
 
+class VisibilityLevel(IllumioEnum):
+    FLOW_FULL_DETAIL = 'flow_full_detail'
+    FLOW_SUMMARY = 'flow_summary'
+    FLOW_DROPS = 'flow_drops'
+    FLOW_OFF = 'flow_off'
+    ENHANCED_DATA_COLLECTION = 'enhanced_data_collection'
+
+
 class PolicyDecision(IllumioEnum):
     ALLOWED = 'allowed'
     BLOCKED = 'blocked'
