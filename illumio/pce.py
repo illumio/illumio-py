@@ -103,9 +103,19 @@ class PolicyComputeEngine:
         return VirtualService.from_json(response.json())
 
     def create_service_binding(self, service_binding: ServiceBinding, **kwargs) -> ServiceBinding:
-        kwargs['json'] = service_binding.to_json()
+        # bafflingly, the create endpoint for service bindings is a batch operation
+        kwargs['json'] = [service_binding.to_json()]
         response = self.post('/service_bindings', **kwargs)
-        return ServiceBinding.from_json(response.json())
+        result = response.json()[0]
+        status = result['status']
+        if status != 'created':
+            raise IllumioApiException("Failed to create Service Binding with status: {}".format(status))
+        return ServiceBinding(href=result['href'])
+
+    def get_ip_list(self, href: str, **kwargs) -> IPList:
+        kwargs.pop('include_org', None)
+        response = self.get(href, include_org=False, **kwargs)
+        return IPList.from_json(response.json())
 
     def get_traffic_flows(self, traffic_query: TrafficQuery, **kwargs) -> List[TrafficFlow]:
         kwargs['json'] = traffic_query.to_json()
