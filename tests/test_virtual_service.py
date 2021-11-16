@@ -5,14 +5,9 @@ import re
 import pytest
 from requests_mock import ANY
 
-from illumio import (
-    IllumioException,
-    IllumioEncoder,
-    VirtualService,
-    ServicePort,
-    ServiceAddress,
-    Label
-)
+from illumio import IllumioException
+from illumio.util import IllumioEncoder
+from illumio.policyobjects import VirtualService, ServicePort, ServiceAddress, Label
 
 MOCK_VIRTUAL_SERVICE = os.path.join(pytest.DATA_DIR, 'virtual_service.json')
 

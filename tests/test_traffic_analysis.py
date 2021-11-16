@@ -6,13 +6,9 @@ from typing import List
 import pytest
 from requests_mock import ANY
 
-from illumio import (
-    IllumioException,
-    IllumioEncoder,
-    TrafficQuery,
-    TrafficQueryFilterBlock,
-    TrafficFlow
-)
+from illumio import IllumioException
+from illumio.util import IllumioEncoder
+from illumio.explorer import TrafficQuery, TrafficQueryFilterBlock, TrafficFlow
 
 MOCK_TRAFFIC_QUERY = os.path.join(pytest.DATA_DIR, 'traffic_query.json')
 MOCK_TRAFFIC_RESPONSE = os.path.join(pytest.DATA_DIR, 'traffic_query_response.json')
