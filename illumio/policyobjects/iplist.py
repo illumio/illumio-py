@@ -1,8 +1,7 @@
 from dataclasses import dataclass
 from typing import List
 
-from illumio import JsonObject
-from illumio.accessmanagement import UserObject
+from illumio import JsonObject, ModifiableObject
 
 
 @dataclass
@@ -20,7 +19,7 @@ class FQDN(JsonObject):
 
 
 @dataclass
-class IPList(UserObject):
+class IPList(ModifiableObject):
     ip_ranges: List[IPRange] = None
     fqdns: List[FQDN] = None
 

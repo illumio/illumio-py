@@ -2,7 +2,7 @@ from dataclasses import dataclass
 
 from illumio import JsonObject
 
-from illumio.accessmanagement import UserObject
+from illumio import ModifiableObject
 
 
 @dataclass
@@ -28,5 +28,5 @@ class ServiceAddress(JsonObject):
 
 
 @dataclass
-class Service(UserObject):
+class Service(ModifiableObject):
     pass

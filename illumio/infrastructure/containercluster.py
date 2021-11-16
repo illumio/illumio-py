@@ -1,8 +1,8 @@
 from dataclasses import dataclass
 
-from illumio.accessmanagement import UserObject
+from illumio import ModifiableObject
 
 
 @dataclass
-class ContainerCluster(UserObject):
+class ContainerCluster(ModifiableObject):
     pass

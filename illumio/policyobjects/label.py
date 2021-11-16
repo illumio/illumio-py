@@ -2,12 +2,11 @@ import json
 from dataclasses import dataclass
 from typing import List
 
-from illumio.accessmanagement import UserObject
-from illumio.util.jsonutils import JsonObject
+from illumio import JsonObject, ModifiableObject
 
 
 @dataclass
-class Label(UserObject):
+class Label(ModifiableObject):
     key: str = None
     value: str = None
     deleted: bool = None

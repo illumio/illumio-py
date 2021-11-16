@@ -1,9 +1,7 @@
 from dataclasses import dataclass
 from typing import List
 
-from illumio import JsonObject, IllumioException
-
-from illumio.accessmanagement import UserObject
+from illumio import IllumioException, JsonObject, ModifiableObject
 from illumio.infrastructure import ContainerCluster, Network
 from illumio.policyobjects import Label, Service
 from illumio.vulnerabilities import Vulnerability, VulnerabilityReport
@@ -99,7 +97,7 @@ class IKEAuthenticationCertificate(JsonObject):
 
 
 @dataclass
-class Workload(UserObject):
+class Workload(ModifiableObject):
     hostname: str = None
     os_type: str = None
     service_principal_name: str = None

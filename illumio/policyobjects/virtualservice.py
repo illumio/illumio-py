@@ -7,8 +7,7 @@ from . import (
     ServicePort
 )
 
-from illumio import IllumioException, IllumioObject, JsonObject
-from illumio.accessmanagement import UserObject
+from illumio import IllumioException, IllumioObject, JsonObject, ModifiableObject
 from illumio.workloads import Workload
 
 HOST_ONLY = 'host_only'
@@ -16,7 +15,7 @@ INTERNAL_BRIDGE_NETWORK = 'internal_bridge_network'
 
 
 @dataclass
-class VirtualService(UserObject):
+class VirtualService(ModifiableObject):
     apply_to: str = None
     pce_fqdn: str = None
     service_addresses: List[ServiceAddress] = None

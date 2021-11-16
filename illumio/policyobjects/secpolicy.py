@@ -2,6 +2,15 @@ import re
 from dataclasses import dataclass
 from typing import List
 
+from illumio import (
+    IllumioException,
+    JsonObject,
+    ModifiableObject,
+    POLICY_OBJECT_HREF_REGEX
+)
+from illumio.rules import Ruleset, EnforcementBoundary
+from illumio.infrastructure import SecureConnectGateway
+
 from . import (
     LabelGroup,
     LabelSet,
@@ -11,14 +20,9 @@ from . import (
     VirtualServer
 )
 
-from illumio import JsonObject, IllumioException, POLICY_OBJECT_HREF_REGEX
-from illumio.accessmanagement import UserObject
-from illumio.rules import Ruleset, EnforcementBoundary
-from illumio.infrastructure import SecureConnectGateway
-
 
 @dataclass
-class FirewallSetting(UserObject):
+class FirewallSetting(ModifiableObject):
     allow_dhcp_client: bool = None
     log_dropped_multicast: bool = None
     log_dropped_broadcast: bool = None
@@ -87,7 +91,7 @@ class PolicyObjectCounts(JsonObject):
 
 
 @dataclass
-class PolicyVersion(UserObject):
+class PolicyVersion(ModifiableObject):
     commit_message: str = None
     version: int = None
     workloads_affected: int = None

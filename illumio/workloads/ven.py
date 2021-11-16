@@ -1,7 +1,7 @@
 from dataclasses import dataclass, field
 from typing import List
 
-from illumio import IllumioException, JsonObject, UserObject
+from illumio import IllumioException, JsonObject, ModifiableObject
 from illumio.util import VisibilityLevel
 
 
@@ -60,7 +60,7 @@ class AgentStatus(JsonObject):
 
 
 @dataclass
-class VENAgent(UserObject):
+class VENAgent(ModifiableObject):
     config: AgentConfig = None
     secure_connect: SecureConnect = None
     status: AgentStatus = None
@@ -76,7 +76,7 @@ class VENAgent(UserObject):
 
 
 @dataclass
-class VEN(UserObject):
+class VEN(ModifiableObject):
     hostname: str = None
     name: str = None
     status: str = None

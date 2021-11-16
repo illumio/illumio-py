@@ -17,6 +17,23 @@ class IllumioObject(JsonObject):
     external_data_reference: str = None
 
 
+@dataclass
+class ModifiableObject(IllumioObject):
+    created_at: str = None
+    updated_at: str = None
+    deleted_at: str = None
+    update_type: str = None
+    delete_type: str = None
+    created_by: IllumioObject = None
+    updated_by: IllumioObject = None
+    deleted_by: IllumioObject = None
+
+    def _decode_complex_types(self) -> None:
+        self.created_by = IllumioObject.from_json(self.created_by) if self.created_by else None
+        self.updated_by = IllumioObject.from_json(self.updated_by) if self.updated_by else None
+        self.deleted_by = IllumioObject.from_json(self.deleted_by) if self.deleted_by else None
+
+
 class IllumioEnum(Enum):
 
     @classmethod
