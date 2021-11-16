@@ -1,4 +1,5 @@
-from dataclasses import dataclass, field
+import re
+from dataclasses import dataclass
 from typing import List
 
 from . import (
@@ -10,7 +11,7 @@ from . import (
     VirtualServer
 )
 
-from illumio import JsonObject, IllumioException
+from illumio import JsonObject, IllumioException, POLICY_OBJECT_HREF_REGEX
 from illumio.accessmanagement import UserObject
 from illumio.rules import Ruleset, EnforcementBoundary
 from illumio.infrastructure import SecureConnectGateway
@@ -32,41 +33,66 @@ class FirewallSetting(UserObject):
     blocked_connection_reject_scopes: List[LabelSet] = None
     loopback_interfaces_in_policy_scopes: List[LabelSet] = None
 
+TYPE_TO_CLASS_MAP = {
+    'label_groups': LabelGroup,
+    'rule_sets': Ruleset,
+    'ip_lists': IPList,
+    'virtual_services': VirtualService,
+    'services': Service,
+    'firewall_settings': FirewallSetting,
+    'enforcement_boundaries': EnforcementBoundary,
+    'secure_connect_gateways': SecureConnectGateway,
+    'virtual_servers': VirtualServer
+}
+
 
 @dataclass
 class PolicyChangeset(JsonObject):
-    label_groups: List[LabelGroup] = field(default_factory=list)
-    services: List[Service] = field(default_factory=list)
-    rule_sets: List[Ruleset] = field(default_factory=list)
-    ip_lists: List[IPList] = field(default_factory=list)
-    virtual_services: List[VirtualService] = field(default_factory=list)
-    firewall_settings: List[FirewallSetting] = field(default_factory=list)
-    enforcement_boundaries: List[EnforcementBoundary] = field(default_factory=list)
-    secure_connect_gateways: List[SecureConnectGateway] = field(default_factory=list)
-    virtual_servers: List[VirtualServer] = field(default_factory=list)
+    label_groups: List[LabelGroup] = None
+    services: List[Service] = None
+    rule_sets: List[Ruleset] = None
+    ip_lists: List[IPList] = None
+    virtual_services: List[VirtualService] = None
+    firewall_settings: List[FirewallSetting] = None
+    enforcement_boundaries: List[EnforcementBoundary] = None
+    secure_connect_gateways: List[SecureConnectGateway] = None
+    virtual_servers: List[VirtualServer] = None
 
     @staticmethod
     def build(hrefs: List[str]):
         changeset = PolicyChangeset()
         for href in hrefs:
-            if 'label_group' in href:
-                changeset.label_groups.append(LabelGroup(href=href))
-            elif 'rule_sets' in href:
-                changeset.rule_sets.append(Ruleset(href=href))
-            elif 'ip_lists' in href:
-                changeset.ip_lists.append(IPList(href=href))
-            elif 'virtual_services' in href:
-                changeset.virtual_services.append(VirtualService(href=href))
-            elif 'services' in href:
-                changeset.services.append(Service(href=href))
-            elif 'firewall_settings' in href:
-                changeset.firewall_settings.append(FirewallSetting(href=href))
-            elif 'enforcement_boundaries' in href:
-                changeset.enforcement_boundaries.append(EnforcementBoundary(href=href))
-            elif 'secure_connect_gateways' in href:
-                changeset.secure_connect_gateways.append(SecureConnectGateway(href=href))
-            elif 'virtual_servers' in href:
-                changeset.virtual_servers.append(VirtualServer(href=href))
+            match = re.match(POLICY_OBJECT_HREF_REGEX, href)
+            if match:
+                object_type = match.group('type')
+                arr = getattr(changeset, object_type) or []
+                arr.append(TYPE_TO_CLASS_MAP[object_type](href=href))
+                setattr(changeset, object_type, arr)
             else:
                 raise IllumioException('Invalid HREF in policy provision changeset: {}'.format(href))
         return changeset
+
+
+@dataclass
+class PolicyObjectCounts(JsonObject):
+    label_groups: int = None
+    services: int = None
+    rule_sets: int = None
+    ip_lists: int = None
+    virtual_services: int = None
+    firewall_settings: int = None
+    enforcement_boundaries: int = None
+    secure_connect_gateways: int = None
+    virtual_servers: int = None
+
+
+@dataclass
+class PolicyVersion(UserObject):
+    commit_message: str = None
+    version: int = None
+    workloads_affected: int = None
+    object_counts: PolicyObjectCounts = None
+
+    def _decode_complex_types(self):
+        super()._decode_complex_types()
+        self.object_counts = PolicyObjectCounts.from_json(self.object_counts) if self.object_counts else None

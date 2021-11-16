@@ -8,7 +8,8 @@ from .policyobjects import (
     VirtualService,
     ServiceBinding,
     IPList,
-    PolicyChangeset
+    PolicyChangeset,
+    PolicyVersion
 )
 from .explorer import TrafficQuery, TrafficFlow
 
@@ -110,7 +111,8 @@ class PolicyComputeEngine:
         status = result['status']
         if status != 'created':
             raise IllumioApiException("Failed to create Service Binding with status: {}".format(status))
-        return ServiceBinding(href=result['href'])
+        service_binding.href = result['href']
+        return service_binding
 
     def get_ip_list(self, href: str, **kwargs) -> IPList:
         kwargs.pop('include_org', None)
@@ -161,4 +163,5 @@ class PolicyComputeEngine:
     def provision_policy_changes(self, change_description: str, hrefs: List[str], **kwargs) -> None:
         policy_changeset = PolicyChangeset.build(hrefs)
         kwargs['json'] = {'update_description': change_description, 'change_subset': policy_changeset.to_json()}
-        self.post('/sec_policy', **kwargs)
+        response = self.post('/sec_policy', **kwargs)
+        return PolicyVersion.from_json(response.json())
