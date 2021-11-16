@@ -7,7 +7,7 @@ from . import (
     ServicePort
 )
 
-from illumio import IllumioException, JsonObject
+from illumio import IllumioException, IllumioObject, JsonObject
 from illumio.accessmanagement import UserObject
 from illumio.workloads import Workload
 
@@ -39,12 +39,14 @@ class VirtualService(UserObject):
 @dataclass
 class PortOverride(JsonObject):
     port: int = None
+    to_port: int = None
     proto: int = None
     new_port: int = None
+    new_to_port: int = None
 
 
 @dataclass
-class ServiceBinding(JsonObject):
+class ServiceBinding(IllumioObject):
     virtual_service: VirtualService = None
     workload: Workload = None
     port_overrides: List[PortOverride] = None
