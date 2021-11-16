@@ -1,8 +1,8 @@
 from dataclasses import dataclass
 
-from illumio import ModifiableObject
+from . import Rule
 
 
 @dataclass
-class EnforcementBoundary(ModifiableObject):
+class EnforcementBoundary(Rule):
     pass

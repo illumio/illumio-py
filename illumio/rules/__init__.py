@@ -1,3 +1,4 @@
 from .rule import *
-from .ruleset import *
+from .iptablesrule import *
 from .enforcementboundary import *
+from .ruleset import *

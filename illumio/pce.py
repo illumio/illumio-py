@@ -13,6 +13,7 @@ from .policyobjects import (
     Workload
 )
 from .explorer import TrafficQuery, TrafficFlow
+from .rules import Ruleset
 
 
 class PolicyComputeEngine:
@@ -117,6 +118,13 @@ class PolicyComputeEngine:
     def get_ip_list(self, href: str, **kwargs) -> IPList:
         response = self.get(href, include_org=False, **kwargs)
         return IPList.from_json(response.json())
+
+    def create_ruleset(self, ruleset: Ruleset, **kwargs) -> Ruleset:
+        if ruleset.scopes is None:
+            ruleset.scopes = []
+        kwargs['json'] = ruleset.to_json()
+        response = self.post('/sec_policy/draft/rule_sets', **kwargs)
+        return Ruleset.from_json(response.json())
 
     def get_workload(self, href: str, **kwargs) -> Workload:
         response = self.get(href, include_org=False, **kwargs)
