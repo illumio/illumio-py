@@ -5,9 +5,9 @@ from illumio import JsonObject, IllumioException
 
 from illumio.accessmanagement import UserObject
 from illumio.infrastructure import ContainerCluster, Network
-from illumio.policyobjects import Label, Service, ServicePort
+from illumio.policyobjects import Label, Service
 from illumio.vulnerabilities import Vulnerability, VulnerabilityReport
-from illumio.util import LinkState, Mode, EnforcementMode
+from illumio.util import LinkState, Mode, EnforcementMode, VisibilityLevel
 
 from . import VEN, VENAgent
 
@@ -22,6 +22,7 @@ class Interface(JsonObject):
     network: Network = None
     network_detection_mode: str = None
     friendly_name: str = None
+    loopback: str = None
 
     def _validate(self):
         if self.link_state and not LinkState.has_value(self.link_state.lower()):
@@ -32,13 +33,24 @@ class Interface(JsonObject):
 
 
 @dataclass
-class WorkloadService(JsonObject):
+class WorkloadServicePort(JsonObject):
+    port: int = None
+    protocol: int = None
+    address: str = None
+    user: str = None
+    package: str = None
+    process_name: str = None
+    win_service_name: str = None
+
+
+@dataclass
+class WorkloadServices(JsonObject):
     uptime_seconds: int = None
     created_at: int = None
-    open_service_ports: List[ServicePort] = None
+    open_service_ports: List[WorkloadServicePort] = None
 
     def _decode_complex_types(self):
-        self.open_service_ports = [ServicePort.from_json(o) for o in self.open_service_ports]
+        self.open_service_ports = [WorkloadServicePort.from_json(o) for o in self.open_service_ports]
 
 
 @dataclass
@@ -101,17 +113,21 @@ class Workload(UserObject):
     os_id: str = None
     os_detail: str = None
     online: bool = None
+    deleted: bool = None
+    ignored_interface_names: List[str] = None
+    caps: List[str] = None
     firewall_coexistence: str = None
     containers_inherit_host_policy: bool = None
     blocked_connection_action: str = None
     labels: List[Label] = None
-    services: List[WorkloadService] = None
+    services: WorkloadServices = None
     vulnerabilities_summary: VulnerabilitiesSummary = None
     detected_vulnerabilities: List[DetectedVulnerability] = None
     agent: VENAgent = None
     ven: VEN = None
     mode: str = None
     enforcement_mode: str = None
+    visibility_level: str = None
     selectively_enforced_services: List[Service] = None
     container_cluster: ContainerCluster = None
     ike_authentication_certificate: IKEAuthenticationCertificate = None
@@ -121,12 +137,14 @@ class Workload(UserObject):
             raise IllumioException("Invalid mode: {}".format(self.mode))
         if self.enforcement_mode and not EnforcementMode.has_value(self.enforcement_mode.lower()):
             raise IllumioException("Invalid enforcement_mode: {}".format(self.enforcement_mode))
+        if self.visibility_level and not VisibilityLevel.has_value(self.visibility_level.lower()):
+            raise IllumioException("Invalid visibility_level: {}".format(self.visibility_level))
 
     def _decode_complex_types(self):
         super()._decode_complex_types()
         self.interfaces = [Interface.from_json(o) for o in self.interfaces] if self.interfaces else None
         self.labels = [Label.from_json(o) for o in self.labels] if self.labels else None
-        self.services = [WorkloadService.from_json(o) for o in self.services] if self.services else None
+        self.services = WorkloadServices.from_json(self.services) if self.services else None
         self.vulnerabilities_summary = VulnerabilitiesSummary.from_json(self.vulnerabilities_summary) if self.vulnerabilities_summary else None
         self.detected_vulnerabilities = [DetectedVulnerability.from_json(o) for o in self.detected_vulnerabilities] if self.detected_vulnerabilities else None
         self.agent = VENAgent.from_json(self.agent) if self.agent else None

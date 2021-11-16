@@ -1,7 +1,8 @@
 from dataclasses import dataclass, field
 from typing import List
 
-from illumio import JsonObject, UserObject
+from illumio import IllumioException, JsonObject, UserObject
+from illumio.util import VisibilityLevel
 
 
 @dataclass
@@ -9,6 +10,11 @@ class AgentConfig(JsonObject):
     mode: str = None
     log_traffic: bool = None
     security_policy_update_mode: str = None
+    visibility_level: VisibilityLevel = None
+
+    def _validate(self):
+        if self.visibility_level and not VisibilityLevel.has_value(self.visibility_level.lower()):
+            raise IllumioException("Invalid visibility_level: {}".format(self.visibility_level))
 
 
 @dataclass
@@ -31,7 +37,9 @@ class AgentHealth(JsonObject):
 
 @dataclass
 class AgentStatus(JsonObject):
+    status: str = None
     uid: str = None
+    instance_id: str = None
     last_heartbeat_on: str = None
     uptime_seconds: int = None
     agent_version: str = None
@@ -56,6 +64,7 @@ class VENAgent(UserObject):
     config: AgentConfig = None
     secure_connect: SecureConnect = None
     status: AgentStatus = None
+    unpair_allowed: bool = None
     active_pce_fqdn: str = None
     target_pce_fqdn: str = None
     type: str = None

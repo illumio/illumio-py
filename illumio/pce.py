@@ -5,11 +5,12 @@ from requests import Session, Response
 
 from .exceptions import IllumioApiException
 from .policyobjects import (
-    VirtualService,
-    ServiceBinding,
     IPList,
     PolicyChangeset,
-    PolicyVersion
+    PolicyVersion,
+    ServiceBinding,
+    VirtualService,
+    Workload
 )
 from .explorer import TrafficQuery, TrafficFlow
 
@@ -94,7 +95,6 @@ class PolicyComputeEngine:
         return self._request('DELETE', endpoint, **kwargs)
 
     def get_virtual_service(self, href: str, **kwargs) -> VirtualService:
-        kwargs.pop('include_org', None)
         response = self.get(href, include_org=False, **kwargs)
         return VirtualService.from_json(response.json())
 
@@ -115,9 +115,12 @@ class PolicyComputeEngine:
         return service_binding
 
     def get_ip_list(self, href: str, **kwargs) -> IPList:
-        kwargs.pop('include_org', None)
         response = self.get(href, include_org=False, **kwargs)
         return IPList.from_json(response.json())
+
+    def get_workload(self, href: str, **kwargs) -> Workload:
+        response = self.get(href, include_org=False, **kwargs)
+        return Workload.from_json(response.json())
 
     def get_traffic_flows(self, traffic_query: TrafficQuery, **kwargs) -> List[TrafficFlow]:
         kwargs['json'] = traffic_query.to_json()
