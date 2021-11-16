@@ -2,11 +2,12 @@ from dataclasses import dataclass
 from typing import List
 
 from illumio import IllumioException
-from illumio.infrastructure import ContainerCluster, Network
-from illumio.policyobjects import Label, Service
-from illumio.vulnerabilities import Vulnerability, VulnerabilityReport
+from illumio.infrastructure import ContainerCluster
+from illumio.policyobjects import Label
+from illumio.vulnerabilities import Vulnerability
 from illumio.util import (
     JsonObject,
+    Reference,
     ModifiableObject,
     LinkState,
     Mode,
@@ -24,7 +25,7 @@ class Interface(JsonObject):
     address: str = None
     cidr_block: int = None
     default_gateway_address: str = None
-    network: Network = None
+    network: Reference = None
     network_detection_mode: str = None
     friendly_name: str = None
     loopback: str = None
@@ -34,7 +35,7 @@ class Interface(JsonObject):
             raise IllumioException("Invalid link_state: {}".format(self.link_state))
 
     def _decode_complex_types(self):
-        self.network = Network.from_json(self.network) if self.network else None
+        self.network = Reference.from_json(self.network) if self.network else None
 
 
 @dataclass
@@ -85,17 +86,15 @@ class DetectedVulnerability(JsonObject):
     proto: int = None
     port_exposure: int = None
     port_wide_exposure: PortWideExposure = None
-    workload: 'Workload' = None
+    workload: Reference = None
     vulnerability: Vulnerability = None
-    vulnerability_report: VulnerabilityReport = None
+    vulnerability_report: Reference = None
 
     def _decode_complex_types(self):
-        if self.port_wide_exposure:
-            self.port_wide_exposure = PortWideExposure.from_json(self.port_wide_exposure)
-        self.workload = Workload(href=self.workload['href']) if self.workload else None
+        self.port_wide_exposure = PortWideExposure.from_json(self.port_wide_exposure) if self.port_wide_exposure else None
+        self.workload = Reference.from_json(self.workload) if self.workload else None
         self.vulnerability = Vulnerability.from_json(self.vulnerability) if self.vulnerability else None
-        if self.vulnerability_report:
-            self.vulnerability_report = VulnerabilityReport.from_json(self.vulnerability_report)
+        self.vulnerability_report = Reference.from_json(self.vulnerability_report) if self.vulnerability_report else None
 
 
 @dataclass
@@ -133,7 +132,7 @@ class Workload(ModifiableObject):
     mode: str = None
     enforcement_mode: str = None
     visibility_level: str = None
-    selectively_enforced_services: List[Service] = None
+    selectively_enforced_services: List[Reference] = None
     container_cluster: ContainerCluster = None
     ike_authentication_certificate: IKEAuthenticationCertificate = None
 
@@ -154,6 +153,6 @@ class Workload(ModifiableObject):
         self.detected_vulnerabilities = [DetectedVulnerability.from_json(o) for o in self.detected_vulnerabilities] if self.detected_vulnerabilities else None
         self.agent = VENAgent.from_json(self.agent) if self.agent else None
         self.ven = VEN.from_json(self.ven) if self.ven else None
-        self.selectively_enforced_services = [Service.from_json(o) for o in self.selectively_enforced_services] if self.selectively_enforced_services else None
+        self.selectively_enforced_services = [Reference.from_json(o) for o in self.selectively_enforced_services] if self.selectively_enforced_services else None
         self.container_cluster = ContainerCluster.from_json(self.container_cluster) if self.container_cluster else None
         self.ike_authentication_certificate = IKEAuthenticationCertificate.from_json(self.ike_authentication_certificate) if self.ike_authentication_certificate else None

@@ -14,6 +14,7 @@ from illumio.policyobjects import (
 )
 from illumio.util import (
     JsonObject,
+    Reference,
     Transmission,
     PolicyDecision,
     FlowDirection,
@@ -28,9 +29,9 @@ OR = 'or'
 
 @dataclass
 class TrafficQueryFilter(JsonObject):
-    label: Label = None
-    workload: Workload = None
-    ip_list: IPList = None
+    label: Reference = None
+    workload: Reference = None
+    ip_list: Reference = None
     ip_address: str = None
     fqdn: str = None
     transmission: str = None
@@ -40,9 +41,9 @@ class TrafficQueryFilter(JsonObject):
             raise IllumioException("Invalid transmission: {}".format(self.transmission))
 
     def _decode_complex_types(self):
-        self.label = Label(href=self.label['href']) if self.label else None
-        self.workload = Workload(href=self.label['href']) if self.workload else None
-        self.ip_list = IPList(href=self.label['href']) if self.ip_list else None
+        self.label = Reference.from_json(self.label) if self.label else None
+        self.workload = Reference.from_json(self.workload) if self.workload else None
+        self.ip_list = Reference.from_json(self.ip_list) if self.ip_list else None
 
 
 @dataclass

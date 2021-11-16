@@ -3,17 +3,13 @@ from dataclasses import dataclass
 from typing import List
 
 from .exceptions import IllumioException
-from .util import JsonObject, ModifiableObject, POLICY_OBJECT_HREF_REGEX
-from .rules import Ruleset, EnforcementBoundary
-from .infrastructure import SecureConnectGateway
-from .policyobjects import (
-    LabelGroup,
-    LabelSet,
-    Service,
-    IPList,
-    VirtualService,
-    VirtualServer
+from .util import (
+    JsonObject,
+    Reference,
+    ModifiableObject,
+    POLICY_OBJECT_HREF_REGEX
 )
+from .policyobjects import LabelSet
 
 
 @dataclass
@@ -32,30 +28,18 @@ class FirewallSetting(ModifiableObject):
     blocked_connection_reject_scopes: List[LabelSet] = None
     loopback_interfaces_in_policy_scopes: List[LabelSet] = None
 
-TYPE_TO_CLASS_MAP = {
-    'label_groups': LabelGroup,
-    'rule_sets': Ruleset,
-    'ip_lists': IPList,
-    'virtual_services': VirtualService,
-    'services': Service,
-    'firewall_settings': FirewallSetting,
-    'enforcement_boundaries': EnforcementBoundary,
-    'secure_connect_gateways': SecureConnectGateway,
-    'virtual_servers': VirtualServer
-}
-
 
 @dataclass
 class PolicyChangeset(JsonObject):
-    label_groups: List[LabelGroup] = None
-    services: List[Service] = None
-    rule_sets: List[Ruleset] = None
-    ip_lists: List[IPList] = None
-    virtual_services: List[VirtualService] = None
-    firewall_settings: List[FirewallSetting] = None
-    enforcement_boundaries: List[EnforcementBoundary] = None
-    secure_connect_gateways: List[SecureConnectGateway] = None
-    virtual_servers: List[VirtualServer] = None
+    label_groups: List[Reference] = None
+    services: List[Reference] = None
+    rule_sets: List[Reference] = None
+    ip_lists: List[Reference] = None
+    virtual_services: List[Reference] = None
+    firewall_settings: List[Reference] = None
+    enforcement_boundaries: List[Reference] = None
+    secure_connect_gateways: List[Reference] = None
+    virtual_servers: List[Reference] = None
 
     @staticmethod
     def build(hrefs: List[str]):
@@ -65,7 +49,7 @@ class PolicyChangeset(JsonObject):
             if match:
                 object_type = match.group('type')
                 arr = getattr(changeset, object_type) or []
-                arr.append(TYPE_TO_CLASS_MAP[object_type](href=href))
+                arr.append(Reference(href=href))
                 setattr(changeset, object_type, arr)
             else:
                 raise IllumioException('Invalid HREF in policy provision changeset: {}'.format(href))

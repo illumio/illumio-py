@@ -2,7 +2,18 @@ import json
 from dataclasses import dataclass
 from typing import List
 
-from illumio.util import JsonObject, ModifiableObject
+from illumio.util import JsonObject, Reference, ModifiableObject
+
+
+@dataclass
+class LabelUsage(JsonObject):
+    label_group: bool = None
+    ruleset: bool = None
+    rule: bool = None
+    static_policy_scopes: bool = None
+    containers_inherit_host_policy_scopes: bool = None
+    blocked_connection_reject_scope: bool = None
+    enforcement_boundary: bool = None
 
 
 @dataclass
@@ -10,35 +21,40 @@ class Label(ModifiableObject):
     key: str = None
     value: str = None
     deleted: bool = None
+    usage: LabelUsage = None
+
+    def _decode_complex_types(self):
+        super()._decode_complex_types()
+        self.usage = LabelUsage.from_json(self.usage) if self.usage else None
 
 
 @dataclass
 class LabelGroup(Label):
     labels: List[Label] = None
-    sub_groups: List[dict] = None
-    usage: dict = None
+    sub_groups: List['LabelGroup'] = None
 
     def _decode_complex_types(self) -> None:
         super()._decode_complex_types()
-        self.labels = [Label.from_json(o) for o in self.labels]
+        self.labels = [Label.from_json(o) for o in self.labels] if self.labels else None
+        self.sub_groups = [LabelGroup.from_json(o) for o in self.sub_groups] if self.sub_groups else None
 
 
 @dataclass
 class LabelSet(JsonObject):
-    labels: List[Label] = None
+    labels: List[Reference] = None
 
     def to_json(self):
-        return [{'label_group' if type(label) is LabelGroup else 'label': label.to_json()} for label in self.labels]
+        json_array = []
+        for label in self.labels:
+            key = 'label_group' if '/label_groups/' in label.href else 'label'
+            json_array.append({key: label.to_json()})
+        return json_array
 
     @classmethod
     def from_json(cls, data) -> 'LabelSet':
         data = json.loads(data) if type(data) is str else data
         labels = []
         for label_entry in data:
-            key = 'label'
-            label_type = Label
-            if key not in label_entry:
-                key = 'label_group'
-                label_type = LabelGroup
-            labels.append(label_type.from_json(label_entry[key]))
+            key = 'label' if 'label' in label_entry else 'label_group'
+            labels.append(Reference.from_json(label_entry[key]))
         return LabelSet(labels=labels)

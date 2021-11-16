@@ -8,12 +8,12 @@ from .exceptions import IllumioApiException
 from .policyobjects import (
     IPList,
     ServiceBinding,
-    VirtualService,
-    Workload
+    VirtualService
 )
 from .explorer import TrafficQuery, TrafficFlow
 from .rules import Ruleset, Rule
 from .util import ANY_IP_LIST_NAME
+from .workloads import Workload
 
 
 class PolicyComputeEngine:

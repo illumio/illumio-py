@@ -2,14 +2,10 @@ from dataclasses import dataclass
 from typing import List
 
 from illumio import IllumioException
-from illumio.util import IllumioObject, JsonObject, ModifiableObject
-from illumio.workloads import Workload
+from illumio.util import IllumioObject, Reference, JsonObject, ModifiableObject
 
-from . import (
-    Label,
-    ServiceAddress,
-    ServicePort
-)
+from .label import Label
+from .service import ServiceAddress, ServicePort
 
 HOST_ONLY = 'host_only'
 INTERNAL_BRIDGE_NETWORK = 'internal_bridge_network'
@@ -47,11 +43,11 @@ class PortOverride(JsonObject):
 
 @dataclass
 class ServiceBinding(IllumioObject):
-    virtual_service: VirtualService = None
-    workload: Workload = None
+    virtual_service: Reference = None
+    workload: Reference = None
     port_overrides: List[PortOverride] = None
 
     def _decode_complex_types(self):
-        self.virtual_service = VirtualService.from_json(self.virtual_service) if self.virtual_service else None
-        self.workload = Workload.from_json(self.workload) if self.workload else None
+        self.virtual_service = Reference.from_json(self.virtual_service) if self.virtual_service else None
+        self.workload = Reference.from_json(self.workload) if self.workload else None
         self.port_overrides = [PortOverride.from_json(o) for o in self.port_overrides] if self.port_overrides else None
