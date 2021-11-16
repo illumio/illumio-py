@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 
-from . import Rule
+from .rule import Rule
 
 
 @dataclass

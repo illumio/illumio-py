@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 
-from illumio import IllumioObject
+from illumio.util import IllumioObject
 
 
 @dataclass

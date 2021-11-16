@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 
-from illumio.util.jsonutils import JsonObject
+from illumio.util import JsonObject
 from illumio.policyobjects import (
     IPList,
     Label,

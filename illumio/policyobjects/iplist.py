@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from typing import List
 
-from illumio import JsonObject, ModifiableObject
+from illumio.util import JsonObject, ModifiableObject
 
 
 @dataclass

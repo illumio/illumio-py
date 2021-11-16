@@ -1,10 +1,11 @@
 from dataclasses import dataclass
 from typing import List
 
-from illumio import ModifiableObject
+from illumio.util import ModifiableObject
 from illumio.policyobjects import LabelSet
 
-from . import Rule, IPTablesRule
+from .rule import Rule
+from .iptablesrule import IPTablesRule
 
 
 @dataclass

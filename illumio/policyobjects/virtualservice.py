@@ -1,14 +1,15 @@
 from dataclasses import dataclass
 from typing import List
 
+from illumio import IllumioException
+from illumio.util import IllumioObject, JsonObject, ModifiableObject
+from illumio.workloads import Workload
+
 from . import (
     Label,
     ServiceAddress,
     ServicePort
 )
-
-from illumio import IllumioException, IllumioObject, JsonObject, ModifiableObject
-from illumio.workloads import Workload
 
 HOST_ONLY = 'host_only'
 INTERNAL_BRIDGE_NETWORK = 'internal_bridge_network'

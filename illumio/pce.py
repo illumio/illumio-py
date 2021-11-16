@@ -3,11 +3,11 @@ from typing import List
 
 from requests import Session, Response
 
+from .secpolicy import PolicyChangeset, PolicyVersion
+
 from .exceptions import IllumioApiException
 from .policyobjects import (
     IPList,
-    PolicyChangeset,
-    PolicyVersion,
     ServiceBinding,
     VirtualService,
     Workload
@@ -176,3 +176,6 @@ class PolicyComputeEngine:
         kwargs['json'] = {'update_description': change_description, 'change_subset': policy_changeset.to_json()}
         response = self.post('/sec_policy', **kwargs)
         return PolicyVersion.from_json(response.json())
+
+
+__all__ = ['PolicyComputeEngine']

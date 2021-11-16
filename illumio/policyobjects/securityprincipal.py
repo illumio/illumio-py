@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 
-from illumio import ModifiableObject
+from illumio.util import ModifiableObject
 
 
 @dataclass

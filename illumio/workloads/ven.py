@@ -1,8 +1,8 @@
 from dataclasses import dataclass, field
 from typing import List
 
-from illumio import IllumioException, JsonObject, ModifiableObject
-from illumio.util import VisibilityLevel
+from illumio import IllumioException
+from illumio.util import JsonObject, ModifiableObject, VisibilityLevel
 
 
 @dataclass

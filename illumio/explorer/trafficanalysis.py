@@ -3,7 +3,7 @@ import socket
 from dataclasses import dataclass, field
 from typing import List
 
-from illumio import JsonObject, IllumioException
+from illumio import IllumioException
 from illumio.infrastructure import Network
 from illumio.policyobjects import (
     IPList,
@@ -13,11 +13,12 @@ from illumio.policyobjects import (
     VirtualService
 )
 from illumio.util import (
-    FQDN_REGEX,
+    JsonObject,
     Transmission,
     PolicyDecision,
     FlowDirection,
-    TrafficState
+    TrafficState,
+    FQDN_REGEX
 )
 from illumio.workloads import Workload
 

@@ -2,16 +2,11 @@ import re
 from dataclasses import dataclass
 from typing import List
 
-from illumio import (
-    IllumioException,
-    JsonObject,
-    ModifiableObject,
-    POLICY_OBJECT_HREF_REGEX
-)
-from illumio.rules import Ruleset, EnforcementBoundary
-from illumio.infrastructure import SecureConnectGateway
-
-from . import (
+from .exceptions import IllumioException
+from .util import JsonObject, ModifiableObject, POLICY_OBJECT_HREF_REGEX
+from .rules import Ruleset, EnforcementBoundary
+from .infrastructure import SecureConnectGateway
+from .policyobjects import (
     LabelGroup,
     LabelSet,
     Service,
@@ -100,3 +95,11 @@ class PolicyVersion(ModifiableObject):
     def _decode_complex_types(self):
         super()._decode_complex_types()
         self.object_counts = PolicyObjectCounts.from_json(self.object_counts) if self.object_counts else None
+
+
+__all__ = [
+    'FirewallSetting',
+    'PolicyVersion',
+    'PolicyObjectCounts',
+    'PolicyChangeset'
+]

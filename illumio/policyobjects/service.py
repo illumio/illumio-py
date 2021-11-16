@@ -1,8 +1,6 @@
 from dataclasses import dataclass
 
-from illumio import JsonObject
-
-from illumio import ModifiableObject
+from illumio.util import JsonObject, ModifiableObject
 
 
 @dataclass

@@ -1,13 +1,20 @@
 from dataclasses import dataclass
 from typing import List
 
-from illumio import IllumioException, JsonObject, ModifiableObject
+from illumio import IllumioException
 from illumio.infrastructure import ContainerCluster, Network
 from illumio.policyobjects import Label, Service
 from illumio.vulnerabilities import Vulnerability, VulnerabilityReport
-from illumio.util import LinkState, Mode, EnforcementMode, VisibilityLevel
+from illumio.util import (
+    JsonObject,
+    ModifiableObject,
+    LinkState,
+    Mode,
+    EnforcementMode,
+    VisibilityLevel
+)
 
-from . import VEN, VENAgent
+from .ven import VEN, VENAgent
 
 
 @dataclass

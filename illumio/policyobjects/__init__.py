@@ -4,4 +4,3 @@ from .label import *
 from .securityprincipal import *
 from .virtualserver import *
 from .virtualservice import *
-from .secpolicy import *

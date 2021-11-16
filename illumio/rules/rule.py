@@ -1,8 +1,7 @@
 from dataclasses import dataclass
 from typing import List
 
-from illumio import ModifiableObject
-from illumio.util.jsonutils import JsonObject
+from illumio.util import JsonObject, ModifiableObject
 from illumio.policyobjects import SecurityPrincipal, Service
 
 from .actor import Actor
