@@ -94,8 +94,6 @@ class Workload(UserObject):
     agent_to_pce_certificate_authentication_id: str = None
     distinguished_name: str = None
     public_ip: str = None
-    external_data_set: str = None
-    external_data_reference: str = None
     interfaces: List[Interface] = None
     service_provider: str = None
     data_center: str = None

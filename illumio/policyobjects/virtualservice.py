@@ -50,8 +50,6 @@ class ServiceBinding(IllumioObject):
     virtual_service: VirtualService = None
     workload: Workload = None
     port_overrides: List[PortOverride] = None
-    external_data_set: str = None
-    external_data_reference: str = None
 
     def _decode_complex_types(self):
         self.virtual_service = VirtualService.from_json(self.virtual_service) if self.virtual_service else None

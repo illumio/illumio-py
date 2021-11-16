@@ -11,8 +11,6 @@ class Label(UserObject):
     key: str = None
     value: str = None
     deleted: bool = None
-    external_data_set: str = None
-    external_data_reference: str = None
 
 
 @dataclass

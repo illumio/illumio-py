@@ -20,6 +20,11 @@ class User(IllumioObject):
 
 @dataclass
 class UserObject(IllumioObject):
+    created_at: str = None
+    updated_at: str = None
+    deleted_at: str = None
+    update_type: str = None
+    delete_type: str = None
     created_by: User = None
     updated_by: User = None
     deleted_by: User = None
