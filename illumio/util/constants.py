@@ -4,6 +4,8 @@ from enum import Enum
 
 from .jsonutils import JsonObject
 
+ANY_IP_LIST_NAME = 'Any (0.0.0.0/0 and ::/0)'
+
 FQDN_REGEX = re.compile('(?=^.{4,253}$)(^((?!-)[a-zA-Z0-9-]{1,63}(?<!-)\.)+[a-zA-Z]{2,63}$)')
 POLICY_OBJECT_HREF_REGEX = re.compile('^\/orgs\/\d+\/sec_policy\/(?:active|draft)\/(?P<type>[a-zA-Z_]+)\/(?P<uid>[a-zA-Z0-9-]+)$')
 

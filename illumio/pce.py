@@ -4,7 +4,6 @@ from typing import List
 from requests import Session, Response
 
 from .secpolicy import PolicyChangeset, PolicyVersion
-
 from .exceptions import IllumioApiException
 from .policyobjects import (
     IPList,
@@ -13,7 +12,8 @@ from .policyobjects import (
     Workload
 )
 from .explorer import TrafficQuery, TrafficFlow
-from .rules import Ruleset
+from .rules import Ruleset, Rule
+from .util import ANY_IP_LIST_NAME
 
 
 class PolicyComputeEngine:
@@ -119,12 +119,28 @@ class PolicyComputeEngine:
         response = self.get(href, include_org=False, **kwargs)
         return IPList.from_json(response.json())
 
+    def get_ip_list_by_name(self, name: str, **kwargs) -> IPList:
+        kwargs['params'] = {'name': name}
+        response = self.get('/sec_policy/ip_lists', **kwargs)
+        return IPList.from_json(response.json())
+
+    def get_default_ip_list(self, **kwargs) -> IPList:
+        kwargs['params'] = {'name': ANY_IP_LIST_NAME}
+        response = self.get('/sec_policy/ip_lists', **kwargs)
+        return IPList.from_json(response.json())
+
     def create_ruleset(self, ruleset: Ruleset, **kwargs) -> Ruleset:
         if ruleset.scopes is None:
             ruleset.scopes = []
         kwargs['json'] = ruleset.to_json()
         response = self.post('/sec_policy/draft/rule_sets', **kwargs)
         return Ruleset.from_json(response.json())
+
+    def create_rule(self, ruleset_href, rule: Rule, **kwargs) -> Rule:
+        kwargs['json'] = rule.to_json()
+        endpoint = '{}/sec_rules'.format(ruleset_href)
+        response = self.post(endpoint, include_org=False, **kwargs)
+        return Rule.from_json(response.json())
 
     def get_workload(self, href: str, **kwargs) -> Workload:
         response = self.get(href, include_org=False, **kwargs)
