@@ -1,8 +1,8 @@
 from dataclasses import dataclass
 
-from illumio import JsonObject
+from illumio import IllumioObject
 
 
 @dataclass
-class Network(JsonObject):
+class Network(IllumioObject):
     pass
