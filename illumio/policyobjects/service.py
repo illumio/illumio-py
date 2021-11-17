@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from typing import List
 
 from illumio.util import JsonObject, ModifiableObject
 
@@ -27,4 +28,8 @@ class ServiceAddress(JsonObject):
 
 @dataclass
 class Service(ModifiableObject):
-    pass
+    service_ports: List[ServicePort] = None
+
+    def _decode_complex_types(self):
+        super()._decode_complex_types()
+        self.service_ports = [ServicePort.from_json(o) for o in self.service_ports] if self.service_ports else None
