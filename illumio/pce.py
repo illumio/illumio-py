@@ -43,6 +43,8 @@ class PolicyComputeEngine:
                 for error in response.json():
                     if error and 'token' in error and 'message' in error:
                         message += '\n{}: {}'.format(error['token'], error['message'])
+                    elif error and 'error' in error:
+                        message += '\n{}'.format(error['error'])
             raise IllumioApiException(message) from e
 
     def _set_request_headers(self, is_async=False, **kwargs):
@@ -119,15 +121,18 @@ class PolicyComputeEngine:
         response = self.get(href, include_org=False, **kwargs)
         return IPList.from_json(response.json())
 
-    def get_ip_list_by_name(self, name: str, **kwargs) -> IPList:
+    def get_ip_lists_by_name(self, name: str, **kwargs) -> IPList:
         kwargs['params'] = {'name': name}
-        response = self.get('/sec_policy/ip_lists', **kwargs)
-        return IPList.from_json(response.json())
+        ip_lists = []
+        for policy_version in {'draft', 'active'}:
+            response = self.get('/sec_policy/{}/ip_lists'.format(policy_version), **kwargs)
+            ip_lists += response.json()
+        return [IPList.from_json(o) for o in ip_lists]
 
     def get_default_ip_list(self, **kwargs) -> IPList:
         kwargs['params'] = {'name': ANY_IP_LIST_NAME}
-        response = self.get('/sec_policy/ip_lists', **kwargs)
-        return IPList.from_json(response.json())
+        response = self.get('/sec_policy/active/ip_lists', **kwargs)
+        return IPList.from_json(response.json()[0])
 
     def create_ruleset(self, ruleset: Ruleset, **kwargs) -> Ruleset:
         if ruleset.scopes is None:
