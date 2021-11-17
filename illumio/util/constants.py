@@ -5,6 +5,9 @@ from typing import List
 
 from .jsonutils import JsonObject
 
+ACTIVE = 'active'
+DRAFT = 'draft'
+
 ANY_IP_LIST_NAME = 'Any (0.0.0.0/0 and ::/0)'
 
 FQDN_REGEX = re.compile('(?=^.{4,253}$)(^((?!-)[a-zA-Z0-9-]{1,63}(?<!-)\.)+[a-zA-Z]{2,63}$)')
