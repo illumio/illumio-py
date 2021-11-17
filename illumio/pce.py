@@ -11,8 +11,8 @@ from .policyobjects import (
     VirtualService
 )
 from .explorer import TrafficQuery, TrafficFlow
-from .rules import Ruleset, Rule
-from .util import ANY_IP_LIST_NAME
+from .rules import Ruleset, Rule, EnforcementBoundary
+from .util import ACTIVE, DRAFT, ANY_IP_LIST_NAME
 from .workloads import Workload
 
 
@@ -101,6 +101,17 @@ class PolicyComputeEngine:
         response = self.get(href, include_org=False, **kwargs)
         return VirtualService.from_json(response.json())
 
+    def get_virtual_services_by_name(self, name: str, policy_version=ACTIVE, **kwargs) -> List[VirtualService]:
+        # bafflingly, a draft version of an active object will still be returned from
+        # GET queries against the /draft/ policy version endpoints. because of this, we
+        # can't easily simplify these functions to perform both lookups, and must rely
+        # on the client to know which version the object is in.
+        kwargs['params'] = {'name': name}
+        if policy_version not in {DRAFT, ACTIVE}:
+            raise IllumioApiException("Invalid policy_version specified: {}".format(policy_version))
+        response = self.get('/sec_policy/{}/virtual_services'.format(policy_version), **kwargs)
+        return [VirtualService.from_json(o) for o in response.json()]
+
     def create_virtual_service(self, virtual_service: VirtualService, **kwargs) -> VirtualService:
         kwargs['json'] = virtual_service.to_json()
         response = self.post('/sec_policy/draft/virtual_services', **kwargs)
@@ -110,32 +121,51 @@ class PolicyComputeEngine:
         kwargs['json'] = [service_binding.to_json()]
         response = self.post('/service_bindings', **kwargs)
         binding = response.json()[0]
-        service_binding.href = binding['href']
-        return service_binding
+        if binding['status'] == 'created':
+            service_binding.href = binding['href']
+            return service_binding
+        raise IllumioApiException("Service binding creation failed with status: {}".format(binding['status']))
 
-    def create_service_bindings(self, service_bindings: List[ServiceBinding], **kwargs) -> List[ServiceBinding]:
+    def create_service_bindings(self, service_bindings: List[ServiceBinding], **kwargs) -> dict:
         kwargs['json'] = [service_binding.to_json() for service_binding in service_bindings]
         response = self.post('/service_bindings', **kwargs)
-        # we don't need to worry about checking for individual creation errors, as a single failure will cause the entire POST to fail:
-        # https://docs.illumio.com/core/21.3/Content/Guides/rest-api/security-policy-objects/virtual-services.htm#CreateaServiceBinding
-        return [ServiceBinding(href=binding['href']) for binding in response.json()]
+        # contrary to what the docs claim, if one or more service bindings fail
+        # to create - even if ALL of them fail! - a 201 response is returned with
+        # error statuses for each failing binding. when creating multiple bindings,
+        # we must support this horrendous behaviour by returning an arbitrary error
+        # object for the failures. since we have no guarantee of ordering, we must
+        # create new ServiceBinding objects for each success, effectively acting as
+        # references.
+        results = {"service_bindings": [], "errors": []}
+        for binding in response.json():
+            if binding['status'] == 'created':
+                results['service_bindings'].append(ServiceBinding(href=binding['href']))
+            else:
+                results['errors'].append({'error': binding['status']})
+        return results
 
     def get_ip_list(self, href: str, **kwargs) -> IPList:
         response = self.get(href, include_org=False, **kwargs)
         return IPList.from_json(response.json())
 
-    def get_ip_lists_by_name(self, name: str, **kwargs) -> IPList:
+    def get_ip_lists_by_name(self, name: str, policy_version=ACTIVE, **kwargs) -> List[IPList]:
         kwargs['params'] = {'name': name}
-        ip_lists = []
-        for policy_version in {'draft', 'active'}:
-            response = self.get('/sec_policy/{}/ip_lists'.format(policy_version), **kwargs)
-            ip_lists += response.json()
-        return [IPList.from_json(o) for o in ip_lists]
+        if policy_version not in {DRAFT, ACTIVE}:
+            raise IllumioApiException("Invalid policy_version specified: {}".format(policy_version))
+        response = self.get('/sec_policy/{}/ip_lists'.format(policy_version), **kwargs)
+        return [IPList.from_json(o) for o in response.json()]
 
     def get_default_ip_list(self, **kwargs) -> IPList:
         kwargs['params'] = {'name': ANY_IP_LIST_NAME}
         response = self.get('/sec_policy/active/ip_lists', **kwargs)
         return IPList.from_json(response.json()[0])
+
+    def get_rulesets_by_name(self, name: str, policy_version=ACTIVE, **kwargs) -> List[Ruleset]:
+        kwargs['params'] = {'name': name}
+        if policy_version not in {DRAFT, ACTIVE}:
+            raise IllumioApiException("Invalid policy_version specified: {}".format(policy_version))
+        response = self.get('/sec_policy/{}/rule_sets'.format(policy_version), **kwargs)
+        return [Ruleset.from_json(o) for o in response.json()]
 
     def create_ruleset(self, ruleset: Ruleset, **kwargs) -> Ruleset:
         if ruleset.scopes is None:
@@ -145,10 +175,24 @@ class PolicyComputeEngine:
         return Ruleset.from_json(response.json())
 
     def create_rule(self, ruleset_href, rule: Rule, **kwargs) -> Rule:
+        if rule.enabled is None:
+            rule.enabled = True
         kwargs['json'] = rule.to_json()
         endpoint = '{}/sec_rules'.format(ruleset_href)
         response = self.post(endpoint, include_org=False, **kwargs)
         return Rule.from_json(response.json())
+
+    def get_enforcement_boundaries_by_name(self, name: str, policy_version=ACTIVE, **kwargs) -> List[EnforcementBoundary]:
+        kwargs['params'] = {'name': name}
+        if policy_version not in {DRAFT, ACTIVE}:
+            raise IllumioApiException("Invalid policy_version specified: {}".format(policy_version))
+        response = self.get('/sec_policy/{}/enforcement_boundaries'.format(policy_version), **kwargs)
+        return [EnforcementBoundary.from_json(o) for o in response.json()]
+
+    def create_enforcement_boundary(self, enforcement_boundary, **kwargs) -> EnforcementBoundary:
+        kwargs['json'] = enforcement_boundary.to_json()
+        response = self.post('/sec_policy/draft/enforcement_boundaries', **kwargs)
+        return EnforcementBoundary.from_json(response.json())
 
     def get_workload(self, href: str, **kwargs) -> Workload:
         response = self.get(href, include_org=False, **kwargs)
