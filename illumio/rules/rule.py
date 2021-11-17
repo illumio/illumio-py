@@ -1,21 +1,25 @@
 from dataclasses import dataclass
-from typing import List
+from typing import List, Union
 
 from illumio.util import JsonObject, Reference, ModifiableObject
-from illumio.policyobjects import Service
+from illumio.policyobjects import Service, ServicePort
 
 from .actor import Actor
 
 
 @dataclass
 class BaseRule(ModifiableObject):
-    ingress_services: List[Service] = None
+    ingress_services: List[Union[Service, ServicePort]] = None
     providers: List[Actor] = None
     consumers: List[Actor] = None
 
     def _decode_complex_types(self):
         super()._decode_complex_types()
-        self.ingress_services = [Service.from_json(o) for o in self.ingress_services] if self.ingress_services else None
+        decoded_ingress_services = []
+        for service in self.ingress_services:
+            service_type = Service if 'href' in service else ServicePort
+            decoded_ingress_services.append(service_type.from_json(service))
+        self.ingress_services = decoded_ingress_services
         self.providers = [Actor.from_json(o) for o in self.providers] if self.providers else None
         self.consumers = [Actor.from_json(o) for o in self.consumers] if self.consumers else None
 
