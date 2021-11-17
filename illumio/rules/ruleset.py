@@ -14,7 +14,6 @@ class Ruleset(ModifiableObject):
     scopes: List[LabelSet] = None
     rules: List[Rule] = None
     ip_tables_rules: List[IPTablesRule] = None
-    caps: List[str] = None
 
     def _decode_complex_types(self) -> None:
         super()._decode_complex_types()

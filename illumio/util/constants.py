@@ -1,6 +1,7 @@
 import re
 from dataclasses import dataclass
 from enum import Enum
+from typing import List
 
 from .jsonutils import JsonObject
 
@@ -34,6 +35,7 @@ class ModifiableObject(IllumioObject):
     created_by: Reference = None
     updated_by: Reference = None
     deleted_by: Reference = None
+    caps: List[str] = None
 
     def _decode_complex_types(self) -> None:
         self.created_by = Reference(href=self.created_by) if self.created_by else None

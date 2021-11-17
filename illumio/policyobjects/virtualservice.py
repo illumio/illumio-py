@@ -19,7 +19,6 @@ class VirtualService(ModifiableObject):
     service_ports: List[ServicePort] = None
     ip_overrides: List[str] = None
     labels: List[Label] = None
-    caps: List[str] = None
 
     def _validate(self):
         if self.apply_to and self.apply_to not in {HOST_ONLY, INTERNAL_BRIDGE_NETWORK}:

@@ -119,7 +119,6 @@ class Workload(ModifiableObject):
     online: bool = None
     deleted: bool = None
     ignored_interface_names: List[str] = None
-    caps: List[str] = None
     firewall_coexistence: str = None
     containers_inherit_host_policy: bool = None
     blocked_connection_action: str = None
