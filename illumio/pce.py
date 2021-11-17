@@ -12,7 +12,7 @@ from .policyobjects import (
 )
 from .explorer import TrafficQuery, TrafficFlow
 from .rules import Ruleset, Rule, EnforcementBoundary
-from .util import ACTIVE, DRAFT, ANY_IP_LIST_NAME
+from .util import EnforcementMode, ACTIVE, DRAFT, ANY_IP_LIST_NAME
 from .workloads import Workload
 
 
@@ -189,7 +189,7 @@ class PolicyComputeEngine:
         response = self.get('/sec_policy/{}/enforcement_boundaries'.format(policy_version), **kwargs)
         return [EnforcementBoundary.from_json(o) for o in response.json()]
 
-    def create_enforcement_boundary(self, enforcement_boundary, **kwargs) -> EnforcementBoundary:
+    def create_enforcement_boundary(self, enforcement_boundary: EnforcementBoundary, **kwargs) -> EnforcementBoundary:
         kwargs['json'] = enforcement_boundary.to_json()
         response = self.post('/sec_policy/draft/enforcement_boundaries', **kwargs)
         return EnforcementBoundary.from_json(response.json())
@@ -197,6 +197,17 @@ class PolicyComputeEngine:
     def get_workload(self, href: str, **kwargs) -> Workload:
         response = self.get(href, include_org=False, **kwargs)
         return Workload.from_json(response.json())
+
+    def update_workload_enforcement_modes(self, enforcement_mode: EnforcementMode, workloads: List[Workload], **kwargs) -> dict:
+        kwargs['json'] = [{'href': workload.href, 'enforcement_mode': enforcement_mode.value} for workload in workloads]
+        response = self.put('/workloads/bulk_update', **kwargs)
+        results = {"workloads": [], "errors": []}
+        for binding in response.json():
+            if binding['status'] == 'updated':
+                results['workloads'].append(Workload(href=binding['href']))
+            else:
+                results['errors'].append({'error': binding['status']})
+        return results
 
     def get_traffic_flows(self, traffic_query: TrafficQuery, **kwargs) -> List[TrafficFlow]:
         kwargs['json'] = traffic_query.to_json()
