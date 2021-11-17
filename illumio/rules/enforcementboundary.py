@@ -1,8 +1,8 @@
 from dataclasses import dataclass
 
-from .rule import Rule
+from .rule import BaseRule
 
 
 @dataclass
-class EnforcementBoundary(Rule):
+class EnforcementBoundary(BaseRule):
     pass
