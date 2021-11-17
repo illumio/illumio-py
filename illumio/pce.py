@@ -107,15 +107,18 @@ class PolicyComputeEngine:
         return VirtualService.from_json(response.json())
 
     def create_service_binding(self, service_binding: ServiceBinding, **kwargs) -> ServiceBinding:
-        # bafflingly, the create endpoint for service bindings is a batch operation
         kwargs['json'] = [service_binding.to_json()]
         response = self.post('/service_bindings', **kwargs)
-        result = response.json()[0]
-        status = result['status']
-        if status != 'created':
-            raise IllumioApiException("Failed to create Service Binding with status: {}".format(status))
-        service_binding.href = result['href']
+        binding = response.json()[0]
+        service_binding.href = binding['href']
         return service_binding
+
+    def create_service_bindings(self, service_bindings: List[ServiceBinding], **kwargs) -> List[ServiceBinding]:
+        kwargs['json'] = [service_binding.to_json() for service_binding in service_bindings]
+        response = self.post('/service_bindings', **kwargs)
+        # we don't need to worry about checking for individual creation errors, as a single failure will cause the entire POST to fail:
+        # https://docs.illumio.com/core/21.3/Content/Guides/rest-api/security-policy-objects/virtual-services.htm#CreateaServiceBinding
+        return [ServiceBinding(href=binding['href']) for binding in response.json()]
 
     def get_ip_list(self, href: str, **kwargs) -> IPList:
         response = self.get(href, include_org=False, **kwargs)
