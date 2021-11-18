@@ -63,6 +63,6 @@ class ModifiableObject(IllumioObject):
     caps: List[str] = None
 
     def _decode_complex_types(self) -> None:
-        self.created_by = Reference(href=self.created_by) if self.created_by else None
-        self.updated_by = Reference(href=self.updated_by) if self.updated_by else None
-        self.deleted_by = Reference(href=self.deleted_by) if self.deleted_by else None
+        self.created_by = Reference.from_json(self.created_by) if self.created_by else None
+        self.updated_by = Reference.from_json(self.updated_by) if self.updated_by else None
+        self.deleted_by = Reference.from_json(self.deleted_by) if self.deleted_by else None
