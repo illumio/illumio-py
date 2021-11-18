@@ -38,7 +38,7 @@ class PolicyComputeEngine:
         except Exception as e:
             message = str(e)
             # Response objects are falsy if the request failed so do a null check
-            if response is not None and response.content:
+            if response is not None and response.headers['Content-Type'] == 'application/json':
                 message = "API call returned error code {}. Errors:".format(response.status_code)
                 for error in response.json():
                     if error and 'token' in error and 'message' in error:
@@ -97,15 +97,15 @@ class PolicyComputeEngine:
     def delete(self, endpoint: str, **kwargs) -> Response:
         return self._request('DELETE', endpoint, **kwargs)
 
-    def _get_by_name(self, name: str, **kwargs):
+    def _get_by_name(self, name: str, object_type, **kwargs):
         kwargs['params'] = {'name': name}
         results = []
-        response = self.get('/sec_policy/{}/virtual_services'.format(ACTIVE), **kwargs)
+        response = self.get('/sec_policy/{}/{}'.format(ACTIVE, object_type), **kwargs)
         results += list(response.json())
         # bafflingly, a draft version of an active object will still be returned from
         # GET queries against the /draft/ policy version endpoints. because of this, we
         # check and only return the active version if it exists
-        response = self.get('/sec_policy/{}/virtual_services'.format(DRAFT), **kwargs)
+        response = self.get('/sec_policy/{}/{}'.format(DRAFT, object_type), **kwargs)
         active_objects = {active_object['name'] for active_object in results}
         for draft_object in response.json():
             if draft_object['name'] not in active_objects:
@@ -117,7 +117,7 @@ class PolicyComputeEngine:
         return VirtualService.from_json(response.json())
 
     def get_virtual_services_by_name(self, name: str, **kwargs) -> List[VirtualService]:
-        results = self._get_by_name(name, **kwargs)
+        results = self._get_by_name(name, object_type='virtual_services', **kwargs)
         return [VirtualService.from_json(o) for o in results]
 
     def create_virtual_service(self, virtual_service: VirtualService, **kwargs) -> VirtualService:
@@ -157,7 +157,7 @@ class PolicyComputeEngine:
         return IPList.from_json(response.json())
 
     def get_ip_lists_by_name(self, name: str, **kwargs) -> List[IPList]:
-        results = self._get_by_name(name, **kwargs)
+        results = self._get_by_name(name, object_type='ip_lists', **kwargs)
         return [IPList.from_json(o) for o in results]
 
     def get_default_ip_list(self, **kwargs) -> IPList:
@@ -166,7 +166,7 @@ class PolicyComputeEngine:
         return IPList.from_json(response.json()[0])
 
     def get_rulesets_by_name(self, name: str, **kwargs) -> List[Ruleset]:
-        results = self._get_by_name(name, **kwargs)
+        results = self._get_by_name(name, object_type='rule_sets', **kwargs)
         return [Ruleset.from_json(o) for o in results]
 
     def create_ruleset(self, ruleset: Ruleset, **kwargs) -> Ruleset:
@@ -185,7 +185,7 @@ class PolicyComputeEngine:
         return Rule.from_json(response.json())
 
     def get_enforcement_boundaries_by_name(self, name: str, **kwargs) -> List[EnforcementBoundary]:
-        results = self._get_by_name(name, **kwargs)
+        results = self._get_by_name(name, object_type='enforcement_boundaries', **kwargs)
         return [EnforcementBoundary.from_json(o) for o in results]
 
     def create_enforcement_boundary(self, enforcement_boundary: EnforcementBoundary, **kwargs) -> EnforcementBoundary:
