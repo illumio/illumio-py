@@ -19,3 +19,6 @@ dist/
 
 # setuptools_scm local dev version file
 _version.py
+
+# mac
+.DS_Store
