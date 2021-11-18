@@ -1,6 +1,10 @@
+import re
 from dataclasses import dataclass
 
-from illumio.util import JsonObject, Reference
+from illumio.exceptions import IllumioException
+from illumio.util import JsonObject, Reference, HREF_REGEX
+
+AMS = 'ams'
 
 
 @dataclass
@@ -12,6 +16,20 @@ class Actor(JsonObject):
     virtual_service: Reference = None
     virtual_server: Reference = None
     ip_list: Reference = None
+
+    @staticmethod
+    def from_href(href):
+        if href.lower() == AMS:  # special case for all objects
+            return Actor(actors=AMS)
+        actor = Actor()
+        match = re.match(HREF_REGEX, href)
+        if match:
+            # HREF object types are plural, so we remove the s
+            object_type = match.group('type')[:-1]
+            setattr(actor, object_type, Reference(href=href))
+        else:
+            raise IllumioException('Invalid HREF in policy provision changeset: {}'.format(href))
+        return actor
 
     def _decode_complex_types(self):
         self.label = Reference.from_json(self.label) if self.label else None

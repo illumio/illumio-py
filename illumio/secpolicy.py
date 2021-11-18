@@ -7,7 +7,7 @@ from .util import (
     JsonObject,
     Reference,
     ModifiableObject,
-    POLICY_OBJECT_HREF_REGEX
+    HREF_REGEX
 )
 from .policyobjects import LabelSet
 
@@ -45,7 +45,7 @@ class PolicyChangeset(JsonObject):
     def build(hrefs: List[str]):
         changeset = PolicyChangeset()
         for href in hrefs:
-            match = re.match(POLICY_OBJECT_HREF_REGEX, href)
+            match = re.match(HREF_REGEX, href)
             if match:
                 object_type = match.group('type')
                 arr = getattr(changeset, object_type) or []

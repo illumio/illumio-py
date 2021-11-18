@@ -54,8 +54,7 @@ class AgentStatus(JsonObject):
     security_policy_sync_state: str = None
 
     def _decode_complex_types(self) -> None:
-        if self.agent_health_errors:
-            self.agent_health_errors = AgentHealthErrors.from_json(self.agent_health_errors)
+        self.agent_health_errors = AgentHealthErrors.from_json(self.agent_health_errors) if self.agent_health_errors else None
         self.agent_health = [AgentHealth.from_json(o) for o in self.agent_health] if self.agent_health else None
 
 
