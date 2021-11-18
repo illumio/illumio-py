@@ -97,20 +97,28 @@ class PolicyComputeEngine:
     def delete(self, endpoint: str, **kwargs) -> Response:
         return self._request('DELETE', endpoint, **kwargs)
 
+    def _get_by_name(self, name: str, **kwargs):
+        kwargs['params'] = {'name': name}
+        results = []
+        response = self.get('/sec_policy/{}/virtual_services'.format(ACTIVE), **kwargs)
+        results += list(response.json())
+        # bafflingly, a draft version of an active object will still be returned from
+        # GET queries against the /draft/ policy version endpoints. because of this, we
+        # check and only return the active version if it exists
+        response = self.get('/sec_policy/{}/virtual_services'.format(DRAFT), **kwargs)
+        active_objects = {active_object['name'] for active_object in results}
+        for draft_object in response.json():
+            if draft_object['name'] not in active_objects:
+                results.append(draft_object)
+        return results
+
     def get_virtual_service(self, href: str, **kwargs) -> VirtualService:
         response = self.get(href, include_org=False, **kwargs)
         return VirtualService.from_json(response.json())
 
-    def get_virtual_services_by_name(self, name: str, policy_version=ACTIVE, **kwargs) -> List[VirtualService]:
-        # bafflingly, a draft version of an active object will still be returned from
-        # GET queries against the /draft/ policy version endpoints. because of this, we
-        # can't easily simplify these functions to perform both lookups, and must rely
-        # on the client to know which version the object is in.
-        kwargs['params'] = {'name': name}
-        if policy_version not in {DRAFT, ACTIVE}:
-            raise IllumioApiException("Invalid policy_version specified: {}".format(policy_version))
-        response = self.get('/sec_policy/{}/virtual_services'.format(policy_version), **kwargs)
-        return [VirtualService.from_json(o) for o in response.json()]
+    def get_virtual_services_by_name(self, name: str, **kwargs) -> List[VirtualService]:
+        results = self._get_by_name(name, **kwargs)
+        return [VirtualService.from_json(o) for o in results]
 
     def create_virtual_service(self, virtual_service: VirtualService, **kwargs) -> VirtualService:
         kwargs['json'] = virtual_service.to_json()
@@ -148,24 +156,18 @@ class PolicyComputeEngine:
         response = self.get(href, include_org=False, **kwargs)
         return IPList.from_json(response.json())
 
-    def get_ip_lists_by_name(self, name: str, policy_version=ACTIVE, **kwargs) -> List[IPList]:
-        kwargs['params'] = {'name': name}
-        if policy_version not in {DRAFT, ACTIVE}:
-            raise IllumioApiException("Invalid policy_version specified: {}".format(policy_version))
-        response = self.get('/sec_policy/{}/ip_lists'.format(policy_version), **kwargs)
-        return [IPList.from_json(o) for o in response.json()]
+    def get_ip_lists_by_name(self, name: str, **kwargs) -> List[IPList]:
+        results = self._get_by_name(name, **kwargs)
+        return [IPList.from_json(o) for o in results]
 
     def get_default_ip_list(self, **kwargs) -> IPList:
         kwargs['params'] = {'name': ANY_IP_LIST_NAME}
         response = self.get('/sec_policy/active/ip_lists', **kwargs)
         return IPList.from_json(response.json()[0])
 
-    def get_rulesets_by_name(self, name: str, policy_version=ACTIVE, **kwargs) -> List[Ruleset]:
-        kwargs['params'] = {'name': name}
-        if policy_version not in {DRAFT, ACTIVE}:
-            raise IllumioApiException("Invalid policy_version specified: {}".format(policy_version))
-        response = self.get('/sec_policy/{}/rule_sets'.format(policy_version), **kwargs)
-        return [Ruleset.from_json(o) for o in response.json()]
+    def get_rulesets_by_name(self, name: str, **kwargs) -> List[Ruleset]:
+        results = self._get_by_name(name, **kwargs)
+        return [Ruleset.from_json(o) for o in results]
 
     def create_ruleset(self, ruleset: Ruleset, **kwargs) -> Ruleset:
         if ruleset.scopes is None:
@@ -182,12 +184,9 @@ class PolicyComputeEngine:
         response = self.post(endpoint, include_org=False, **kwargs)
         return Rule.from_json(response.json())
 
-    def get_enforcement_boundaries_by_name(self, name: str, policy_version=ACTIVE, **kwargs) -> List[EnforcementBoundary]:
-        kwargs['params'] = {'name': name}
-        if policy_version not in {DRAFT, ACTIVE}:
-            raise IllumioApiException("Invalid policy_version specified: {}".format(policy_version))
-        response = self.get('/sec_policy/{}/enforcement_boundaries'.format(policy_version), **kwargs)
-        return [EnforcementBoundary.from_json(o) for o in response.json()]
+    def get_enforcement_boundaries_by_name(self, name: str, **kwargs) -> List[EnforcementBoundary]:
+        results = self._get_by_name(name, **kwargs)
+        return [EnforcementBoundary.from_json(o) for o in results]
 
     def create_enforcement_boundary(self, enforcement_boundary: EnforcementBoundary, **kwargs) -> EnforcementBoundary:
         kwargs['json'] = enforcement_boundary.to_json()
