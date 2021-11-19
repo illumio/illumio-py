@@ -1,6 +1,7 @@
 import json
 import os
 import re
+from datetime import datetime, timezone
 from typing import List
 
 import pytest
@@ -50,3 +51,15 @@ def test_invalid_policy_decision():
 def test_response_structure(mock_traffic_response):
     assert len(mock_traffic_response) > 1
     assert mock_traffic_response[0].src is not None
+
+
+def test_traffic_query_builder():
+    query = TrafficQuery.build()
+
+
+def test_timestamp_conversion():
+    start_date = datetime.strptime('2021-11-05', '%Y-%m-%d').replace(tzinfo=timezone.utc)
+    end_date = datetime.strptime('2021-11-12', '%Y-%m-%d').replace(tzinfo=timezone.utc)
+    query = TrafficQuery(start_date=start_date.timestamp(), end_date=end_date.timestamp() * 1000, policy_decisions=["unknown"])
+    assert query.start_date == '2021-11-05T00:00:00Z'
+    assert query.end_date == '2021-11-12T00:00:00Z'

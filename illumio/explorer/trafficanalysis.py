@@ -1,7 +1,8 @@
 import re
 import socket
 from dataclasses import dataclass, field
-from typing import List
+from datetime import datetime
+from typing import List, Union, Optional
 
 from illumio import IllumioException
 from illumio.infrastructure import Network
@@ -70,8 +71,8 @@ class TrafficQueryServiceBlock(JsonObject):
 
 @dataclass
 class TrafficQuery(JsonObject):
-    start_date: str
-    end_date: str
+    start_date: Union[str, int, float]
+    end_date: Union[str, int, float]
     sources: TrafficQueryFilterBlock = field(default_factory=TrafficQueryFilterBlock)
     destinations: TrafficQueryFilterBlock = field(default_factory=TrafficQueryFilterBlock)
     services: TrafficQueryServiceBlock = field(default_factory=TrafficQueryServiceBlock)
@@ -82,7 +83,8 @@ class TrafficQuery(JsonObject):
     query_name: str = None  # required for async traffic queries
 
     @staticmethod
-    def build(start_date: str = None, end_date: str = None,
+    def build(start_date: Optional[Union[str, int, float]] = None,
+            end_date: Optional[Union[str, int, float]] = None,
             include_sources=[], exclude_sources=[],
             include_destinations=[], exclude_destinations=[],
             include_services=[], exclude_services=[], policy_decisions=[],
@@ -106,6 +108,23 @@ class TrafficQuery(JsonObject):
             exclude_workloads_from_ip_list_query=exclude_workloads_from_ip_list_query,
             max_results=max_results, query_name=query_name
         )
+
+    def __post_init__(self):
+        if type(self.start_date) is int or type(self.start_date) is float:
+            self.start_date = self._convert_timestamp_to_date_string(self.start_date)
+        if type(self.end_date) is int or type(self.end_date) is float:
+            self.end_date = self._convert_timestamp_to_date_string(self.end_date)
+        super().__post_init__()
+
+    def _convert_timestamp_to_date_string(self, timestamp: int) -> str:
+        try:
+            # the Unix timestamp could be in seconds or milliseconds,
+            # so first try converting it as-is and catch the potential
+            # out-of-bounds ValueError
+            dt = datetime.utcfromtimestamp(timestamp)
+        except ValueError:
+            dt = datetime.utcfromtimestamp(timestamp / 1000)
+        return dt.strftime('%Y-%m-%dT%H:%M:%SZ')
 
     def _validate(self):
         for policy_decision in self.policy_decisions:
