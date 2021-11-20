@@ -27,6 +27,9 @@ class PolicyComputeEngine:
     def set_credentials(self, username: str, password: str) -> None:
         self._session.auth = (username, password)
 
+    def set_proxies(self, http_proxy: str = None, https_proxy: str = None) -> None:
+        self._session.proxies.update({'http': http_proxy, 'https': https_proxy})
+
     def _request(self, method: str, endpoint: str, include_org=True, **kwargs) -> Response:
         try:
             response = None  # avoid reference before assignment errors in case of cxn failure
