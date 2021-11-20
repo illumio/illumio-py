@@ -49,8 +49,8 @@ class TrafficQueryFilter(JsonObject):
 
 @dataclass
 class TrafficQueryFilterBlock(JsonObject):
-    # bafflingly, the include parameter is specified as a list of lists
-    # of object references or key-value pairs.
+    # the include parameter is specified as a list of lists
+    # of object references or key-value pairs
     include: List[List[TrafficQueryFilter]] = field(default_factory=list)
     exclude: List[TrafficQueryFilter] = field(default_factory=list)
 

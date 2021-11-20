@@ -102,9 +102,9 @@ class PolicyComputeEngine:
         results = []
         response = self.get('/sec_policy/{}/{}'.format(ACTIVE, object_type), **kwargs)
         results += list(response.json())
-        # bafflingly, a draft version of an active object will still be returned from
-        # GET queries against the /draft/ policy version endpoints. because of this, we
-        # check and only return the active version if it exists
+        # a draft version of an active object will still be returned from GET queries
+        # against the /draft/ policy version endpoints. because of this, we check and
+        # only return the active version if it exists
         response = self.get('/sec_policy/{}/{}'.format(DRAFT, object_type), **kwargs)
         active_objects = {active_object['name'] for active_object in results}
         for draft_object in response.json():
@@ -176,7 +176,7 @@ class PolicyComputeEngine:
         response = self.post('/sec_policy/draft/rule_sets', **kwargs)
         return Ruleset.from_json(response.json())
 
-    def create_rule(self, ruleset_href, rule: Rule, **kwargs) -> Rule:
+    def create_rule(self, ruleset_href: str, rule: Rule, **kwargs) -> Rule:
         if rule.enabled is None:
             rule.enabled = True
         kwargs['json'] = rule.to_json()
@@ -214,11 +214,11 @@ class PolicyComputeEngine:
         return [TrafficFlow.from_json(flow) for flow in response.json()]
 
     def get_traffic_flows_async(self, query_name: str, traffic_query: TrafficQuery, **kwargs) -> List[TrafficFlow]:
-        # the redundancy/reuse between this function and get_collection is unfortunately necessary due
-        # to the completely different request & response structure for the async calls. note how
-        # location is pulled from the initial response HREF rather than a header, retry-after is missing,
-        # the success status is 'completed' rather than 'done', and the 'result' value of the response
-        # contains the HREF directly rather than an object
+        # the redundancy/reuse between this function and get_collection is necessary due
+        # to the different request & response structures for the async calls. location is
+        # pulled from the initial response HREF rather than a header, retry-after is missing,
+        # the success status is 'completed' rather than 'done', and the 'result' value of
+        # the response contains the HREF directly rather than an object
         try:
             traffic_query.query_name = query_name
             kwargs['json'] = traffic_query.to_json()

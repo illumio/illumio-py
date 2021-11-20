@@ -1,7 +1,6 @@
 from dataclasses import dataclass
 from typing import List, Union
 
-from illumio.exceptions import IllumioException
 from illumio.util import JsonObject, Reference, ModifiableObject
 from illumio.policyobjects import Service, ServicePort
 
