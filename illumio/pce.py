@@ -141,12 +141,9 @@ class PolicyComputeEngine:
         kwargs['json'] = [service_binding.to_json() for service_binding in service_bindings]
         response = self.post('/service_bindings', **kwargs)
         # contrary to what the docs claim, if one or more service bindings fail
-        # to create - even if ALL of them fail! - a 201 response is returned with
-        # error statuses for each failing binding. when creating multiple bindings,
-        # we must support this horrendous behaviour by returning an arbitrary error
-        # object for the failures. since we have no guarantee of ordering, we must
-        # create new ServiceBinding objects for each success, effectively acting as
-        # references.
+        # to create - even if all of them fail - a 201 response is returned with
+        # error statuses for each failing binding. we rewrap the response to
+        # simplify processing
         results = {"service_bindings": [], "errors": []}
         for binding in response.json():
             if binding['status'] == 'created':
@@ -252,7 +249,7 @@ class PolicyComputeEngine:
         except Exception as e:
             raise IllumioApiException from e
 
-    def provision_policy_changes(self, change_description: str, hrefs: List[str], **kwargs) -> None:
+    def provision_policy_changes(self, change_description: str, hrefs: List[str], **kwargs) -> PolicyVersion:
         policy_changeset = PolicyChangeset.build(hrefs)
         kwargs['json'] = {'update_description': change_description, 'change_subset': policy_changeset.to_json()}
         response = self.post('/sec_policy', **kwargs)
