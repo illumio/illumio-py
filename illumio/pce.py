@@ -33,7 +33,6 @@ class PolicyComputeEngine:
     def _request(self, method: str, endpoint: str, include_org=True, **kwargs) -> Response:
         try:
             response = None  # avoid reference before assignment errors in case of cxn failure
-            self._set_request_headers(**kwargs)
             url = self._build_url(endpoint, include_org)
             response = self._session.request(method, url, **kwargs)
             response.raise_for_status()
@@ -50,20 +49,14 @@ class PolicyComputeEngine:
                         message += '\n{}'.format(error['error'])
             raise IllumioApiException(message) from e
 
-    def _set_request_headers(self, is_async=False, **kwargs):
-        headers = kwargs.get('headers', {})
-        if 'data' in kwargs or 'json' in kwargs:
-            kwargs['headers'] = {**headers, **{'Content-Type': 'application/json'}}
-        if is_async:
-            kwargs['headers'] = {**headers, **{'Prefer': 'respond-async'}}
-
     def _build_url(self, endpoint: str, include_org=True) -> str:
         org_str = '/orgs/{}'.format(self.org_id) if include_org else ''
         return '{}{}{}'.format(self.base_url, org_str, endpoint)
 
     def get_collection(self, endpoint: str, **kwargs) -> Response:
         try:
-            self._set_request_headers(is_async=True, **kwargs)
+            headers = kwargs.get('headers', {})
+            kwargs['headers'] = {**headers, **{'Prefer': 'respond-async'}}
             response = self._session.get(self._build_url(endpoint), **kwargs)
             response.raise_for_status()
             location = response.headers['Location']
@@ -79,6 +72,7 @@ class PolicyComputeEngine:
                 if poll_status == 'failed':
                     raise Exception('Async collection job failed: ' + poll_result['result']['message'])
                 elif poll_status == 'done':
+                    print(poll_result)
                     collection_href = poll_result['result']['href']
                     break
 
@@ -92,16 +86,21 @@ class PolicyComputeEngine:
         return self._request('GET', endpoint, **kwargs)
 
     def post(self, endpoint: str, **kwargs) -> Response:
+        headers = kwargs.get('headers', {})
+        kwargs['headers'] = {**headers, **{'Content-Type': 'application/json'}}
         return self._request('POST', endpoint, **kwargs)
 
     def put(self, endpoint: str, **kwargs) -> Response:
+        headers = kwargs.get('headers', {})
+        kwargs['headers'] = {**headers, **{'Content-Type': 'application/json'}}
         return self._request('PUT', endpoint, **kwargs)
 
     def delete(self, endpoint: str, **kwargs) -> Response:
         return self._request('DELETE', endpoint, **kwargs)
 
     def _get_by_name(self, name: str, object_type, **kwargs):
-        kwargs['params'] = {'name': name}
+        params = kwargs.get('params', {})
+        kwargs['params'] = {**params, **{'name': name}}
         results = []
         response = self.get('/sec_policy/{}/{}'.format(ACTIVE, object_type), **kwargs)
         results += list(response.json())
@@ -161,7 +160,8 @@ class PolicyComputeEngine:
         return [IPList.from_json(o) for o in results]
 
     def get_default_ip_list(self, **kwargs) -> IPList:
-        kwargs['params'] = {'name': ANY_IP_LIST_NAME}
+        params = kwargs.get('params', {})
+        kwargs['params'] = {**params, **{'name': ANY_IP_LIST_NAME}}
         response = self.get('/sec_policy/active/ip_lists', **kwargs)
         return IPList.from_json(response.json()[0])
 
@@ -197,6 +197,10 @@ class PolicyComputeEngine:
         response = self.get(href, include_org=False, **kwargs)
         return Workload.from_json(response.json())
 
+    def get_workloads(self, **kwargs) -> List[Workload]:
+        response = self.get('/workloads', **kwargs)
+        return [Workload.from_json(o) for o in response.json()]
+
     def update_workload_enforcement_modes(self, enforcement_mode: EnforcementMode, workloads: List[Workload], **kwargs) -> dict:
         kwargs['json'] = [{'href': workload.href, 'enforcement_mode': enforcement_mode.value} for workload in workloads]
         response = self.put('/workloads/bulk_update', **kwargs)
@@ -222,7 +226,8 @@ class PolicyComputeEngine:
         try:
             traffic_query.query_name = query_name
             kwargs['json'] = traffic_query.to_json()
-            self._set_request_headers(is_async=True, **kwargs)
+            headers = kwargs.get('headers', {})
+            kwargs['headers'] = {**headers, **{'Content-Type': 'application/json', 'Prefer': 'respond-async'}}
             response = self._session.post(self._build_url('/traffic_flows/async_queries'), **kwargs)
             response.raise_for_status()
             query_status = response.json()
