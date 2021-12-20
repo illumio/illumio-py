@@ -98,6 +98,13 @@ class PolicyComputeEngine:
     def delete(self, endpoint: str, **kwargs) -> Response:
         return self._request('DELETE', endpoint, **kwargs)
 
+    def check_connection(self, **kwargs) -> bool:
+        try:
+            self.get('/noop', include_org=False, **kwargs)
+            return True
+        except IllumioApiException:
+            return False
+
     def _get_by_name(self, name: str, object_type, **kwargs):
         params = kwargs.get('params', {})
         kwargs['params'] = {**params, **{'name': name}}
@@ -198,6 +205,18 @@ class PolicyComputeEngine:
         return Workload.from_json(response.json())
 
     def get_workloads(self, **kwargs) -> List[Workload]:
+        # the Illumio APIs don't use pagination, opting instead for an async
+        # batch GET approach that can be slow. instead, we accommodate large
+        # numbers of workloads by first fetching 0 results to get the
+        # X-Total-Count in the response, then fetching all results synchronously.
+        # this approach should have an advantage over an async call up to over
+        # 100,000 workloads
+        params = kwargs.get('params', {})
+        kwargs['params'] = {**params, **{'max_results': 0}}
+        response = self.get('/workloads', **kwargs)
+
+        filtered_workload_count = response.headers['X-Total-Count']
+        kwargs['params'] = {**params, **{'max_results': int(filtered_workload_count)}}
         response = self.get('/workloads', **kwargs)
         return [Workload.from_json(o) for o in response.json()]
 
