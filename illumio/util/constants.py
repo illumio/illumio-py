@@ -65,7 +65,7 @@ class FlowDirection(IllumioEnum):
 class TrafficState(IllumioEnum):
     ACTIVE = 'active'
     CLOSED = 'closed'
-    TIMED_OUT = 'timed_out'
+    TIMED_OUT = 'timed out'
     SNAPSHOT = 'snapshot'
     NEW = 'new'
     UNKNOWN = 'unknown'

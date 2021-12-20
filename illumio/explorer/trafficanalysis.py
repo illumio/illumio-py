@@ -212,7 +212,7 @@ class TrafficFlow(JsonObject):
         if self.policy_decision and not PolicyDecision.has_value(self.policy_decision.lower()):
             raise IllumioException("Invalid policy_decision: {}".format(self.policy_decision))
         if self.state and not TrafficState.has_value(self.state.lower()):
-            raise IllumioException("Invalid transmission: {}".format(self.state))
+            raise IllumioException("Invalid state: {}".format(self.state))
         if self.transmission and not Transmission.has_value(self.transmission.lower()):
             raise IllumioException("Invalid transmission: {}".format(self.transmission))
 
