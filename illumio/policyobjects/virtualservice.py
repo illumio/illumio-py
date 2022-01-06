@@ -3,6 +3,7 @@ from typing import List
 
 from illumio import IllumioException
 from illumio.util import IllumioObject, Reference, JsonObject, ModifiableObject
+from illumio.workloads import Workload
 
 from .label import Label
 from .service import ServiceAddress, ServicePort
@@ -43,10 +44,10 @@ class PortOverride(JsonObject):
 @dataclass
 class ServiceBinding(IllumioObject):
     virtual_service: Reference = None
-    workload: Reference = None
+    workload: Workload = None
     port_overrides: List[PortOverride] = None
 
     def _decode_complex_types(self):
         self.virtual_service = Reference.from_json(self.virtual_service) if self.virtual_service else None
-        self.workload = Reference.from_json(self.workload) if self.workload else None
+        self.workload = Workload.from_json(self.workload) if self.workload else None
         self.port_overrides = [PortOverride.from_json(o) for o in self.port_overrides] if self.port_overrides else None
