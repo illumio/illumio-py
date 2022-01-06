@@ -100,7 +100,7 @@ class PolicyComputeEngine:
 
     def check_connection(self, **kwargs) -> bool:
         try:
-            self.get('/noop', include_org=False, **kwargs)
+            self.get('/health', include_org=False, **kwargs)
             return True
         except IllumioApiException:
             return False
