@@ -43,7 +43,7 @@ class LabelGroup(Label):
 class LabelSet(JsonObject):
     labels: List[Reference] = None
 
-    def to_json(self):
+    def _encode(self):
         json_array = []
         for label in self.labels:
             key = 'label_group' if '/label_groups/' in label.href else 'label'
