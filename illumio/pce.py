@@ -146,10 +146,9 @@ class PolicyComputeEngine:
     def create_service_bindings(self, service_bindings: List[ServiceBinding], **kwargs) -> dict:
         kwargs['json'] = [service_binding.to_json() for service_binding in service_bindings]
         response = self.post('/service_bindings', **kwargs)
-        # contrary to what the docs claim, if one or more service bindings fail
-        # to create - even if all of them fail - a 201 response is returned with
-        # error statuses for each failing binding. we rewrap the response to
-        # simplify processing
+        # if one or more service bindings fail to create - even if all of them
+        # fail - a 201 response is returned with error statuses for each failing
+        # binding. we rewrap the response to simplify processing
         results = {"service_bindings": [], "errors": []}
         for binding in response.json():
             if binding['status'] == 'created':

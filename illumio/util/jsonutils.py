@@ -2,6 +2,7 @@ import copy
 import json
 from abc import ABC
 from dataclasses import dataclass, fields
+from inspect import signature
 from typing import List, Any
 
 from .functions import ignore_empty_keys
@@ -28,8 +29,31 @@ class JsonObject(ABC):
 
     @classmethod
     def from_json(cls, data) -> 'JsonObject':
+        """
+        Given a JSON object or dictionary, decode the data as an object
+        of the calling JsonObject subtype. Accepts arbitrary key/value pairs
+        as a form of forwards-compatibility.
+
+        Classes can optionally extend decoding with the _decode_complex_types
+        function for complex-type members.
+
+        Based in part on https://stackoverflow.com/a/55101438
+        """
         data = json.loads(data) if type(data) is str else data
-        o = cls(**data)
+        cls_fields = {field for field in signature(cls).parameters}
+
+        defined_params, undefined_params = {}, {}
+        for k, v in data.items():
+            if k in cls_fields:
+                defined_params[k] = v
+            else:
+                undefined_params[k] = v
+
+        o = cls(**defined_params)
+
+        for k, v in undefined_params.items():
+            setattr(o, k, v)
+
         o._decode_complex_types()
         return o
 
@@ -39,9 +63,14 @@ class JsonObject(ABC):
 
 def deep_encode(o: Any) -> Any:
     """
-    Functionally similar to the dataclasses asdict function, but with the necessary
+    Recursively encode members of the given object and return a JSON-compatible
+    copy. Children of the JsonObject superclass can optionally implement an
+    _encode method to provide a customized encoding response, otherwise the
+    default ignore_empty_keys function is called to remove null value pairs.
+
+    Functionally similar to the dataclasses asdict method, but with the necessary
     adjustment of calling an optional custom encoding function for types that
-    don't strictly mirror their dataclass field key-value pairs when json-encoded.
+    don't strictly mirror their dataclass field pairs when encoded.
     """
     if issubclass(o.__class__, JsonObject):
         result = []
