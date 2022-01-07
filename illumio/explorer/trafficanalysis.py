@@ -92,18 +92,18 @@ class TrafficQuery(JsonObject):
             query_name=None) -> 'TrafficQuery':
         return TrafficQuery(
             start_date=start_date, end_date=end_date,
-            sources={
-                'include': _parse_traffic_filters(include_sources, include=True),
-                'exclude': _parse_traffic_filters(exclude_sources)
-            },
-            destinations={
-                'include': _parse_traffic_filters(include_destinations, include=True),
-                'exclude': _parse_traffic_filters(exclude_destinations)
-            },
-            services={
-                'include': include_services,
-                'exclude': exclude_services
-            },
+            sources=TrafficQueryFilterBlock(
+                include=_parse_traffic_filters(include_sources, include=True),
+                exclude=_parse_traffic_filters(exclude_sources)
+            ),
+            destinations=TrafficQueryFilterBlock(
+                include=_parse_traffic_filters(include_destinations, include=True),
+                exclude=_parse_traffic_filters(exclude_destinations)
+            ),
+            services=TrafficQueryServiceBlock(
+                include=include_services,
+                exclude=exclude_services
+            ),
             policy_decisions=policy_decisions,
             exclude_workloads_from_ip_list_query=exclude_workloads_from_ip_list_query,
             max_results=max_results, query_name=query_name
