@@ -1,9 +1,9 @@
 from dataclasses import dataclass
-from typing import List
+from typing import List, Union
 
 from illumio import IllumioException
 from illumio.infrastructure import ContainerCluster
-from illumio.policyobjects import Label
+from illumio.policyobjects import Label, Service, ServicePort
 from illumio.vulnerabilities import Vulnerability
 from illumio.util import (
     JsonObject,
@@ -131,7 +131,8 @@ class Workload(ModifiableObject):
     mode: str = None
     enforcement_mode: str = None
     visibility_level: str = None
-    selectively_enforced_services: List[Reference] = None
+    num_enforcement_boundaries: int = None
+    selectively_enforced_services: List[Union[Service, ServicePort]] = None
     container_cluster: ContainerCluster = None
     ike_authentication_certificate: IKEAuthenticationCertificate = None
 
@@ -152,6 +153,10 @@ class Workload(ModifiableObject):
         self.detected_vulnerabilities = [DetectedVulnerability.from_json(o) for o in self.detected_vulnerabilities] if self.detected_vulnerabilities else None
         self.agent = VENAgent.from_json(self.agent) if self.agent else None
         self.ven = VEN.from_json(self.ven) if self.ven else None
-        self.selectively_enforced_services = [Reference.from_json(o) for o in self.selectively_enforced_services] if self.selectively_enforced_services else None
+        enforced_services = []
+        for service in self.selectively_enforced_services or []:
+            service_type = Service if 'href' in service else ServicePort
+            enforced_services.append(service_type.from_json(service))
+        self.selectively_enforced_services = enforced_services if enforced_services else None
         self.container_cluster = ContainerCluster.from_json(self.container_cluster) if self.container_cluster else None
         self.ike_authentication_certificate = IKEAuthenticationCertificate.from_json(self.ike_authentication_certificate) if self.ike_authentication_certificate else None

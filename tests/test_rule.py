@@ -5,7 +5,6 @@ from typing import List
 
 import pytest
 from requests_mock import ANY
-from illumio.policyobjects.label import Label
 
 from illumio.util import IllumioEncoder
 from illumio.rules import Rule
