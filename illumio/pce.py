@@ -40,7 +40,7 @@ class PolicyComputeEngine:
         except Exception as e:
             message = str(e)
             # Response objects are falsy if the request failed so do a null check
-            if response is not None and response.headers['Content-Type'] == 'application/json':
+            if response is not None and response.headers.get('Content-Type', '') == 'application/json':
                 message = "API call returned error code {}. Errors:".format(response.status_code)
                 for error in response.json():
                     if error and 'token' in error and 'message' in error:
