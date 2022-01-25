@@ -1,4 +1,4 @@
-dataclasses~=0.8
-pytest~=6.2.5
-requests~=2.26.0
-requests-mock~=1.9.3
+dataclasses>=0.8; python_version == '3.6'
+pytest>=6.2.5
+requests>=2.26.0
+requests-mock>=1.9.3
