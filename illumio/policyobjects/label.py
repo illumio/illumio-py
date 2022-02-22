@@ -2,7 +2,7 @@ import json
 from dataclasses import dataclass
 from typing import List
 
-from illumio.util import JsonObject, Reference, ModifiableObject
+from illumio.util import JsonObject, ModifiableObject
 
 
 @dataclass
@@ -41,7 +41,7 @@ class LabelGroup(Label):
 
 @dataclass
 class LabelSet(JsonObject):
-    labels: List[Reference] = None
+    labels: List[Label] = None
 
     def _encode(self):
         json_array = []
@@ -56,5 +56,5 @@ class LabelSet(JsonObject):
         labels = []
         for label_entry in data:
             key = 'label' if 'label' in label_entry else 'label_group'
-            labels.append(Reference.from_json(label_entry[key]))
+            labels.append(Label.from_json(label_entry[key]))
         return LabelSet(labels=labels)
