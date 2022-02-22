@@ -116,15 +116,17 @@ class TrafficQuery(JsonObject):
             self.end_date = self._convert_timestamp_to_date_string(self.end_date)
         super().__post_init__()
 
-    def _convert_timestamp_to_date_string(self, timestamp: int) -> str:
+    def _convert_timestamp_to_date_string(self, timestamp: Union[int, float]) -> str:
         try:
             # the Unix timestamp could be in seconds or milliseconds,
-            # so first try converting it as-is and catch the potential
-            # out-of-bounds ValueError
+            # so check the number of digits; 12 digits in s is year 5138
+            # and we could theoretically be looking at dates before 2001 (10 digits)
+            if len(str(int(timestamp))) >= 12:
+                timestamp = timestamp / 1000
             dt = datetime.utcfromtimestamp(timestamp)
-        except ValueError:
-            dt = datetime.utcfromtimestamp(timestamp / 1000)
-        return dt.strftime('%Y-%m-%dT%H:%M:%SZ')
+            return dt.strftime('%Y-%m-%dT%H:%M:%SZ')
+        except Exception:
+            raise IllumioException("Invalid start or end time provided for traffic analysis")
 
     def _validate(self):
         for policy_decision in self.policy_decisions:
