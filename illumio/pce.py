@@ -12,7 +12,7 @@ from .policyobjects import (
 )
 from .explorer import TrafficQuery, TrafficFlow
 from .rules import Ruleset, Rule, EnforcementBoundary
-from .util import EnforcementMode, ACTIVE, DRAFT, ANY_IP_LIST_NAME
+from .util import EnforcementMode, ACTIVE, DRAFT, ANY_IP_LIST_NAME, WORKLOAD_BULK_UPDATE_MAX
 from .workloads import Workload
 
 
@@ -72,7 +72,6 @@ class PolicyComputeEngine:
                 if poll_status == 'failed':
                     raise Exception('Async collection job failed: ' + poll_result['result']['message'])
                 elif poll_status == 'done':
-                    print(poll_result)
                     collection_href = poll_result['result']['href']
                     break
 
@@ -211,23 +210,27 @@ class PolicyComputeEngine:
         # this approach should have an advantage over an async call up to over
         # 100,000 workloads
         params = kwargs.get('params', {})
-        kwargs['params'] = {**params, **{'max_results': 0}}
-        response = self.get('/workloads', **kwargs)
 
-        filtered_workload_count = response.headers['X-Total-Count']
-        kwargs['params'] = {**params, **{'max_results': int(filtered_workload_count)}}
+        if 'max_results' not in params:
+            kwargs['params'] = {**params, **{'max_results': 0}}
+            response = self.get('/workloads', **kwargs)
+            filtered_workload_count = response.headers['X-Total-Count']
+            kwargs['params'] = {**params, **{'max_results': int(filtered_workload_count)}}
+
         response = self.get('/workloads', **kwargs)
         return [Workload.from_json(o) for o in response.json()]
 
     def update_workload_enforcement_modes(self, enforcement_mode: EnforcementMode, workloads: List[Workload], **kwargs) -> dict:
-        kwargs['json'] = [{'href': workload.href, 'enforcement_mode': enforcement_mode.value} for workload in workloads]
-        response = self.put('/workloads/bulk_update', **kwargs)
         results = {"workloads": [], "errors": []}
-        for binding in response.json():
-            if binding['status'] == 'updated':
-                results['workloads'].append(Workload(href=binding['href']))
-            else:
-                results['errors'].append({'error': binding['status']})
+        while workloads:
+            kwargs['json'] = [{'href': workload.href, 'enforcement_mode': enforcement_mode.value} for workload in workloads[:WORKLOAD_BULK_UPDATE_MAX]]
+            workloads = workloads[WORKLOAD_BULK_UPDATE_MAX:]
+            response = self.put('/workloads/bulk_update', **kwargs)
+            for binding in response.json():
+                if binding['status'] == 'updated':
+                    results['workloads'].append(Workload(href=binding['href']))
+                else:
+                    results['errors'].append({'error': binding['status']})
         return results
 
     def get_traffic_flows(self, traffic_query: TrafficQuery, **kwargs) -> List[TrafficFlow]:

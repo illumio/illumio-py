@@ -12,4 +12,4 @@ def pytest_configure():
 
 @pytest.fixture(scope='session')
 def pce():
-    return PolicyComputeEngine('crest-mnc.ilabs.io', port=8443)
+    return PolicyComputeEngine('test.pce.com', port=443)
