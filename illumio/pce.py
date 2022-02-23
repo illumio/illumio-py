@@ -1,5 +1,5 @@
 import time
-from typing import List
+from typing import List, Union
 
 from requests import Session, Response
 
@@ -62,24 +62,34 @@ class PolicyComputeEngine:
             location = response.headers['Location']
             retry_after = int(response.headers['Retry-After'])
 
-            while True:
-                time.sleep(retry_after)
-                response = self.get(location, include_org=False)
-                response.raise_for_status()
-                poll_result = response.json()
-                poll_status = poll_result['status']
-
-                if poll_status == 'failed':
-                    raise Exception('Async collection job failed: ' + poll_result['result']['message'])
-                elif poll_status == 'done':
-                    collection_href = poll_result['result']['href']
-                    break
+            collection_href = self._async_poll(location, retry_after)
 
             response = self.get(collection_href, include_org=False)
             response.raise_for_status()
             return response
         except Exception as e:
             raise IllumioApiException from e
+
+    def _async_poll(self, job_location: str, retry_time: Union[int, float] = 1.) -> str:
+        while True:
+            time.sleep(retry_time)
+            retry_time *= 1.5  # slight backoff to avoid spamming the PCE for long-running jobs
+            response = self.get(job_location, include_org=False)
+            response.raise_for_status()
+            poll_result = response.json()
+            poll_status = poll_result['status']
+
+            if poll_status == 'failed':
+                raise Exception('Async collection job failed: ' + poll_result['result']['message'])
+            elif poll_status == 'completed':
+                # traffic flow async jobs
+                collection_href = poll_result['result']
+                break
+            elif poll_status == 'done':
+                # policy object collection jobs
+                collection_href = poll_result['result']['href']
+                break
+        return collection_href
 
     def get(self, endpoint: str, **kwargs) -> Response:
         return self._request('GET', endpoint, **kwargs)
@@ -239,11 +249,6 @@ class PolicyComputeEngine:
         return [TrafficFlow.from_json(flow) for flow in response.json()]
 
     def get_traffic_flows_async(self, query_name: str, traffic_query: TrafficQuery, **kwargs) -> List[TrafficFlow]:
-        # the redundancy/reuse between this function and get_collection is necessary due
-        # to the different request & response structures for the async calls. location is
-        # pulled from the initial response HREF rather than a header, retry-after is missing,
-        # the success status is 'completed' rather than 'done', and the 'result' value of
-        # the response contains the HREF directly rather than an object
         try:
             traffic_query.query_name = query_name
             kwargs['json'] = traffic_query.to_json()
@@ -253,21 +258,8 @@ class PolicyComputeEngine:
             response.raise_for_status()
             query_status = response.json()
             location = query_status['href']
-            backoff = 0.1
 
-            while True:
-                backoff *= 2
-                time.sleep(backoff)
-                response = self.get(location, include_org=False)
-                response.raise_for_status()
-                poll_result = response.json()
-                poll_status = poll_result['status']
-
-                if poll_status == 'failed':
-                    raise Exception('Async collection job failed: ' + poll_result['result']['message'])
-                elif poll_status == 'completed':
-                    collection_href = poll_result['result']
-                    break
+            collection_href = self._async_poll(location)
 
             response = self.get(collection_href, include_org=False)
             response.raise_for_status()
