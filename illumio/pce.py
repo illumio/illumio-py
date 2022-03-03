@@ -114,9 +114,7 @@ class PolicyComputeEngine:
         except IllumioApiException:
             return False
 
-    def _get_by_name(self, name: str, object_type, **kwargs):
-        params = kwargs.get('params', {})
-        kwargs['params'] = {**params, **{'name': name}}
+    def _get_policy_objects(self, object_type, **kwargs):
         results = []
         response = self.get('/sec_policy/{}/{}'.format(ACTIVE, object_type), **kwargs)
         results += list(response.json())
@@ -134,8 +132,8 @@ class PolicyComputeEngine:
         response = self.get(href, include_org=False, **kwargs)
         return VirtualService.from_json(response.json())
 
-    def get_virtual_services_by_name(self, name: str, **kwargs) -> List[VirtualService]:
-        results = self._get_by_name(name, object_type='virtual_services', **kwargs)
+    def get_virtual_services(self, **kwargs) -> List[VirtualService]:
+        results = self._get_policy_objects(object_type='virtual_services', **kwargs)
         return [VirtualService.from_json(o) for o in results]
 
     def create_virtual_service(self, virtual_service: VirtualService, **kwargs) -> VirtualService:
@@ -170,8 +168,8 @@ class PolicyComputeEngine:
         response = self.get(href, include_org=False, **kwargs)
         return IPList.from_json(response.json())
 
-    def get_ip_lists_by_name(self, name: str, **kwargs) -> List[IPList]:
-        results = self._get_by_name(name, object_type='ip_lists', **kwargs)
+    def get_ip_lists(self, **kwargs) -> List[IPList]:
+        results = self._get_policy_objects(object_type='ip_lists', **kwargs)
         return [IPList.from_json(o) for o in results]
 
     def get_default_ip_list(self, **kwargs) -> IPList:
@@ -180,8 +178,13 @@ class PolicyComputeEngine:
         response = self.get('/sec_policy/active/ip_lists', **kwargs)
         return IPList.from_json(response.json()[0])
 
-    def get_rulesets_by_name(self, name: str, **kwargs) -> List[Ruleset]:
-        results = self._get_by_name(name, object_type='rule_sets', **kwargs)
+    def create_ip_list(self, ip_list: IPList, **kwargs) -> IPList:
+        kwargs['json'] = ip_list.to_json()
+        response = self.post('/sec_policy/draft/ip_lists', **kwargs)
+        return IPList.from_json(response.json())
+
+    def get_rulesets(self, **kwargs) -> List[Ruleset]:
+        results = self._get_policy_objects(object_type='rule_sets', **kwargs)
         return [Ruleset.from_json(o) for o in results]
 
     def create_ruleset(self, ruleset: Ruleset, **kwargs) -> Ruleset:
@@ -199,8 +202,8 @@ class PolicyComputeEngine:
         response = self.post(endpoint, include_org=False, **kwargs)
         return Rule.from_json(response.json())
 
-    def get_enforcement_boundaries_by_name(self, name: str, **kwargs) -> List[EnforcementBoundary]:
-        results = self._get_by_name(name, object_type='enforcement_boundaries', **kwargs)
+    def get_enforcement_boundaries(self, **kwargs) -> List[EnforcementBoundary]:
+        results = self._get_policy_objects(object_type='enforcement_boundaries', **kwargs)
         return [EnforcementBoundary.from_json(o) for o in results]
 
     def create_enforcement_boundary(self, enforcement_boundary: EnforcementBoundary, **kwargs) -> EnforcementBoundary:
