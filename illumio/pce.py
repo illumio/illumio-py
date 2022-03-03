@@ -12,7 +12,14 @@ from .policyobjects import (
 )
 from .explorer import TrafficQuery, TrafficFlow
 from .rules import Ruleset, Rule, EnforcementBoundary
-from .util import EnforcementMode, ACTIVE, DRAFT, ANY_IP_LIST_NAME, WORKLOAD_BULK_UPDATE_MAX
+from .util import (
+    deprecated,
+    EnforcementMode,
+    ACTIVE,
+    DRAFT,
+    ANY_IP_LIST_NAME,
+    WORKLOAD_BULK_UPDATE_MAX
+)
 from .workloads import Workload
 
 
@@ -136,6 +143,13 @@ class PolicyComputeEngine:
         results = self._get_policy_objects(object_type='virtual_services', **kwargs)
         return [VirtualService.from_json(o) for o in results]
 
+    @deprecated(deprecated_in="0.8.0")
+    def get_virtual_services_by_name(self, name: str, **kwargs) -> List[VirtualService]:
+        params = kwargs.get('params', {})
+        kwargs['params'] = {**params, **{'name': name}}
+        results = self._get_policy_objects(object_type='virtual_services', **kwargs)
+        return [VirtualService.from_json(o) for o in results]
+
     def create_virtual_service(self, virtual_service: VirtualService, **kwargs) -> VirtualService:
         kwargs['json'] = virtual_service.to_json()
         response = self.post('/sec_policy/draft/virtual_services', **kwargs)
@@ -172,6 +186,13 @@ class PolicyComputeEngine:
         results = self._get_policy_objects(object_type='ip_lists', **kwargs)
         return [IPList.from_json(o) for o in results]
 
+    @deprecated(deprecated_in="0.8.0")
+    def get_ip_lists_by_name(self, name: str, **kwargs) -> List[IPList]:
+        params = kwargs.get('params', {})
+        kwargs['params'] = {**params, **{'name': name}}
+        results = self._get_policy_objects(object_type='ip_lists', **kwargs)
+        return [IPList.from_json(o) for o in results]
+
     def get_default_ip_list(self, **kwargs) -> IPList:
         params = kwargs.get('params', {})
         kwargs['params'] = {**params, **{'name': ANY_IP_LIST_NAME}}
@@ -184,6 +205,13 @@ class PolicyComputeEngine:
         return IPList.from_json(response.json())
 
     def get_rulesets(self, **kwargs) -> List[Ruleset]:
+        results = self._get_policy_objects(object_type='rule_sets', **kwargs)
+        return [Ruleset.from_json(o) for o in results]
+
+    @deprecated(deprecated_in="0.8.0")
+    def get_rulesets_by_name(self, name: str, **kwargs) -> List[Ruleset]:
+        params = kwargs.get('params', {})
+        kwargs['params'] = {**params, **{'name': name}}
         results = self._get_policy_objects(object_type='rule_sets', **kwargs)
         return [Ruleset.from_json(o) for o in results]
 
@@ -203,6 +231,13 @@ class PolicyComputeEngine:
         return Rule.from_json(response.json())
 
     def get_enforcement_boundaries(self, **kwargs) -> List[EnforcementBoundary]:
+        results = self._get_policy_objects(object_type='enforcement_boundaries', **kwargs)
+        return [EnforcementBoundary.from_json(o) for o in results]
+
+    @deprecated(deprecated_in="0.8.0")
+    def get_enforcement_boundaries_by_name(self, name: str, **kwargs) -> List[EnforcementBoundary]:
+        params = kwargs.get('params', {})
+        kwargs['params'] = {**params, **{'name': name}}
         results = self._get_policy_objects(object_type='enforcement_boundaries', **kwargs)
         return [EnforcementBoundary.from_json(o) for o in results]
 
