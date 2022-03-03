@@ -59,7 +59,9 @@ def test_traffic_query_builder():
 
 def test_timestamp_conversion():
     start_date = datetime.strptime('2021-11-05', '%Y-%m-%d').replace(tzinfo=timezone.utc)
+    start_time_seconds = start_date.timestamp()
     end_date = datetime.strptime('2021-11-12', '%Y-%m-%d').replace(tzinfo=timezone.utc)
-    query = TrafficQuery(start_date=start_date.timestamp(), end_date=end_date.timestamp() * 1000, policy_decisions=["unknown"])
+    end_time_milliseconds = end_date.timestamp() * 1000
+    query = TrafficQuery(start_date=start_time_seconds, end_date=end_time_milliseconds, policy_decisions=["unknown"])
     assert query.start_date == '2021-11-05T00:00:00Z'
     assert query.end_date == '2021-11-12T00:00:00Z'
