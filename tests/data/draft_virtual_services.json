@@ -1,0 +1,71 @@
+[
+    {
+        "href": "/orgs/1/sec_policy/draft/virtual_services/14d7ff69-2fa4-458b-a299-e3f11ffa9b01",
+        "created_at": "2021-10-05T12:34:56.789Z",
+        "updated_at": "2021-10-05T12:34:56.789Z",
+        "deleted_at": null,
+        "created_by": {
+            "href": "/users/1"
+        },
+        "updated_by": {
+            "href": "/users/1"
+        },
+        "deleted_by": null,
+        "update_type": "create",
+        "name": "test-service",
+        "description": null,
+        "pce_fqdn": null,
+        "service_ports": [
+            {
+                "port": 1234,
+                "proto": 6
+            },
+            {
+                "port": 80,
+                "proto": 17,
+                "to_port": 443
+            }
+        ],
+        "service_addresses": [
+            {
+                "ip": "1.1.1.1",
+                "port": 101
+            },
+            {
+                "description": "test description",
+                "fqdn": "*.illumio.com"
+            }
+        ],
+        "labels": [
+            {
+                "href": "/orgs/1/labels/1",
+                "key": "role",
+                "value": "R-WEB"
+            },
+            {
+                "href": "/orgs/1/labels/2",
+                "key": "app",
+                "value": "A-HRM"
+            },
+            {
+                "href": "/orgs/1/labels/3",
+                "key": "env",
+                "value": "E-STAGE"
+            },
+            {
+                "href": "/orgs/1/labels/4",
+                "key": "loc",
+                "value": "L-TOR"
+            }
+        ],
+        "ip_overrides": [
+            "1.2.3.4"
+        ],
+        "apply_to": "host_only",
+        "caps": [
+            "write",
+            "provision",
+            "delete"
+        ]
+    }
+]
