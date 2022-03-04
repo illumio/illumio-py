@@ -204,6 +204,10 @@ class PolicyComputeEngine:
         response = self.post('/sec_policy/draft/ip_lists', **kwargs)
         return IPList.from_json(response.json())
 
+    def get_ruleset(self, href: str, **kwargs) -> Ruleset:
+        response = self.get(href, include_org=False, **kwargs)
+        return Ruleset.from_json(response.json())
+
     def get_rulesets(self, **kwargs) -> List[Ruleset]:
         results = self._get_policy_objects(object_type='rule_sets', **kwargs)
         return [Ruleset.from_json(o) for o in results]
