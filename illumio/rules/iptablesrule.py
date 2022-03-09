@@ -19,6 +19,3 @@ class IPTablesRule(ModifiableObject):
     enabled: bool = None
     statements: List[IPTablesStatement] = None
     actors: List[Actor] = None
-
-    def _decode_complex_types(self):
-        self.statements = [IPTablesStatement.from_json(o) for o in self.statements] if self.statements else None

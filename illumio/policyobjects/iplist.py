@@ -22,8 +22,3 @@ class FQDN(JsonObject):
 class IPList(ModifiableObject):
     ip_ranges: List[IPRange] = None
     fqdns: List[FQDN] = None
-
-    def _decode_complex_types(self):
-        super()._decode_complex_types()
-        self.ip_ranges = [IPRange.from_json(o) for o in self.ip_ranges] if self.ip_ranges else None
-        self.fqdns = [FQDN.from_json(o) for o in self.fqdns] if self.fqdns else None

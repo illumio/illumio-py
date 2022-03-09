@@ -76,10 +76,6 @@ class PolicyVersion(ModifiableObject):
     workloads_affected: int = None
     object_counts: PolicyObjectCounts = None
 
-    def _decode_complex_types(self):
-        super()._decode_complex_types()
-        self.object_counts = PolicyObjectCounts.from_json(self.object_counts) if self.object_counts else None
-
 
 __all__ = [
     'FirewallSetting',

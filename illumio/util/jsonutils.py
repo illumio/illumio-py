@@ -58,7 +58,24 @@ class JsonObject(ABC):
         return o
 
     def _decode_complex_types(self) -> None:
-        pass
+        for field in fields(self):
+            value = getattr(self, field.name)
+            decoded_value = self._decode_field(field.type, value)
+            setattr(self, field.name, decoded_value)
+
+    def _decode_field(self, type_, value) -> Any:
+        if value is None:
+            return None
+        if isinstance(value, JsonObject):
+            # if the value has already been decoded, return it
+            return value
+        elif issubclass(type_, JsonObject):
+            return type_.from_json(value)
+        elif isinstance(value, list):
+            # if the value is a list, expect the field type to be List[T]
+            type_ = type_.__args__[0]
+            return list(self._decode_field(type_, o) for o in value)
+        return value
 
 
 def deep_encode(o: Any) -> Any:
@@ -72,16 +89,16 @@ def deep_encode(o: Any) -> Any:
     adjustment of calling an optional custom encoding function for types that
     don't strictly mirror their dataclass field pairs when encoded.
     """
-    if issubclass(o.__class__, JsonObject):
+    if isinstance(o, JsonObject):
         result = []
-        if hasattr(o.__class__, '_encode'):
+        if hasattr(type(o), '_encode'):
             return o._encode()
         for f in fields(o):
             value = deep_encode(getattr(o, f.name))
             result.append((f.name, value))
         return ignore_empty_keys(result)
     elif isinstance(o, (list, tuple)):
-        return type(o)(deep_encode(v) for v in o)
+        return type(o)(deep_encode(o) for o in o)
     elif isinstance(o, dict):
         return type(o)((deep_encode(k), deep_encode(v)) for k, v in o.items())
     else:
@@ -113,8 +130,3 @@ class ModifiableObject(IllumioObject):
     updated_by: Reference = None
     deleted_by: Reference = None
     caps: List[str] = None
-
-    def _decode_complex_types(self) -> None:
-        self.created_by = Reference.from_json(self.created_by) if self.created_by else None
-        self.updated_by = Reference.from_json(self.updated_by) if self.updated_by else None
-        self.deleted_by = Reference.from_json(self.deleted_by) if self.deleted_by else None

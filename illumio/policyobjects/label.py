@@ -23,20 +23,11 @@ class Label(ModifiableObject):
     deleted: bool = None
     usage: LabelUsage = None
 
-    def _decode_complex_types(self):
-        super()._decode_complex_types()
-        self.usage = LabelUsage.from_json(self.usage) if self.usage else None
-
 
 @dataclass
 class LabelGroup(Label):
     labels: List[Label] = None
     sub_groups: List['LabelGroup'] = None
-
-    def _decode_complex_types(self):
-        super()._decode_complex_types()
-        self.labels = [Label.from_json(o) for o in self.labels] if self.labels else None
-        self.sub_groups = [LabelGroup.from_json(o) for o in self.sub_groups] if self.sub_groups else None
 
 
 @dataclass

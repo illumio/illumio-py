@@ -41,11 +41,6 @@ class TrafficQueryFilter(JsonObject):
         if self.transmission and not Transmission.has_value(self.transmission.lower()):
             raise IllumioException("Invalid transmission: {}".format(self.transmission))
 
-    def _decode_complex_types(self):
-        self.label = Reference.from_json(self.label) if self.label else None
-        self.workload = Reference.from_json(self.workload) if self.workload else None
-        self.ip_list = Reference.from_json(self.ip_list) if self.ip_list else None
-
 
 @dataclass
 class TrafficQueryFilterBlock(JsonObject):
@@ -54,19 +49,11 @@ class TrafficQueryFilterBlock(JsonObject):
     include: List[List[TrafficQueryFilter]] = field(default_factory=list)
     exclude: List[TrafficQueryFilter] = field(default_factory=list)
 
-    def _decode_complex_types(self):
-        self.include = [[TrafficQueryFilter.from_json(o) for o in block] for block in self.include]
-        self.exclude = [TrafficQueryFilter.from_json(o) for o in self.exclude]
-
 
 @dataclass
 class TrafficQueryServiceBlock(JsonObject):
     include: List[ServicePort] = field(default_factory=list)
     exclude: List[ServicePort] = field(default_factory=list)
-
-    def _decode_complex_types(self):
-        self.include = [ServicePort.from_json(o) for o in self.include]
-        self.exclude = [ServicePort.from_json(o) for o in self.exclude]
 
 
 @dataclass
@@ -135,11 +122,6 @@ class TrafficQuery(JsonObject):
         if self.sources_destinations_query_op.lower() not in {AND, OR}:
             raise IllumioException("sources_destinations_query_op must be one of 'and' or 'or', was {}".format(self.sources_destinations_query_op))
 
-    def _decode_complex_types(self):
-        self.sources = TrafficQueryFilterBlock.from_json(self.sources)
-        self.destinations = TrafficQueryFilterBlock.from_json(self.destinations)
-        self.services = TrafficQueryServiceBlock.from_json(self.services)
-
 
 def _parse_traffic_filters(refs: List[str], include=False) -> List[object]:
     traffic_objects = []
@@ -177,13 +159,6 @@ class TrafficNode(JsonObject):
     virtual_server: VirtualServer = None
     virtual_service: VirtualService = None
 
-    def _decode_complex_types(self):
-        self.label = Label.from_json(self.label) if self.label else None
-        self.workload = Workload.from_json(self.workload) if self.workload else None
-        self.ip_lists = [IPList.from_json(o) for o in self.ip_lists] if self.ip_lists else None
-        self.virtual_server = VirtualServer.from_json(self.virtual_server) if self.virtual_server else None
-        self.virtual_service = VirtualService.from_json(self.virtual_service) if self.virtual_service else None
-
 
 @dataclass
 class TimestampRange(JsonObject):
@@ -217,9 +192,3 @@ class TrafficFlow(JsonObject):
             raise IllumioException("Invalid state: {}".format(self.state))
         if self.transmission and not Transmission.has_value(self.transmission.lower()):
             raise IllumioException("Invalid transmission: {}".format(self.transmission))
-
-    def _decode_complex_types(self):
-        self.src = TrafficNode.from_json(self.src)
-        self.dst = TrafficNode.from_json(self.dst)
-        self.timestamp_range = TimestampRange.from_json(self.timestamp_range) if self.timestamp_range else None
-        self.service = ServicePort.from_json(self.service) if self.service else None

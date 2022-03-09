@@ -145,18 +145,9 @@ class Workload(ModifiableObject):
             raise IllumioException("Invalid visibility_level: {}".format(self.visibility_level))
 
     def _decode_complex_types(self):
-        super()._decode_complex_types()
-        self.interfaces = [Interface.from_json(o) for o in self.interfaces] if self.interfaces else None
-        self.labels = [Label.from_json(o) for o in self.labels] if self.labels else None
-        self.services = WorkloadServices.from_json(self.services) if self.services else None
-        self.vulnerabilities_summary = VulnerabilitiesSummary.from_json(self.vulnerabilities_summary) if self.vulnerabilities_summary else None
-        self.detected_vulnerabilities = [DetectedVulnerability.from_json(o) for o in self.detected_vulnerabilities] if self.detected_vulnerabilities else None
-        self.agent = VENAgent.from_json(self.agent) if self.agent else None
-        self.ven = VEN.from_json(self.ven) if self.ven else None
         enforced_services = []
         for service in self.selectively_enforced_services or []:
             service_type = Service if 'href' in service else ServicePort
             enforced_services.append(service_type.from_json(service))
         self.selectively_enforced_services = enforced_services if enforced_services else None
-        self.container_cluster = ContainerCluster.from_json(self.container_cluster) if self.container_cluster else None
-        self.ike_authentication_certificate = IKEAuthenticationCertificate.from_json(self.ike_authentication_certificate) if self.ike_authentication_certificate else None
+        super()._decode_complex_types()

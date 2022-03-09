@@ -53,10 +53,6 @@ class AgentStatus(JsonObject):
     agent_health: List[AgentHealth] = None
     security_policy_sync_state: str = None
 
-    def _decode_complex_types(self) -> None:
-        self.agent_health_errors = AgentHealthErrors.from_json(self.agent_health_errors) if self.agent_health_errors else None
-        self.agent_health = [AgentHealth.from_json(o) for o in self.agent_health] if self.agent_health else None
-
 
 @dataclass
 class VENAgent(ModifiableObject):
@@ -67,11 +63,6 @@ class VENAgent(ModifiableObject):
     active_pce_fqdn: str = None
     target_pce_fqdn: str = None
     type: str = None
-
-    def _decode_complex_types(self):
-        self.config = AgentConfig.from_json(self.config) if self.config else None
-        self.secure_connect = SecureConnect.from_json(self.secure_connect) if self.secure_connect else None
-        self.status = AgentStatus.from_json(self.status) if self.status else None
 
 
 @dataclass
