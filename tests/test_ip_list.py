@@ -34,6 +34,7 @@ def new_ip_list() -> IPList:
         ]
     )
 
+
 @pytest.fixture(scope='module')
 def get_callback(PolicyUtil, draft_ip_lists, active_ip_lists):
     def _callback_fn(request, context):
