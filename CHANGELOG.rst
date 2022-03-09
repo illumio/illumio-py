@@ -1,6 +1,14 @@
 Changelog
 =========
 
+Version 0.8.1 (2022-03-09)
+-------------
+
+* overhaul complex type decoding by centralizing logic in JsonObject
+* update test cases
+* add changelog
+
+
 Version 0.8.0 (2022-03-03)
 -------------
 
@@ -20,8 +28,7 @@ Version 0.7.3 (2022-02-22)
 * fix LabelSet internal type as workload repr can use full Label objects
 * improve logic for traffic analysis timestamp conversion
 * add classifiers to setup config
-fix license copyright
-
+* fix license copyright
 
 Version 0.7.2 (2022-01-25)
 -------------
@@ -160,7 +167,6 @@ Version 0.3.0 (2021-11-11)
 * move JsonObject class to jsonutils
 * standardize formatting for complex type decoding
 * use IllumioEncoder rather than directly calling to_json
-
 
 Version 0.2.0 (2021-11-10)
 -------------
