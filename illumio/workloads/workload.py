@@ -34,9 +34,6 @@ class Interface(JsonObject):
         if self.link_state and not LinkState.has_value(self.link_state.lower()):
             raise IllumioException("Invalid link_state: {}".format(self.link_state))
 
-    def _decode_complex_types(self):
-        self.network = Reference.from_json(self.network) if self.network else None
-
 
 @dataclass
 class WorkloadServicePort(JsonObject):
@@ -55,9 +52,6 @@ class WorkloadServices(JsonObject):
     created_at: int = None
     open_service_ports: List[WorkloadServicePort] = None
 
-    def _decode_complex_types(self):
-        self.open_service_ports = [WorkloadServicePort.from_json(o) for o in self.open_service_ports]
-
 
 @dataclass
 class PortWideExposure(JsonObject):
@@ -74,10 +68,6 @@ class VulnerabilitiesSummary(JsonObject):
     vulnerability_score: int = None
     max_vulnerability_score: int = None
 
-    def _decode_complex_types(self):
-        if self.vulnerable_port_wide_exposure:
-            self.vulnerable_port_wide_exposure = PortWideExposure.from_json(self.vulnerable_port_wide_exposure)
-
 
 @dataclass
 class DetectedVulnerability(JsonObject):
@@ -89,12 +79,6 @@ class DetectedVulnerability(JsonObject):
     workload: Reference = None
     vulnerability: Vulnerability = None
     vulnerability_report: Reference = None
-
-    def _decode_complex_types(self):
-        self.port_wide_exposure = PortWideExposure.from_json(self.port_wide_exposure) if self.port_wide_exposure else None
-        self.workload = Reference.from_json(self.workload) if self.workload else None
-        self.vulnerability = Vulnerability.from_json(self.vulnerability) if self.vulnerability else None
-        self.vulnerability_report = Reference.from_json(self.vulnerability_report) if self.vulnerability_report else None
 
 
 @dataclass
