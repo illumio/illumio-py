@@ -18,6 +18,10 @@ def convert_draft_href_to_active(href: str) -> str:
     return href.replace('/{}/'.format(DRAFT), '/{}/'.format(ACTIVE))
 
 
+def convert_active_href_to_draft(href: str) -> str:
+    return href.replace('/{}/'.format(ACTIVE), '/{}/'.format(DRAFT))
+
+
 def deprecated(deprecated_in, message=None):
     def _deprecated(func):
         """

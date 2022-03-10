@@ -14,6 +14,7 @@ from .explorer import TrafficQuery, TrafficFlow
 from .rules import Ruleset, Rule, EnforcementBoundary
 from .util import (
     deprecated,
+    convert_active_href_to_draft,
     EnforcementMode,
     ACTIVE,
     DRAFT,
@@ -230,6 +231,9 @@ class PolicyComputeEngine:
         if rule.enabled is None:
             rule.enabled = True
         kwargs['json'] = rule.to_json()
+        # rules can't be created in active rulesets, so if we receive an
+        # active HREF, assume the user wants to modify its draft version
+        ruleset_href = convert_active_href_to_draft(ruleset_href)
         endpoint = '{}/sec_rules'.format(ruleset_href)
         response = self.post(endpoint, include_org=False, **kwargs)
         return Rule.from_json(response.json())
