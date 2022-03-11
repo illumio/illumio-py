@@ -1,14 +1,7 @@
 # illumio-py  
 
-[![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
-
-
-## Table of Contents  
-
-* [Release notes](#release-notes)
-* [Overview](#overview)
-* [Installation](#installation)
-* [Contributing](#contributing)
+[![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg?color=orange)](https://opensource.org/licenses/Apache-2.0)
+[![Latest Release](https://img.shields.io/github/v/release/dsommerville-illumio/illumio-py?label=Latest%20Release)](https://github.com/dsommerville-illumio/illumio-py/releases/latest)
 
 ## Release Notes  
 
