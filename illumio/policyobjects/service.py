@@ -2,6 +2,7 @@ import socket
 from dataclasses import dataclass
 from typing import List
 
+from illumio import IllumioException
 from illumio.util import JsonObject, ModifiableObject
 
 
@@ -12,7 +13,10 @@ class BaseService(JsonObject):
 
     def __post_init__(self):
         if type(self.proto) is str:
-            self.proto = socket.getprotobyname(self.proto)
+            try:
+                self.proto = socket.getprotobyname(self.proto)
+            except:
+                raise IllumioException("Invalid protocol name: {}".format(self.proto))
         super().__post_init__()
 
 

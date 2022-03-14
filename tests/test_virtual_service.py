@@ -33,6 +33,7 @@ def new_service() -> VirtualService:
         ]
     )
 
+
 @pytest.fixture(scope='module')
 def get_callback(PolicyUtil, draft_virtual_services, active_virtual_services):
     def _callback_fn(request, context):
@@ -75,6 +76,15 @@ def test_decoded_labels(mock_virtual_service: VirtualService):
 def test_create_virtual_service(pce: PolicyComputeEngine, new_service: VirtualService):
     created_virtual_service = pce.create_virtual_service(new_service)
     assert created_virtual_service.name == 'VS-TEST'
+
+
+def test_invalid_protocol_name():
+    with pytest.raises(IllumioException):
+        VirtualService(
+            name='VS-TEST', service_ports=[
+                ServicePort(port=443, proto="invalidproto")
+            ]
+        )
 
 
 def test_invalid_apply_to_value():
