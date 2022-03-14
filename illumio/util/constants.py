@@ -21,7 +21,7 @@ class IllumioEnum(Enum):
 
 class PolicyObjectType(IllumioEnum):
     def __new__(cls, value, endpoint):
-        o = int.__new__(cls, value)
+        o = object.__new__(cls)
         o._value_ = value
 
         o.endpoint = endpoint
