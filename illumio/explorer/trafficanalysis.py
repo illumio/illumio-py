@@ -2,7 +2,7 @@ import re
 import socket
 from dataclasses import dataclass, field
 from datetime import datetime
-from typing import List, Union, Optional
+from typing import Any, List, Union, Optional
 
 from illumio import IllumioException
 from illumio.infrastructure import Network
@@ -49,11 +49,63 @@ class TrafficQueryFilterBlock(JsonObject):
     include: List[List[TrafficQueryFilter]] = field(default_factory=list)
     exclude: List[TrafficQueryFilter] = field(default_factory=list)
 
+    def __post_init__(self):
+        self.include = _parse_traffic_filters(self.include, include=True)
+        self.exclude = _parse_traffic_filters(self.exclude)
+        super().__post_init__()
+
+
+def _parse_traffic_filters(refs: List[Any], include=False) -> List[object]:
+    traffic_objects = []
+    for ref in refs:
+        if type(ref) is not str:
+            traffic_objects.append(ref)
+            continue
+        elif re.match(FQDN_REGEX, ref):
+            if include:
+                raise IllumioException("Cannot specify consumer FQDN filter")
+            o = {'fqdn': ref}
+        elif 'label' in ref:
+            o = {'label': {'href': ref}}
+        elif 'workload' in ref:
+            o = {'workload': {'href': ref}}
+        elif 'ip_list' in ref:
+            o = {'ip_list': {'href': ref}}
+        elif Transmission.has_value(ref.lower()):
+            if include:
+                raise IllumioException("Cannot specify consumer transmission filter")
+            o = {'transmission': ref}
+        else:
+            try:
+                socket.inet_aton(ref)  # check if the reference is an IP address
+                o = {'ip_address': ref}
+            except socket.error:
+                raise IllumioException('Invalid traffic filter type: {}').format(ref)
+        traffic_objects.append([o] if include else o)
+    return traffic_objects
+
 
 @dataclass
 class TrafficQueryServiceBlock(JsonObject):
     include: List[ServicePort] = field(default_factory=list)
     exclude: List[ServicePort] = field(default_factory=list)
+
+    def __post_init__(self):
+        self.include = _parse_service_ports(self.include)
+        self.exclude = _parse_service_ports(self.exclude)
+        super().__post_init__()
+
+
+def _parse_service_ports(service_ports: List[Union[ServicePort, dict]]):
+    parsed_service_ports = []
+    for service_port in service_ports:
+        if type(service_port) is ServicePort:
+            parsed_service_ports.append(service_port)
+        elif type(service_port) is dict:
+            parsed_service_ports.append(ServicePort.from_json(service_port))
+        else:
+            raise IllumioException("Invalid service port type: {}".format(type(service_port)))
+    return parsed_service_ports
 
 
 @dataclass
@@ -80,12 +132,12 @@ class TrafficQuery(JsonObject):
         return TrafficQuery(
             start_date=start_date, end_date=end_date,
             sources=TrafficQueryFilterBlock(
-                include=_parse_traffic_filters(include_sources, include=True),
-                exclude=_parse_traffic_filters(exclude_sources)
+                include=include_sources,
+                exclude=exclude_sources
             ),
             destinations=TrafficQueryFilterBlock(
-                include=_parse_traffic_filters(include_destinations, include=True),
-                exclude=_parse_traffic_filters(exclude_destinations)
+                include=include_destinations,
+                exclude=exclude_destinations
             ),
             services=TrafficQueryServiceBlock(
                 include=include_services,
@@ -121,33 +173,6 @@ class TrafficQuery(JsonObject):
                 raise IllumioException("Invalid policy_decision: {}".format(policy_decision))
         if self.sources_destinations_query_op.lower() not in {AND, OR}:
             raise IllumioException("sources_destinations_query_op must be one of 'and' or 'or', was {}".format(self.sources_destinations_query_op))
-
-
-def _parse_traffic_filters(refs: List[str], include=False) -> List[object]:
-    traffic_objects = []
-    for ref in refs:
-        if re.match(FQDN_REGEX, ref):
-            if include:
-                raise IllumioException("Cannot specify consumer FQDN filter")
-            o = {'fqdn': ref}
-        elif 'label' in ref:
-            o = {'label': {'href': ref}}
-        elif 'workload' in ref:
-            o = {'workload': {'href': ref}}
-        elif 'iplist' in ref:
-            o = {'ip_list': {'href': ref}}
-        elif Transmission.has_value(ref.lower()):
-            if include:
-                raise IllumioException("Cannot specify consumer transmission filter")
-            o = {'transmission': ref}
-        else:
-            try:
-                socket.inet_aton(ref)  # check if the reference is an IP address
-                o = {'ip_address': ref}
-            except socket.error:
-                raise IllumioException('Invalid traffic filter type: {}').format(ref)
-        traffic_objects.append([o] if include else o)
-    return traffic_objects
 
 
 @dataclass
