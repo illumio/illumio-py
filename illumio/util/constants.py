@@ -19,6 +19,21 @@ class IllumioEnum(Enum):
         return value in cls._value2member_map_
 
 
+class PolicyObjectType(IllumioEnum):
+    def __new__(cls, value, endpoint):
+        o = int.__new__(cls, value)
+        o._value_ = value
+
+        o.endpoint = endpoint
+        return o
+
+    LABEL = 'label', 'labels'
+    IP_LIST = 'ip_list', 'ip_lists'
+    VIRTUAL_SERVICE = 'virtual_service', 'virtual_services'
+    RULESET = 'rule_set', 'rule_sets'
+    ENFORCEMENT_BOUNDARY = 'enforcement_boundary', 'enforcement_boundaries'
+
+
 class LinkState(IllumioEnum):
     UP = 'up'
     DOWN = 'down'
