@@ -1,13 +1,29 @@
 Changelog
 =========
 
+Version 0.8.2 (2022-03-14)
+-------------
+
+* add tests for PCE URL parsing
+* improve documentation
+    * add README and CONTRIBUTING docs
+    * add copyright and license header to all modules
+    * add docstrings for PolicyComputeEngine functions, improve URL parsing
+* add UnmodifiableObject class for PolicyVersion (create only)
+* change IllumioObject to inherit from Reference
+* update parsing in traffic query blocks to simplify builder
+* raise IllumioException if invalid protocol name is passed to BaseService subclass
+* deprecate convert_protocol function in favour of baking proto conversion into service post_init
+* add PolicyObjectType enum
+* add parse_url function to improve handling of PCE url arg
+* default to draft version of rulesets when creating rules
+
 Version 0.8.1 (2022-03-09)
 -------------
 
 * overhaul complex type decoding by centralizing logic in JsonObject
 * update test cases
 * add changelog
-
 
 Version 0.8.0 (2022-03-03)
 -------------
