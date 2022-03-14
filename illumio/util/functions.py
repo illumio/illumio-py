@@ -38,3 +38,14 @@ def deprecated(deprecated_in, message=None):
             return func(*args, **kwargs)
         return wrapper
     return _deprecated
+
+
+def parse_url(url: str) -> tuple:
+    protocol = None
+    url = url.strip()        # remove leading/trailing whitespace
+    if '://' in url:         # use provided protocol if included
+        protocol, url = url.split('://')
+    if protocol not in ('http', 'https'):
+        protocol = 'https'   # only support http(s)
+    url = url.split('/')[0]  # remove any provided path
+    return protocol, url
