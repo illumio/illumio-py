@@ -1,3 +1,13 @@
+# -*- coding: utf-8 -*-
+
+"""This module provides classes related to labels and label groups.
+
+Copyright:
+    (c) 2022 Illumio
+
+License:
+    Apache2, see LICENSE for more details.
+"""
 import json
 from dataclasses import dataclass
 from typing import List

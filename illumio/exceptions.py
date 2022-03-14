@@ -1,3 +1,13 @@
+# -*- coding: utf-8 -*-
+
+"""This module provides common exception classes used throughout the application.
+
+Copyright:
+    (c) 2022 Illumio
+
+License:
+    Apache2, see LICENSE for more details.
+"""
 class IllumioException(Exception):
     """Superclass for Illumio library exceptions"""
 

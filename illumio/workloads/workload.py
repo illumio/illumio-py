@@ -1,3 +1,13 @@
+# -*- coding: utf-8 -*-
+
+"""This module provides classes related to workload objects.
+
+Copyright:
+    (c) 2022 Illumio
+
+License:
+    Apache2, see LICENSE for more details.
+"""
 from dataclasses import dataclass
 from typing import List, Union
 

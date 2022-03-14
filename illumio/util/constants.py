@@ -1,3 +1,13 @@
+# -*- coding: utf-8 -*-
+
+"""This module provides constant values and enumerations used by the PCE REST API.
+
+Copyright:
+    (c) 2022 Illumio
+
+License:
+    Apache2, see LICENSE for more details.
+"""
 import re
 from enum import Enum
 

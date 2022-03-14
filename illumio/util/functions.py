@@ -1,3 +1,13 @@
+# -*- coding: utf-8 -*-
+
+"""This module provides helper functions and decorators for common use-cases.
+
+Copyright:
+    (c) 2022 Illumio
+
+License:
+    Apache2, see LICENSE for more details.
+"""
 import functools
 import socket
 import warnings

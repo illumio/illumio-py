@@ -1,3 +1,13 @@
+# -*- coding: utf-8 -*-
+
+"""This module provides a helper for actor objects in rules and enforcement boundaries.
+
+Copyright:
+    (c) 2022 Illumio
+
+License:
+    Apache2, see LICENSE for more details.
+"""
 import re
 from dataclasses import dataclass
 

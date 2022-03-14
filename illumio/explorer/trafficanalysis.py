@@ -1,3 +1,13 @@
+# -*- coding: utf-8 -*-
+
+"""This module provides classes for traffic analysis using Explorer.
+
+Copyright:
+    (c) 2022 Illumio
+
+License:
+    Apache2, see LICENSE for more details.
+"""
 import re
 import socket
 from dataclasses import dataclass, field

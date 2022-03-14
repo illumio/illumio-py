@@ -1,3 +1,17 @@
+# -*- coding: utf-8 -*-
+
+"""This module provides the core of the class model used in the client.
+
+The base JsonObject class handles basic encoding and decoding to translate
+responses from the PCE REST API into python objects. The implementation
+leverages dataclasses to simplify the logic for these operations.
+
+Copyright:
+    (c) 2022 Illumio
+
+License:
+    Apache2, see LICENSE for more details.
+"""
 import copy
 import json
 from abc import ABC
