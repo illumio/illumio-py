@@ -6,10 +6,6 @@ from illumio._version import version
 from .constants import ACTIVE, DRAFT
 
 
-def convert_protocol(protocol: str) -> int:
-    return socket.getprotobyname(protocol)
-
-
 def ignore_empty_keys(o):
     return {k: v for (k, v) in o if v is not None}
 
@@ -49,3 +45,22 @@ def parse_url(url: str) -> tuple:
         protocol = 'https'   # only support http(s)
     url = url.split('/')[0]  # remove any provided path
     return protocol, url
+
+
+@deprecated(deprecated_in='0.8.2')
+def convert_protocol(protocol: str) -> int:
+    """DEPRECATED (v0.8.2). Protocol conversion is baked into service creation.
+
+    Given a protocol name, returns the integer ID of that protocol.
+
+    Usage:
+        >>> convert_protocol('tcp')
+        6
+
+    Args:
+        protocol (str): case-insensitive protocol string, e.g. 'tcp', 'UDP'
+
+    Returns:
+        int: the integer ID of the given protocol, e.g. 17 for 'udp'
+    """
+    return socket.getprotobyname(protocol)

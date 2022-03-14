@@ -2,11 +2,11 @@ from dataclasses import dataclass
 from typing import List
 
 from illumio import IllumioException
-from illumio.util import IllumioObject, Reference, JsonObject, ModifiableObject
+from illumio.util import IllumioObject, Reference, ModifiableObject
 from illumio.workloads import Workload
 
 from .label import Label
-from .service import ServiceAddress, ServicePort
+from .service import BaseService, ServiceAddress, ServicePort
 
 HOST_ONLY = 'host_only'
 INTERNAL_BRIDGE_NETWORK = 'internal_bridge_network'
@@ -27,10 +27,8 @@ class VirtualService(ModifiableObject):
 
 
 @dataclass
-class PortOverride(JsonObject):
-    port: int = None
+class PortOverride(BaseService):
     to_port: int = None
-    proto: int = None
     new_port: int = None
     new_to_port: int = None
 

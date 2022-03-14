@@ -3,7 +3,7 @@ from typing import List, Union
 
 from illumio import IllumioException
 from illumio.infrastructure import ContainerCluster
-from illumio.policyobjects import Label, Service, ServicePort
+from illumio.policyobjects import Label, BaseService, Service, ServicePort
 from illumio.vulnerabilities import Vulnerability
 from illumio.util import (
     JsonObject,
@@ -70,10 +70,8 @@ class VulnerabilitiesSummary(JsonObject):
 
 
 @dataclass
-class DetectedVulnerability(JsonObject):
+class DetectedVulnerability(BaseService):
     ip_address: str = None
-    port: int = None
-    proto: int = None
     port_exposure: int = None
     port_wide_exposure: PortWideExposure = None
     workload: Reference = None

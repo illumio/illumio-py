@@ -1,3 +1,4 @@
+import socket
 from dataclasses import dataclass
 from typing import List
 
@@ -5,9 +6,18 @@ from illumio.util import JsonObject, ModifiableObject
 
 
 @dataclass
-class ServicePort(JsonObject):
+class BaseService(JsonObject):
     port: int = None
     proto: int = None
+
+    def __post_init__(self):
+        if type(self.proto) is str:
+            self.proto = socket.getprotobyname(self.proto)
+        super().__post_init__()
+
+
+@dataclass
+class ServicePort(BaseService):
     to_port: int = None
     icmp_type: int = None
     icmp_code: int = None
@@ -18,10 +28,8 @@ class ServicePort(JsonObject):
 
 
 @dataclass
-class ServiceAddress(JsonObject):
+class ServiceAddress(BaseService):
     ip: str = None
-    port: int = None
-    proto: int = None
     fqdn: str = None
     description: str = None
 

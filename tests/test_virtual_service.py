@@ -7,7 +7,6 @@ from requests_mock import ANY
 
 from illumio import PolicyComputeEngine, IllumioException
 from illumio.policyobjects import VirtualService, ServicePort, ServiceAddress, Label
-from illumio.util import convert_protocol
 
 DRAFT_VIRTUAL_SERVICES = os.path.join(pytest.DATA_DIR, 'draft_virtual_services.json')
 ACTIVE_VIRTUAL_SERVICES = os.path.join(pytest.DATA_DIR, 'active_virtual_services.json')
@@ -30,7 +29,7 @@ def new_service() -> VirtualService:
     return VirtualService(
         name="VS-TEST",
         service_ports=[
-            ServicePort(port=443, proto=convert_protocol("TCP"))
+            ServicePort(port=443, proto="TCP")
         ]
     )
 
