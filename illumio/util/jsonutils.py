@@ -28,9 +28,9 @@ class JsonObject(ABC):
         return deep_encode(self)
 
     @classmethod
-    def from_json(cls, data) -> 'JsonObject':
+    def from_json(cls, data: Any) -> 'JsonObject':
         """
-        Given a JSON object or dictionary, decode the data as an object
+        Given a JSON object or dictionary, decodes the data as an object
         of the calling JsonObject subtype. Accepts arbitrary key/value pairs
         as a form of forwards-compatibility.
 
@@ -111,8 +111,7 @@ class Reference(JsonObject):
 
 
 @dataclass
-class IllumioObject(JsonObject):
-    href: str = None
+class IllumioObject(Reference):
     name: str = None
     description: str = None
     external_data_set: str = None
@@ -130,3 +129,9 @@ class ModifiableObject(IllumioObject):
     updated_by: Reference = None
     deleted_by: Reference = None
     caps: List[str] = None
+
+
+@dataclass
+class UnmodifiableObject(IllumioObject):
+    created_at: str = None
+    created_by: Reference = None

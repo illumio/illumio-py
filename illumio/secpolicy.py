@@ -7,6 +7,7 @@ from .util import (
     JsonObject,
     Reference,
     ModifiableObject,
+    UnmodifiableObject,
     HREF_REGEX
 )
 from .policyobjects import LabelSet
@@ -70,7 +71,7 @@ class PolicyObjectCounts(JsonObject):
 
 
 @dataclass
-class PolicyVersion(ModifiableObject):
+class PolicyVersion(UnmodifiableObject):
     commit_message: str = None
     version: int = None
     workloads_affected: int = None
