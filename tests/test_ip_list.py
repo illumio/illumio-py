@@ -28,9 +28,11 @@ def active_ip_lists() -> list:
 @pytest.fixture(scope='module')
 def new_ip_list() -> IPList:
     return IPList(
-        name="IPL-WELL-KNOWN",
+        name="IPL-INTERNAL",
         ip_ranges=[
-            IPRange(from_ip=1, to_ip=1023)
+            IPRange(from_ip='10.0.0.0/8'),
+            IPRange(from_ip='172.16.0.0/12'),
+            IPRange(from_ip='192.168.0.0', to_ip='192.168.255.255')
         ]
     )
 
