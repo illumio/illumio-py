@@ -11,6 +11,8 @@ See the [CHANGELOG](CHANGELOG.rst).
 
 Illumio Policy Compute Engine REST client for python 3. Exposes PCE API endpoints as functions through a simple interface.  
 
+Compatible with Illumio Core PCE version 21.2+.  
+
 The main entrypoint for the client is the `PolicyComputeEngine` class:  
 
 ```python
@@ -46,6 +48,10 @@ $ cd illumio-py
 $ python -m build .
 $ pip install dist/illumio*.whl
 ```
+
+## Support  
+
+The `illumio` package is released and distributed as open source software subject to the included [LICENSE](LICENSE). Illumio has no obligation or responsibility related to the package with respect to support, maintenance, availability, security or otherwise. Please read the entire [LICENSE](LICENSE) for additional information regarding the permissions and limitations. Support is offered on a best-effort basis through the [Illumio app integrations team](mailto://app-integrations@illumio.com) and project contributors.
 
 ## Contributing  
 
