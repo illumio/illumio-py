@@ -16,7 +16,7 @@ import copy
 import json
 from abc import ABC
 from dataclasses import dataclass, fields
-from inspect import signature
+from inspect import signature, isclass
 from typing import List, Any
 
 from .functions import ignore_empty_keys
@@ -83,7 +83,7 @@ class JsonObject(ABC):
         if isinstance(value, JsonObject):
             # if the value has already been decoded, return it
             return value
-        elif issubclass(type_, JsonObject):
+        elif isclass(type_) and issubclass(type_, JsonObject):
             return type_.from_json(value)
         elif isinstance(value, list):
             # if the value is a list, expect the field type to be List[T]
