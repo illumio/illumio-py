@@ -20,6 +20,8 @@ Pull requests please follow the standard github PR process.
 
 Please add unit tests for new functionality to the best of your ability.  
 
+Run tests against all supported python versions with ```make test```.  
+
 ## Documentation  
 
 ### Project documentation  
