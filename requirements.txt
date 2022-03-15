@@ -1,4 +1,6 @@
+-e .
 dataclasses>=0.8; python_version == '3.6'
 pytest>=6.2.5
+pytest-cov
 requests>=2.26.0
 requests-mock>=1.9.3

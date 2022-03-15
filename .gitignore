@@ -10,7 +10,15 @@ venv/
 # pyc files
 __pycache__/
 *.pyc
+
+# test folders
+.tox/
 .pytest_cache/
+
+# coverage
+.coverage
+coverage.xml
+report.xml
 
 # build files
 build/
