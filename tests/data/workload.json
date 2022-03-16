@@ -3,7 +3,7 @@
     "deleted": false,
     "name": null,
     "description": null,
-    "hostname": "perf-workload-47732",
+    "hostname": "ubuntu-db",
     "service_principal_name": null,
     "public_ip": "66.151.147.220",
     "distinguished_name": null,

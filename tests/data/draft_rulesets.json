@@ -12,7 +12,7 @@
         },
         "deleted_by": null,
         "update_type": null,
-        "name": "RS-IBM-SOAR-3389-TCP",
+        "name": "RS-RINGFENCE",
         "description": "",
         "enabled": true,
         "scopes": [
