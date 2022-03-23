@@ -1,4 +1,4 @@
-.PHONY: init test coverage
+.PHONY: init test coverage ci
 
 init:
 	pip install -r requirements.txt tox
@@ -8,3 +8,6 @@ test:
 
 coverage:
 	pytest --cov-config .coveragerc --verbose --cov-report term --cov-report xml --cov=illumio tests
+
+ci:
+	pytest tests --junitxml=report.xml
