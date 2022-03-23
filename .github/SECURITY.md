@@ -1,6 +1,6 @@
 # Vulnerability Disclosure
 
-The Illumio team and community take security bugs in all Illumio projects seriously. If you believe you have found a potential security vulnerability in the `illumio` package, please reach out directly to [Duncan Sommerville](mailto:duncan.sommerville@illumio.com)(@dsommerville-illumio) and the [Illumio App Integrations Team](mailto:app-integrations@illumio.com). **Please do not file a public issue.**
+The Illumio team and community take security bugs in all Illumio projects seriously. If you believe you have found a potential security vulnerability in the `illumio` package, please reach out directly to [Duncan Sommerville](mailto:duncan.sommerville@illumio.com) and the [Illumio App Integrations Team](mailto:app-integrations@illumio.com). **Please do not file a public issue.**
 
 Please include code you used to find the problem and the shortest amount of code necessary to reproduce it.
 
