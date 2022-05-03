@@ -1,12 +1,6 @@
 # How to contribute
 
-## Prerequisites  
-
-### Sign the CLA  
-
-When submitting a pull request, you will be prompted to to sign the Illumio [Contributor License Agreement](CLA.md). The signature is then stored remotely so the process only needs to be completed once.  
-
-## GitHub workflow
+## GitHub workflow  
 
 Suggested contribution workflow (feature branching):
 
@@ -22,11 +16,15 @@ Suggested contribution workflow (feature branching):
 
 Pull requests please follow the standard github PR process.  
 
+### Sign the CLA  
+
+When submitting a pull request, you will be prompted to to sign the Illumio [Contributor License Agreement](CLA.md). The signature is then stored remotely so the process only needs to be completed once.  
+
 ## Testing  
 
-Please add unit tests for new functionality to the best of your ability.  
+Make sure to add unit tests to cover any new functionality. When making changes to existing code, add any necessary regression tests, and/or change existing tests where needed.  
 
-Run tests against all supported python versions with ```make test```.  
+Run tests against all supported python versions with ```make test```. Tests are run using the `tox` library. It's recommended to install python environments with [`pyenv`](https://github.com/pyenv/pyenv) and install the [`tox-pyenv` library](https://pypi.org/project/tox-pyenv/) to test against multiple versions at once.  
 
 ## Documentation  
 
