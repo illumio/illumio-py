@@ -1,5 +1,11 @@
 # How to contribute
 
+## Prerequisites  
+
+### Sign the CLA  
+
+When submitting a pull request, you will be prompted to to sign the Illumio [Contributor License Agreement](CLA.md). The signature is then stored remotely so the process only needs to be completed once.  
+
 ## GitHub workflow
 
 Suggested contribution workflow (feature branching):
