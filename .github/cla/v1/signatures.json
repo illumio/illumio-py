@@ -1,3 +1,12 @@
 {
-   "signedContributors": []
+  "signedContributors": [
+    {
+      "name": "dsommerville-illumio",
+      "id": 91619967,
+      "comment_id": 1116394130,
+      "created_at": "2022-05-03T18:06:20Z",
+      "repoId": 428815353,
+      "pullRequestNo": 1
+    }
+  ]
 }
