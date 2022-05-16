@@ -28,6 +28,8 @@ import time
 from typing import List, Union
 
 from requests import Session, Response
+from requests.adapters import HTTPAdapter
+from urllib3.util.retry import Retry
 
 from .secpolicy import PolicyChangeset, PolicyVersion
 from .exceptions import IllumioApiException
@@ -78,6 +80,20 @@ class PolicyComputeEngine:
         protocol, url = parse_url(url)
         self.base_url = "{}://{}:{}/api/{}".format(protocol, url, port, version)
         self.org_id = org_id
+        self._setup_retry()
+
+    def _setup_retry(self):
+        """Configures `requests.Session` retry defaults"""
+        retry_strategy = Retry(
+            total=5,  # retry up to 5 times
+            # {backoff} * (2 ** ({retry count} - 1))
+            # 1, 2, 4, 8, 16 (seconds)
+            backoff_factor=2,
+            status_forcelist=[429, 500, 502, 503, 504]
+        )
+        adapter = HTTPAdapter(max_retries=retry_strategy)
+        self._session.mount("https://", adapter)
+        self._session.mount("http://", adapter)
 
     def set_credentials(self, username: str, password: str) -> None:
         """Sets username and password values to authenticate with the PCE.
