@@ -1,9 +1,10 @@
-.PHONY: init test coverage ci
+.PHONY: init test coverage ci publish
 
 init:
-	pip install -r requirements.txt tox
+	pip install -r requirements.txt
 
 test:
+	pip install -qq --upgrade tox
 	tox -p
 
 coverage:
@@ -11,3 +12,9 @@ coverage:
 
 ci:
 	pytest tests --junitxml=report.xml
+
+publish:
+	pip install --upgrade twine
+	python -m build .
+	twine upload dist/*
+	rm -rf build dist illumio.egg-info
