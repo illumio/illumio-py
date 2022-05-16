@@ -1,6 +1,11 @@
 Changelog
 =========
 
+Version 0.8.3 (2022-05-16)
+-------------
+
+* add retry logic to PCE requests session
+
 Version 0.8.2 (2022-03-14)
 -------------
 
