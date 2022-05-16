@@ -17,9 +17,8 @@ jobs:
           PERSONAL_ACCESS_TOKEN : ${{ secrets.PERSONAL_ACCESS_TOKEN }}
         with:
           path-to-signatures: '.github/cla/v1/signatures.json'
-          path-to-document: 'https://github.com/dsommerville-illumio/illumio-py/blob/main/.github/CLA.md' # e.g. a CLA or a DCO document
+          path-to-document: 'https://github.com/illumio/illumio-cla/blob/main/CLA.md'
           branch: 'main'
           allowlist: dependabot[bot]
-          # remote-organization-name: illumio
-          # remote-repository-name: cla-agreements
-
+          remote-organization-name: illumio
+          remote-repository-name: illumio-cla

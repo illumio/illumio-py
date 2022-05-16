@@ -1,13 +1,7 @@
 # illumio-py  
 
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg?color=orange)](https://opensource.org/licenses/Apache-2.0)
-[![Latest Release](https://img.shields.io/github/v/release/dsommerville-illumio/illumio-py?label=Latest%20Release)](https://github.com/dsommerville-illumio/illumio-py/releases/latest)
-
-## Release Notes  
-
-See the [CHANGELOG](CHANGELOG.rst).  
-
-## Overview  
+[![Latest Release](https://img.shields.io/github/v/release/illumio/illumio-py?label=Latest%20Release)](https://github.com/illumio/illumio-py/releases/latest)
 
 Illumio Policy Compute Engine REST client for python 3. Exposes PCE API endpoints as functions through a simple interface.  
 
@@ -36,25 +30,27 @@ For more information on the Illumio APIs, see the [REST API guide](https://docs.
 
 ## Installation  
 
-> The `illumio` library is not yet available on pypi.  
+The `illumio` library is now [available on pypi](https://pypi.org/project/illumio/)!  
 
-The wheel and source distributables for the latest release can be found [here](/releases/latest).  
+```sh
+$ python -m pip install illumio
+```
 
 To build and install from source  
 
 ```sh
-$ git clone git@github.com:dsommerville-illumio/illumio-py.git
+$ git clone git@github.com:illumio/illumio-py.git
 $ cd illumio-py
 $ make
 ```
 
 ## Support  
 
-The `illumio` package is released and distributed as open source software subject to the included [LICENSE](LICENSE). Illumio has no obligation or responsibility related to the package with respect to support, maintenance, availability, security or otherwise. Please read the entire [LICENSE](LICENSE) for additional information regarding the permissions and limitations. Support is offered on a best-effort basis through the [Illumio app integrations team](mailto:app-integrations@illumio.com) and project contributors.
+The `illumio` package is released and distributed as open source software subject to the included [LICENSE](LICENSE). Illumio has no obligation or responsibility related to the package with respect to support, maintenance, availability, security or otherwise. Please read the entire [LICENSE](LICENSE) for additional information regarding the permissions and limitations. Support is offered on a best-effort basis through the [Illumio app integrations team](mailto:app-integrations@illumio.com) and project contributors.  
 
 ## Contributing  
 
-See [CONTRIBUTING](.github/CONTRIBUTING.md) for details.  
+See the project's [CONTRIBUTING](https://github.com/illumio/illumio-py/blob/main/.github/CONTRIBUTING.md) document for details.  
 
 ## License  
 
