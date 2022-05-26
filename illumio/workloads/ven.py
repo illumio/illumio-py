@@ -23,7 +23,7 @@ class AgentConfig(JsonObject):
     visibility_level: VisibilityLevel = None
 
     def _validate(self):
-        if self.visibility_level and not VisibilityLevel.has_value(self.visibility_level.lower()):
+        if self.visibility_level and not self.visibility_level in VisibilityLevel:
             raise IllumioException("Invalid visibility_level: {}".format(self.visibility_level))
 
 

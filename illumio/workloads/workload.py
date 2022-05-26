@@ -41,7 +41,7 @@ class Interface(JsonObject):
     loopback: str = None
 
     def _validate(self):
-        if self.link_state and not LinkState.has_value(self.link_state.lower()):
+        if self.link_state and not self.link_state in LinkState:
             raise IllumioException("Invalid link_state: {}".format(self.link_state))
 
 
@@ -129,11 +129,11 @@ class Workload(ModifiableObject):
     ike_authentication_certificate: IKEAuthenticationCertificate = None
 
     def _validate(self):
-        if self.mode and not Mode.has_value(self.mode.lower()):
+        if self.mode and not self.mode in Mode:
             raise IllumioException("Invalid mode: {}".format(self.mode))
-        if self.enforcement_mode and not EnforcementMode.has_value(self.enforcement_mode.lower()):
+        if self.enforcement_mode and not self.enforcement_mode in EnforcementMode:
             raise IllumioException("Invalid enforcement_mode: {}".format(self.enforcement_mode))
-        if self.visibility_level and not VisibilityLevel.has_value(self.visibility_level.lower()):
+        if self.visibility_level and not self.visibility_level in VisibilityLevel:
             raise IllumioException("Invalid visibility_level: {}".format(self.visibility_level))
 
     def _decode_complex_types(self):
