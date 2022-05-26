@@ -3,7 +3,6 @@ import os
 import re
 
 import pytest
-from requests_mock import ANY
 
 from illumio import PolicyComputeEngine
 from illumio.rules import Ruleset

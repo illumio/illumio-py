@@ -3,7 +3,6 @@ import os
 import re
 
 import pytest
-from requests_mock import ANY
 
 from illumio import PolicyComputeEngine, IllumioException
 from illumio.policyobjects import VirtualService, ServicePort, ServiceAddress, Label

@@ -3,10 +3,8 @@ import os
 import re
 
 import pytest
-from requests_mock import ANY
 
 from illumio.policyobjects import Service, ServicePort
-from illumio.util import EnforcementMode
 from illumio.workloads import Workload
 
 MOCK_WORKLOAD = os.path.join(pytest.DATA_DIR, 'workload.json')
