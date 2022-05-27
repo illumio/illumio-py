@@ -1,7 +1,7 @@
 Changelog
 =========
 
-Version 0.8.4 (Unreleased)
+Version 0.8.4 (2022-05-27)
 -------------
 
 * add CRUD operation functions for pairing profile objects to the PCE interface
