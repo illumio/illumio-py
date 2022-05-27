@@ -1,10 +1,6 @@
 from illumio import PolicyComputeEngine
 
 
-def test_failed_connection_check(pce):
-    assert pce.check_connection() == False
-
-
 def test_custom_protocol():
     pce = PolicyComputeEngine('http://my.pce.com')
     assert pce.base_url == 'http://my.pce.com:443/api/v2'

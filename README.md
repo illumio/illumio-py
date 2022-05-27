@@ -1,4 +1,4 @@
-# illumio-py  
+# illumio  
 
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg?color=orange)](https://opensource.org/licenses/Apache-2.0)
 [![Latest Release](https://img.shields.io/github/v/release/illumio/illumio-py?label=Latest%20Release)](https://github.com/illumio/illumio-py/releases/latest)
@@ -46,7 +46,7 @@ $ make
 
 ## Support  
 
-The `illumio` package is released and distributed as open source software subject to the included [LICENSE](LICENSE). Illumio has no obligation or responsibility related to the package with respect to support, maintenance, availability, security or otherwise. Please read the entire [LICENSE](LICENSE) for additional information regarding the permissions and limitations. Support is offered on a best-effort basis through the [Illumio app integrations team](mailto:app-integrations@illumio.com) and project contributors.  
+The `illumio` package is released and distributed as open source software subject to the included [LICENSE](https://github.com/illumio/illumio-py/blob/main/LICENSE). Illumio has no obligation or responsibility related to the package with respect to support, maintenance, availability, security or otherwise. Please read the entire [LICENSE](https://github.com/illumio/illumio-py/blob/main/LICENSE) for additional information regarding the permissions and limitations. Support is offered on a best-effort basis through the [Illumio app integrations team](mailto:app-integrations@illumio.com) and project contributors.  
 
 ## Contributing  
 

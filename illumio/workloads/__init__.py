@@ -9,3 +9,4 @@ License:
 """
 from .ven import *
 from .workload import *
+from .pairing_profile import *

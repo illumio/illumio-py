@@ -48,7 +48,7 @@ class TrafficQueryFilter(JsonObject):
     transmission: str = None
 
     def _validate(self):
-        if self.transmission and not Transmission.has_value(self.transmission.lower()):
+        if self.transmission and not self.transmission in Transmission:
             raise IllumioException("Invalid transmission: {}".format(self.transmission))
 
 
@@ -81,7 +81,7 @@ def _parse_traffic_filters(refs: List[Any], include=False) -> List[object]:
             o = {'workload': {'href': ref}}
         elif 'ip_list' in ref:
             o = {'ip_list': {'href': ref}}
-        elif Transmission.has_value(ref.lower()):
+        elif ref in Transmission:
             if include:
                 raise IllumioException("Cannot specify consumer transmission filter")
             o = {'transmission': ref}
@@ -179,7 +179,7 @@ class TrafficQuery(JsonObject):
 
     def _validate(self):
         for policy_decision in self.policy_decisions:
-            if not PolicyDecision.has_value(policy_decision.lower()):
+            if not policy_decision in PolicyDecision:
                 raise IllumioException("Invalid policy_decision: {}".format(policy_decision))
         if self.sources_destinations_query_op.lower() not in {AND, OR}:
             raise IllumioException("sources_destinations_query_op must be one of 'and' or 'or', was {}".format(self.sources_destinations_query_op))
@@ -219,11 +219,11 @@ class TrafficFlow(JsonObject):
     network: Network = None
 
     def _validate(self):
-        if self.flow_direction and not FlowDirection.has_value(self.flow_direction.lower()):
+        if self.flow_direction and not self.flow_direction in FlowDirection:
             raise IllumioException("Invalid flow_direction: {}".format(self.flow_direction))
-        if self.policy_decision and not PolicyDecision.has_value(self.policy_decision.lower()):
+        if self.policy_decision and not self.policy_decision in PolicyDecision:
             raise IllumioException("Invalid policy_decision: {}".format(self.policy_decision))
-        if self.state and not TrafficState.has_value(self.state.lower()):
+        if self.state and not self.state in TrafficState:
             raise IllumioException("Invalid state: {}".format(self.state))
-        if self.transmission and not Transmission.has_value(self.transmission.lower()):
+        if self.transmission and not self.transmission in Transmission:
             raise IllumioException("Invalid transmission: {}".format(self.transmission))

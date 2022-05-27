@@ -1,0 +1,130 @@
+[
+    {
+        "href": "/orgs/1/sec_policy/draft/ip_lists/2",
+        "created_at": "2021-05-17T12:52:57.963Z",
+        "updated_at": "2021-05-17T12:52:57.966Z",
+        "deleted_at": null,
+        "created_by": {
+            "href": "/users/15"
+        },
+        "updated_by": {
+            "href": "/users/15"
+        },
+        "deleted_by": null,
+        "update_type": null,
+        "name": "IPL-2",
+        "ip_ranges": [
+            {
+                "from_ip": "1.1.1.1",
+                "exclusion": false
+            }
+        ],
+        "fqdns": []
+    },
+    {
+        "href": "/orgs/1/sec_policy/draft/ip_lists/3",
+        "created_at": "2021-06-15T10:23:55.837Z",
+        "updated_at": "2021-06-15T10:23:55.840Z",
+        "deleted_at": null,
+        "created_by": {
+            "href": "/users/15"
+        },
+        "updated_by": {
+            "href": "/users/15"
+        },
+        "deleted_by": null,
+        "update_type": null,
+        "name": "IPL-3",
+        "description": "example desc",
+        "ip_ranges": [
+            {
+                "description": "example ip_ranges description",
+                "from_ip": "1.1.0.0",
+                "exclusion": false
+            }
+        ],
+        "fqdns": [
+            {
+                "fqdn": "app.example.com",
+                "description": "example fqdn description"
+            }
+        ]
+    },
+    {
+        "href": "/orgs/1/sec_policy/draft/ip_lists/4",
+        "created_at": "2021-04-14T18:41:18.229Z",
+        "updated_at": "2021-04-14T18:41:18.258Z",
+        "deleted_at": null,
+        "created_by": {
+            "href": "/users/18"
+        },
+        "updated_by": {
+            "href": "/users/18"
+        },
+        "deleted_by": null,
+        "name": "IPL-4",
+        "description": "Test Data",
+        "ip_ranges": [
+            {
+                "from_ip": "27.194.210.171",
+                "exclusion": false
+            },
+            {
+                "from_ip": "40.159.122.194",
+                "exclusion": false
+            }
+        ],
+        "fqdns": []
+    },
+    {
+        "href": "/orgs/1/sec_policy/active/ip_lists/1",
+        "created_at": "2019-04-05T19:58:39.545Z",
+        "updated_at": "2019-04-05T19:58:39.552Z",
+        "deleted_at": null,
+        "created_by": {
+            "href": "/users/0"
+        },
+        "updated_by": {
+            "href": "/users/0"
+        },
+        "deleted_by": null,
+        "name": "Any (0.0.0.0/0 and ::/0)",
+        "ip_ranges": [
+            {
+                "from_ip": "0.0.0.0/0",
+                "exclusion": false
+            },
+            {
+                "from_ip": "::/0",
+                "exclusion": false
+            }
+        ],
+        "fqdns": []
+    },
+    {
+        "href": "/orgs/1/sec_policy/active/ip_lists/4",
+        "created_at": "2021-04-14T18:41:18.229Z",
+        "updated_at": "2021-04-14T18:41:18.258Z",
+        "deleted_at": null,
+        "created_by": {
+            "href": "/users/18"
+        },
+        "updated_by": {
+            "href": "/users/18"
+        },
+        "deleted_by": null,
+        "name": "IPL-4",
+        "description": "Test Data",
+        "ip_ranges": [
+            {
+                "from_ip": "27.194.210.171",
+                "exclusion": false
+            },
+            {
+                "from_ip": "40.159.122.194",
+                "exclusion": false
+            }
+        ],
+        "fqdns": []
+    }
+]

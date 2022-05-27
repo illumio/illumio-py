@@ -9,7 +9,7 @@ License:
     Apache2, see LICENSE for more details.
 """
 import re
-from enum import Enum
+from enum import Enum, EnumMeta
 
 ACTIVE = 'active'
 DRAFT = 'draft'
@@ -22,14 +22,15 @@ HREF_REGEX = re.compile('^\/orgs\/\d+\/(?:sec_policy\/(?:active|draft)\/)?(?P<ty
 WORKLOAD_BULK_UPDATE_MAX = 1000
 
 
-class IllumioEnum(Enum):
+class IllumioEnumMeta(EnumMeta):
 
-    @classmethod
-    def has_value(cls, value):
+    def __contains__(cls, value):
+        if type(value) is str:
+            value = value.lower()
         return value in cls._value2member_map_
 
 
-class PolicyObjectType(IllumioEnum):
+class PolicyObjectType(Enum, metaclass=IllumioEnumMeta):
     def __new__(cls, value, endpoint):
         o = object.__new__(cls)
         o._value_ = value
@@ -44,26 +45,26 @@ class PolicyObjectType(IllumioEnum):
     ENFORCEMENT_BOUNDARY = 'enforcement_boundary', 'enforcement_boundaries'
 
 
-class LinkState(IllumioEnum):
+class LinkState(Enum, metaclass=IllumioEnumMeta):
     UP = 'up'
     DOWN = 'down'
     UNKNOWN = 'unknown'
 
 
-class Mode(IllumioEnum):
+class Mode(Enum, metaclass=IllumioEnumMeta):
     IDLE = 'idle'
     ILLUMINATED = 'illuminated'
     ENFORCED = 'enforced'
 
 
-class EnforcementMode(IllumioEnum):
+class EnforcementMode(Enum, metaclass=IllumioEnumMeta):
     IDLE = 'idle'
     VISIBILITY_ONLY = 'visibility_only'
     FULL = 'full'
     SELECTIVE = 'selective'
 
 
-class VisibilityLevel(IllumioEnum):
+class VisibilityLevel(Enum, metaclass=IllumioEnumMeta):
     FLOW_FULL_DETAIL = 'flow_full_detail'
     FLOW_SUMMARY = 'flow_summary'
     FLOW_DROPS = 'flow_drops'
@@ -71,25 +72,25 @@ class VisibilityLevel(IllumioEnum):
     ENHANCED_DATA_COLLECTION = 'enhanced_data_collection'
 
 
-class PolicyDecision(IllumioEnum):
+class PolicyDecision(Enum, metaclass=IllumioEnumMeta):
     ALLOWED = 'allowed'
     BLOCKED = 'blocked'
     POTENTIALLY_BLOCKED = 'potentially_blocked'
     UNKNOWN = 'unknown'
 
 
-class Transmission(IllumioEnum):
+class Transmission(Enum, metaclass=IllumioEnumMeta):
     BROADCAST = 'broadcast'
     MULTICAST = 'multicast'
     UNICAST = 'unicast'
 
 
-class FlowDirection(IllumioEnum):
+class FlowDirection(Enum, metaclass=IllumioEnumMeta):
     INBOUND = 'inbound'
     OUTBOUND = 'outbound'
 
 
-class TrafficState(IllumioEnum):
+class TrafficState(Enum, metaclass=IllumioEnumMeta):
     ACTIVE = 'active'
     CLOSED = 'closed'
     TIMED_OUT = 'timed out'
