@@ -52,7 +52,7 @@ from .util import (
     ANY_IP_LIST_NAME,
     WORKLOAD_BULK_UPDATE_MAX
 )
-from .workloads import Workload
+from .workloads import Workload, PairingProfile
 
 
 class PolicyComputeEngine:
@@ -871,6 +871,139 @@ class PolicyComputeEngine:
         kwargs['json'] = enforcement_boundary.to_json()
         response = self.post('/sec_policy/draft/enforcement_boundaries', **kwargs)
         return EnforcementBoundary.from_json(response.json())
+
+    def get_pairing_profile(self, href: str, **kwargs) -> PairingProfile:
+        """Retrieves a pairing profile from the PCE using its HREF.
+
+        Args:
+            href (str): the HREF of the pairing profile object to fetch.
+
+        Returns:
+            PairingProfile: the decoded pairing profile object.
+        """
+        response = self.get(href, include_org=False, **kwargs)
+        return PairingProfile.from_json(response.json())
+
+    def get_pairing_profiles(self, **kwargs) -> List[PairingProfile]:
+        """Retrieves pairing profile objects from the PCE based on the given parameters.
+
+        Keyword arguments to this function are passed to the `requests.get` call.
+        See https://docs.illumio.com/core/21.5/API-Reference/index.html#tocSpairing_profiles_get
+        for details on filter parameters for pairing profile collection queries.
+
+        Usage:
+            >>> pairing_profiles = pce.get_pairing_profiles(
+            ...     params={
+            ...         'name': 'PP-'
+            ...     }
+            ... )
+            >>> pairing_profiles
+            [
+                PairingProfile(
+                    href='/orgs/1/pairing_profiles/19',
+                    name='PP-DATABASE-VENS',
+                    ...
+                ),
+                ...
+            ]
+
+        Returns:
+            List[PairingProfile]: the returned list of decoded pairing profiles.
+        """
+        response = self.get('/pairing_profiles', **kwargs)
+        return [PairingProfile.from_json(o) for o in response.json()]
+
+    def create_pairing_profile(self, pairing_profile: PairingProfile, **kwargs) -> PairingProfile:
+        """Creates a pairing profile object in the PCE.
+
+        See https://docs.illumio.com/core/21.5/API-Reference/index.html#tocSpairing_profiles_post
+        for details on POST body parameters when creating pairing profiles.
+
+        Usage:
+            >>> from illumio.workloads import PairingProfile
+            >>> pairing_profile = PairingProfile(
+            ...     name='PP-DATABASE-VENS',
+            ...     enabled=True,
+            ...     enforcement_mode='visibility_only',
+            ...     visibility_level='flows_summary'
+            ... )
+            >>> pairing_profile = pce.create_pairing_profile(pairing_profile)
+            >>> pairing_profile
+            PairingProfile(
+                href='/orgs/1/pairing_profiles/19',
+                name='PP-DATABASE-VENS',
+                enabled=True,
+                enforcement_mode='visibility_only',
+                visibility_level='flows_summary',
+                ...
+            )
+
+        Args:
+            pairing_profile (PairingProfile): the pairing profile to create.
+
+        Returns:
+            PairingProfile: the re-encoded pairing profile object with valid HREF.
+        """
+        kwargs['json'] = pairing_profile.to_json()
+        response = self.post('/pairing_profiles', **kwargs)
+        return PairingProfile.from_json(response.json())
+
+    def update_pairing_profile(self, href: str, pairing_profile: PairingProfile, **kwargs) -> PairingProfile:
+        """Updates a pairing profile object in the PCE.
+
+        Usage:
+            >>> from illumio.workloads import PairingProfile
+            >>> pairing_profiles = pce.get_pairing_profiles(
+            ...     params={'name': 'PP-DATABASE', 'max_results': 1}
+            ... )
+            >>> existing_profile = pairing_profiles[0]
+            >>> update = PairingProfile(
+            ...     name='PP-DATABASE-VENS',
+            ...     enabled=False  # disable this profile
+            ... )
+            >>> updated_profile = pce.update_pairing_profile(existing_profile.href, update)
+            >>> updated_profile
+            PairingProfile(
+                href='/orgs/1/pairing_profiles/19',
+                name='PP-DATABASE-VENS',
+                enabled=False,
+                enforcement_mode='visibility_only',
+                visibility_level='flows_summary',
+                ...
+            )
+
+        Args:
+            href (str): the HREF of the pairing profile to update.
+            pairing_profile (PairingProfile): the updated pairing profile.
+
+        Returns:
+            PairingProfile: the re-encoded updated pairing profile object.
+        """
+        kwargs['json'] = pairing_profile.to_json()
+        response = self.put(href, include_org=False, **kwargs)
+        return PairingProfile.from_json(response.json())
+
+    def delete_pairing_profile(self, href: str, **kwargs) -> None:
+        """Deletes a pairing profile object in the PCE.
+
+        Args:
+            href (str): the HREF of the pairing profile to delete.
+        """
+        self.delete(href, include_org=False, **kwargs)
+
+    def generate_pairing_key(self, pairing_profile_href: str, **kwargs) -> str:
+        """Generates a pairing key using a pairing profile.
+
+        Args:
+            pairing_profile_href (str): the HREF of the pairing profile to use.
+
+        Returns:
+            str: the pairing key value.
+        """
+        uri = '{}/pairing_key'.format(pairing_profile_href)
+        kwargs['json'] = {}
+        response = self.post(uri, include_org=False, **kwargs)
+        return response.json().get('activation_code')
 
     def get_workload(self, href: str, **kwargs) -> Workload:
         """Retrieves a workload from the PCE using its HREF.
