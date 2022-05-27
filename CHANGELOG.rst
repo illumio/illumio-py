@@ -1,6 +1,14 @@
 Changelog
 =========
 
+Version 0.8.4 (Unreleased)
+-------------
+
+* add CRUD operation functions for pairing profile objects to the PCE interface
+* add pairing profile tests
+* improve mock test scaffolding
+* change IllumioEnum to metaclass and replace has_value with contains builtin
+
 Version 0.8.3 (2022-05-16)
 -------------
 
