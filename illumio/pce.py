@@ -948,7 +948,7 @@ class PolicyComputeEngine:
         response = self.post('/pairing_profiles', **kwargs)
         return PairingProfile.from_json(response.json())
 
-    def update_pairing_profile(self, href: str, pairing_profile: PairingProfile, **kwargs) -> PairingProfile:
+    def update_pairing_profile(self, href: str, pairing_profile: PairingProfile, **kwargs) -> None:
         """Updates a pairing profile object in the PCE.
 
         Usage:
@@ -975,13 +975,9 @@ class PolicyComputeEngine:
         Args:
             href (str): the HREF of the pairing profile to update.
             pairing_profile (PairingProfile): the updated pairing profile.
-
-        Returns:
-            PairingProfile: the re-encoded updated pairing profile object.
         """
         kwargs['json'] = pairing_profile.to_json()
-        response = self.put(href, include_org=False, **kwargs)
-        return PairingProfile.from_json(response.json())
+        self.put(href, include_org=False, **kwargs)
 
     def delete_pairing_profile(self, href: str, **kwargs) -> None:
         """Deletes a pairing profile object in the PCE.
