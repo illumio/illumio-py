@@ -28,7 +28,9 @@ from illumio.util import (
 
 @dataclass
 class PairingProfile(ModifiableObject):
-    enabled: bool = None
+    # the enabled flag is required when creating
+    # pairing profiles, so set it to default to True
+    enabled: bool = True
     agent_software_release: str = None
     enforcement_mode: str = None
     enforcement_mode_lock: bool = None
