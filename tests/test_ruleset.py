@@ -8,19 +8,12 @@ from illumio import PolicyComputeEngine
 from illumio.rules import Ruleset
 
 MOCK_RULESET = os.path.join(pytest.DATA_DIR, 'ruleset.json')
-DRAFT_RULESETS = os.path.join(pytest.DATA_DIR, 'draft_rulesets.json')
-ACTIVE_RULESETS = os.path.join(pytest.DATA_DIR, 'active_rulesets.json')
+RULESETS = os.path.join(pytest.DATA_DIR, 'rulesets.json')
 
 
 @pytest.fixture(scope='module')
-def draft_rulesets() -> list:
-    with open(DRAFT_RULESETS, 'r') as f:
-        yield json.loads(f.read())
-
-
-@pytest.fixture(scope='module')
-def active_rulesets() -> list:
-    with open(ACTIVE_RULESETS, 'r') as f:
+def rulesets() -> list:
+    with open(RULESETS, 'r') as f:
         yield json.loads(f.read())
 
 
@@ -32,10 +25,14 @@ def new_ruleset() -> Ruleset:
 
 
 @pytest.fixture(scope='module')
-def get_callback(PolicyUtil, draft_rulesets, active_rulesets):
+def rulesets_mock(PolicyObjectMock, rulesets):
+    yield PolicyObjectMock(rulesets)
+
+
+@pytest.fixture(scope='module')
+def get_callback(rulesets_mock):
     def _callback_fn(request, context):
-        policy_util = PolicyUtil(draft_rulesets, active_rulesets)
-        return policy_util.get_mock_objects(request.path_url)
+        return rulesets_mock.get_mock_objects(request.path_url)
     return _callback_fn
 
 

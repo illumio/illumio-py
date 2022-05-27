@@ -8,19 +8,12 @@ from illumio import PolicyComputeEngine
 from illumio.policyobjects import IPList, IPRange
 from illumio.util import ANY_IP_LIST_NAME
 
-DRAFT_IP_LISTS = os.path.join(pytest.DATA_DIR, 'draft_ip_lists.json')
-ACTIVE_IP_LISTS = os.path.join(pytest.DATA_DIR, 'active_ip_lists.json')
+IP_LISTS = os.path.join(pytest.DATA_DIR, 'ip_lists.json')
 
 
 @pytest.fixture(scope='module')
-def draft_ip_lists() -> list:
-    with open(DRAFT_IP_LISTS, 'r') as f:
-        yield json.loads(f.read())
-
-
-@pytest.fixture(scope='module')
-def active_ip_lists() -> list:
-    with open(ACTIVE_IP_LISTS, 'r') as f:
+def ip_lists() -> list:
+    with open(IP_LISTS, 'r') as f:
         yield json.loads(f.read())
 
 
@@ -37,10 +30,14 @@ def new_ip_list() -> IPList:
 
 
 @pytest.fixture(scope='module')
-def get_callback(PolicyUtil, draft_ip_lists, active_ip_lists):
+def ip_lists_mock(PolicyObjectMock, ip_lists):
+    yield PolicyObjectMock(ip_lists)
+
+
+@pytest.fixture(scope='module')
+def get_callback(ip_lists_mock):
     def _callback_fn(request, context):
-        policy_util = PolicyUtil(draft_ip_lists, active_ip_lists)
-        return policy_util.get_mock_objects(request.path_url)
+        return ip_lists_mock.get_mock_objects(request.path_url)
     return _callback_fn
 
 
@@ -70,7 +67,7 @@ def test_active_overrides_draft(pce: PolicyComputeEngine):
     assert '/active/' in repeated_ip_lists[0].href
 
 
-def test_get_by_name(requests_mock, draft_ip_lists, active_ip_lists, pce: PolicyComputeEngine):
+def test_get_by_name(pce: PolicyComputeEngine):
     ip_lists = pce.get_ip_lists_by_name(name="IPL-")
     assert len(ip_lists) == 3
 

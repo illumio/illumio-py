@@ -7,19 +7,12 @@ import pytest
 from illumio import PolicyComputeEngine, IllumioException
 from illumio.policyobjects import VirtualService, ServicePort, ServiceAddress, Label
 
-DRAFT_VIRTUAL_SERVICES = os.path.join(pytest.DATA_DIR, 'draft_virtual_services.json')
-ACTIVE_VIRTUAL_SERVICES = os.path.join(pytest.DATA_DIR, 'active_virtual_services.json')
+VIRTUAL_SERVICES = os.path.join(pytest.DATA_DIR, 'virtual_services.json')
 
 
 @pytest.fixture(scope='module')
-def draft_virtual_services() -> list:
-    with open(DRAFT_VIRTUAL_SERVICES, 'r') as f:
-        yield json.loads(f.read())
-
-
-@pytest.fixture(scope='module')
-def active_virtual_services() -> list:
-    with open(ACTIVE_VIRTUAL_SERVICES, 'r') as f:
+def virtual_services() -> list:
+    with open(VIRTUAL_SERVICES, 'r') as f:
         yield json.loads(f.read())
 
 
@@ -34,10 +27,14 @@ def new_service() -> VirtualService:
 
 
 @pytest.fixture(scope='module')
-def get_callback(PolicyUtil, draft_virtual_services, active_virtual_services):
+def virtual_services_mock(PolicyObjectMock, virtual_services):
+    yield PolicyObjectMock(virtual_services)
+
+
+@pytest.fixture(scope='module')
+def get_callback(virtual_services_mock):
     def _callback_fn(request, context):
-        policy_util = PolicyUtil(draft_virtual_services, active_virtual_services)
-        return policy_util.get_mock_objects(request.path_url)
+        return virtual_services_mock.get_mock_objects(request.path_url)
     return _callback_fn
 
 
