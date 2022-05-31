@@ -38,11 +38,14 @@ class PceObjectMock(object):
     """
     Base class for PCE object mocks
     """
-    base_pattern = '^/api/v2/orgs/\d+/([a-zA-Z_\-]+)'
-    href_pattern = '^/api/v2(/orgs/\d+/[a-zA-Z_\-]+/[a-zA-Z0-9\-]+)$'
+    base_pattern = '^/api/v2/orgs/\d+(?:/sec_policy/(?:draft|active))?/([a-zA-Z_\-]+)'
+    href_pattern = '^/api/v2(/orgs/\d+(?:/sec_policy/(?:draft|active))?(?:/[a-zA-Z_\-]+/[a-zA-Z0-9\-]+)+)$'
 
-    def __init__(self, mock_objects) -> None:
-        self.mock_objects = mock_objects
+    def __init__(self) -> None:
+        self.mock_objects = []
+
+    def add_mock_objects(self, mock_objects):
+        self.mock_objects += mock_objects
 
     def get_mock_objects(self, path) -> Any:
         pattern = re.compile(self.base_pattern)
@@ -71,6 +74,8 @@ class PceObjectMock(object):
             query_pattern = re.compile('([a-zA-Z0-9_\-\+%]+)=([a-zA-Z0-9_\-\+%\.\\\/~]+)')
             for param_match in re.finditer(query_pattern, path):
                 key, value = param_match.group(1), unquote_plus(param_match.group(2), encoding='utf-8')
+                if key not in o:
+                    continue
                 if key == 'labels':
                     # labels param is a list of lists of label HREFs
                     # example: [["/orgs/1/labels/1", "/orgs/1/labels/2"], ["/orgs/1/labels/3"]]
@@ -94,6 +99,10 @@ class PceObjectMock(object):
         return matching_objects
 
     def _object_sieve(self, path):
+        if '/sec_policy/' in path:
+            if '/{}/'.format(ACTIVE) in path:
+                return [o for o in self.mock_objects if ACTIVE in o['href']]
+            return [o for o in self.mock_objects if DRAFT in o['href']]
         return self.mock_objects
 
     def create_mock_object(self, path, body):
@@ -102,7 +111,7 @@ class PceObjectMock(object):
         if not match:
             raise Exception("Invalid path: {}".format(path))
         object_type = match.group(1)
-        href = '{}/{}'.format(path.lstrip('/api/v2'), OBJECT_TYPE_REF_MAP[object_type]())
+        href = '/orgs/{}/{}'.format(path.split('/orgs/')[-1], OBJECT_TYPE_REF_MAP[object_type]())
         body['href'] = href
         self.mock_objects.append(body)
         return body
@@ -114,18 +123,19 @@ class PceObjectMock(object):
             _mock_objects = copy(self.mock_objects)
             for o in _mock_objects:
                 if match.group(1) == o['href']:
-                    self.mock_objects.remove(o)
-                    self.mock_objects.append(body)
-                    return body
+                    for k, v in body.items():
+                        o[k] = v
+                    return
             raise Exception("Attempting to update invalid or missing object")
         raise Exception("Invalid HREF passed to update_mock_object")
 
-
-class PolicyObjectMock(PceObjectMock):
-    base_pattern = '^/api/v2/orgs/\d+/sec_policy/(?:draft|active)/'
-    href_pattern = '^/api/v2(/orgs/\d+/sec_policy/(?:draft|active)/[a-zA-Z_\-]+/[a-zA-Z0-9\-]+)$'
-
-    def _object_sieve(self, path):
-        if '/{}/'.format(ACTIVE) in path:
-            return [o for o in self.mock_objects if ACTIVE in o['href']]
-        return [o for o in self.mock_objects if DRAFT in o['href']]
+    def delete_mock_object(self, path):
+        href_capture_pattern = re.compile(self.href_pattern)
+        match = re.match(href_capture_pattern, path)
+        if match:
+            _mock_objects = copy(self.mock_objects)
+            for o in _mock_objects:
+                if match.group(1) == o['href']:
+                    self.mock_objects.remove(o)
+            raise Exception("Attempting to delete invalid or missing object")
+        raise Exception("Invalid HREF passed to delete_mock_object")
