@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-"""This module provides classes related to policy rulesets.
+"""This module provides classes related to policy rule sets.
 
 Copyright:
     (c) 2022 Illumio
@@ -11,7 +11,7 @@ License:
 from dataclasses import dataclass
 from typing import List
 
-from illumio.util import ModifiableObject
+from illumio.util import ModifiableObject, pce_api
 from illumio.policyobjects import LabelSet
 
 from .rule import Rule
@@ -19,7 +19,8 @@ from .iptablesrule import IPTablesRule
 
 
 @dataclass
-class Ruleset(ModifiableObject):
+@pce_api('rule_sets', is_sec_policy=True)
+class RuleSet(ModifiableObject):
     enabled: bool = None
     scopes: List[LabelSet] = None
     rules: List[Rule] = None

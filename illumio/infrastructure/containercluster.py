@@ -10,9 +10,10 @@ License:
 """
 from dataclasses import dataclass
 
-from illumio.util import ModifiableObject
+from illumio.util import ModifiableObject, pce_api
 
 
 @dataclass
+@pce_api('container_clusters')
 class ContainerCluster(ModifiableObject):
     pass

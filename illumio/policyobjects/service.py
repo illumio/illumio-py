@@ -13,7 +13,7 @@ from dataclasses import dataclass
 from typing import List
 
 from illumio import IllumioException
-from illumio.util import JsonObject, ModifiableObject
+from illumio.util import JsonObject, ModifiableObject, pce_api
 
 
 @dataclass
@@ -49,5 +49,6 @@ class ServiceAddress(BaseService):
 
 
 @dataclass
+@pce_api('services', is_sec_policy=True)
 class Service(ModifiableObject):
     service_ports: List[ServicePort] = None

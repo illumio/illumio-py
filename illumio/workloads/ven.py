@@ -12,7 +12,7 @@ from dataclasses import dataclass, field
 from typing import List
 
 from illumio import IllumioException
-from illumio.util import JsonObject, ModifiableObject, VisibilityLevel
+from illumio.util import JsonObject, ModifiableObject, VisibilityLevel, pce_api
 
 
 @dataclass
@@ -20,11 +20,12 @@ class AgentConfig(JsonObject):
     mode: str = None
     log_traffic: bool = None
     security_policy_update_mode: str = None
-    visibility_level: VisibilityLevel = None
+    visibility_level: str = None
 
     def _validate(self):
         if self.visibility_level and not self.visibility_level in VisibilityLevel:
             raise IllumioException("Invalid visibility_level: {}".format(self.visibility_level))
+        super()._validate()
 
 
 @dataclass
@@ -76,6 +77,7 @@ class VENAgent(ModifiableObject):
 
 
 @dataclass
+@pce_api('vens')
 class VEN(ModifiableObject):
     hostname: str = None
     name: str = None

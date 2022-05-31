@@ -9,24 +9,20 @@ License:
     Apache2, see LICENSE for more details.
 """
 from dataclasses import dataclass
-from typing import List, Union
+from typing import List
 
 from illumio import IllumioException
-from illumio.infrastructure import ContainerCluster
-from illumio.policyobjects import Label, BaseService, Service, ServicePort
-from illumio.vulnerabilities import Vulnerability
 from illumio.util import (
-    JsonObject,
     Reference,
     ModifiableObject,
-    LinkState,
-    Mode,
     EnforcementMode,
-    VisibilityLevel
+    VisibilityLevel,
+    pce_api
 )
 
 
 @dataclass
+@pce_api('pairing_profiles')
 class PairingProfile(ModifiableObject):
     # the enabled flag is required when creating
     # pairing profiles, so set it to default to True
@@ -49,16 +45,9 @@ class PairingProfile(ModifiableObject):
     is_default: bool = None
     last_pairing_at: str = None
 
-    # Deprecated parameters
-    mode: str = None
-    mode_lock: bool = None
-    log_traffic: bool = None
-    log_traffic_lock: bool = None
-
     def _validate(self):
-        if self.mode and not self.mode in Mode:
-            raise IllumioException("Invalid mode: {}".format(self.mode))
         if self.enforcement_mode and not self.enforcement_mode in EnforcementMode:
             raise IllumioException("Invalid enforcement_mode: {}".format(self.enforcement_mode))
         if self.visibility_level and not self.visibility_level in VisibilityLevel:
             raise IllumioException("Invalid visibility_level: {}".format(self.visibility_level))
+        super()._validate()

@@ -11,7 +11,7 @@ License:
 from dataclasses import dataclass
 from typing import List
 
-from illumio.util import JsonObject, ModifiableObject
+from illumio.util import JsonObject, ModifiableObject, pce_api
 
 
 @dataclass
@@ -29,6 +29,7 @@ class FQDN(JsonObject):
 
 
 @dataclass
+@pce_api('ip_lists', is_sec_policy=True)
 class IPList(ModifiableObject):
     ip_ranges: List[IPRange] = None
     fqdns: List[FQDN] = None

@@ -11,7 +11,7 @@ License:
 from dataclasses import dataclass
 from typing import List, Union
 
-from illumio.util import JsonObject, Reference, ModifiableObject
+from illumio.util import JsonObject, Reference, ModifiableObject, pce_api
 from illumio.policyobjects import Service, ServicePort
 
 from .actor import Actor
@@ -28,7 +28,7 @@ class BaseRule(ModifiableObject):
             ingress_services: List[Union[JsonObject, dict, str]], **kwargs) -> 'BaseRule':
         services = []
         for service in ingress_services:
-            if type(service) is JsonObject:
+            if issubclass(service.__class__, JsonObject):
                 services.append(service)
             elif type(service) is str:
                 services.append(Service(href=service))
@@ -58,6 +58,7 @@ class LabelResolutionBlock(JsonObject):
 
 
 @dataclass
+@pce_api('rules', endpoint='/sec_rules')
 class Rule(BaseRule):
     enabled: bool = None
     resolve_labels_as: LabelResolutionBlock = None

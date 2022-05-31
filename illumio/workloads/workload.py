@@ -20,9 +20,9 @@ from illumio.util import (
     Reference,
     ModifiableObject,
     LinkState,
-    Mode,
     EnforcementMode,
-    VisibilityLevel
+    VisibilityLevel,
+    pce_api
 )
 
 from .ven import VEN, VENAgent
@@ -38,11 +38,12 @@ class Interface(JsonObject):
     network: Reference = None
     network_detection_mode: str = None
     friendly_name: str = None
-    loopback: str = None
+    loopback: bool = False
 
     def _validate(self):
         if self.link_state and not self.link_state in LinkState:
             raise IllumioException("Invalid link_state: {}".format(self.link_state))
+        super()._validate()
 
 
 @dataclass
@@ -59,7 +60,6 @@ class WorkloadServicePort(JsonObject):
 @dataclass
 class WorkloadServices(JsonObject):
     uptime_seconds: int = None
-    created_at: int = None
     open_service_ports: List[WorkloadServicePort] = None
 
 
@@ -95,6 +95,7 @@ class IKEAuthenticationCertificate(JsonObject):
 
 
 @dataclass
+@pce_api('workloads')
 class Workload(ModifiableObject):
     hostname: str = None
     os_type: str = None
@@ -120,7 +121,6 @@ class Workload(ModifiableObject):
     detected_vulnerabilities: List[DetectedVulnerability] = None
     agent: VENAgent = None
     ven: VEN = None
-    mode: str = None
     enforcement_mode: str = None
     visibility_level: str = None
     num_enforcement_boundaries: int = None
@@ -129,12 +129,11 @@ class Workload(ModifiableObject):
     ike_authentication_certificate: IKEAuthenticationCertificate = None
 
     def _validate(self):
-        if self.mode and not self.mode in Mode:
-            raise IllumioException("Invalid mode: {}".format(self.mode))
         if self.enforcement_mode and not self.enforcement_mode in EnforcementMode:
             raise IllumioException("Invalid enforcement_mode: {}".format(self.enforcement_mode))
         if self.visibility_level and not self.visibility_level in VisibilityLevel:
             raise IllumioException("Invalid visibility_level: {}".format(self.visibility_level))
+        super()._validate()
 
     def _decode_complex_types(self):
         enforced_services = []

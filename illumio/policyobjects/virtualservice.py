@@ -12,7 +12,7 @@ from dataclasses import dataclass
 from typing import List
 
 from illumio import IllumioException
-from illumio.util import IllumioObject, Reference, ModifiableObject
+from illumio.util import IllumioObject, Reference, ModifiableObject, pce_api
 from illumio.workloads import Workload
 
 from .label import Label
@@ -23,6 +23,7 @@ INTERNAL_BRIDGE_NETWORK = 'internal_bridge_network'
 
 
 @dataclass
+@pce_api('virtual_services', is_sec_policy=True)
 class VirtualService(ModifiableObject):
     apply_to: str = None
     pce_fqdn: str = None
@@ -34,6 +35,7 @@ class VirtualService(ModifiableObject):
     def _validate(self):
         if self.apply_to and self.apply_to not in {HOST_ONLY, INTERNAL_BRIDGE_NETWORK}:
             raise IllumioException("Invalid 'apply_to' value: {}".format(self.apply_to))
+        super()._validate()
 
 
 @dataclass
@@ -44,6 +46,7 @@ class PortOverride(BaseService):
 
 
 @dataclass
+@pce_api('service_bindings')
 class ServiceBinding(IllumioObject):
     virtual_service: Reference = None
     workload: Workload = None

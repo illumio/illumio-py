@@ -10,9 +10,12 @@ License:
 """
 from dataclasses import dataclass
 
+from illumio.util import pce_api
+
 from .rule import BaseRule
 
 
 @dataclass
+@pce_api('enforcement_boundaries', is_sec_policy=True)
 class EnforcementBoundary(BaseRule):
     pass

@@ -12,7 +12,7 @@ import json
 from dataclasses import dataclass
 from typing import List
 
-from illumio.util import JsonObject, ModifiableObject
+from illumio.util import JsonObject, ModifiableObject, pce_api
 
 
 @dataclass
@@ -27,6 +27,7 @@ class LabelUsage(JsonObject):
 
 
 @dataclass
+@pce_api('labels')
 class Label(ModifiableObject):
     key: str = None
     value: str = None
@@ -35,6 +36,7 @@ class Label(ModifiableObject):
 
 
 @dataclass
+@pce_api('label_groups', is_sec_policy=True)
 class LabelGroup(Label):
     labels: List[Label] = None
     sub_groups: List['LabelGroup'] = None
