@@ -19,7 +19,9 @@ ANY_IP_LIST_NAME = 'Any (0.0.0.0/0 and ::/0)'
 FQDN_REGEX = re.compile('(?=^.{4,253}$)(^((?!-)[a-zA-Z0-9-]{1,63}(?<!-)\.)+[a-zA-Z]{2,63}$)')
 HREF_REGEX = re.compile('^\/orgs\/\d+\/(?:sec_policy\/(?:active|draft)\/)?(?P<type>[a-zA-Z_]+)\/(?P<uid>[a-zA-Z0-9-]+)$')
 
-WORKLOAD_BULK_UPDATE_MAX = 1000
+BULK_CHANGE_LIMIT = 1000
+
+PCE_APIS = {}
 
 
 class IllumioEnumMeta(EnumMeta):
@@ -30,31 +32,10 @@ class IllumioEnumMeta(EnumMeta):
         return value in cls._value2member_map_
 
 
-class PolicyObjectType(Enum, metaclass=IllumioEnumMeta):
-    def __new__(cls, value, endpoint):
-        o = object.__new__(cls)
-        o._value_ = value
-
-        o.endpoint = endpoint
-        return o
-
-    LABEL = 'label', 'labels'
-    IP_LIST = 'ip_list', 'ip_lists'
-    VIRTUAL_SERVICE = 'virtual_service', 'virtual_services'
-    RULESET = 'rule_set', 'rule_sets'
-    ENFORCEMENT_BOUNDARY = 'enforcement_boundary', 'enforcement_boundaries'
-
-
 class LinkState(Enum, metaclass=IllumioEnumMeta):
     UP = 'up'
     DOWN = 'down'
     UNKNOWN = 'unknown'
-
-
-class Mode(Enum, metaclass=IllumioEnumMeta):
-    IDLE = 'idle'
-    ILLUMINATED = 'illuminated'
-    ENFORCED = 'enforced'
 
 
 class EnforcementMode(Enum, metaclass=IllumioEnumMeta):

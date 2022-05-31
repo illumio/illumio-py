@@ -19,12 +19,16 @@ from dataclasses import dataclass, fields
 from inspect import signature, isclass
 from typing import List, Any
 
-from .functions import ignore_empty_keys
+from .functions import ignore_empty_keys, isunion, islist
 
 _default = json.JSONEncoder()  # fall back to the default encoder for non-Illumio API objects
 
 
 class IllumioEncoder(json.JSONEncoder):
+    """Convenience class for encoding JsonObjects.
+
+    >>> json.dumps(flow, cls=IllumioEncoder, indent=4)
+    """
     def default(self, o: Any) -> Any:
         return getattr(o.__class__, "to_json", _default.default)(o)
 
@@ -36,7 +40,35 @@ class JsonObject(ABC):
         self._validate()
 
     def _validate(self):
-        pass
+        for field in fields(self):
+            value = getattr(self, field.name)
+            if not self._validate_field(field.type, value):
+                raise AttributeError("Invalid value for {}: {}. Must be of type {}".format(field.name, value, field.type))
+
+    def _validate_field(self, expected_type, value) -> bool:
+        if value is None:
+            return True
+        if expected_type is object:
+            return True
+        if type(value) == expected_type:
+            return True
+        if isunion(expected_type):
+            return any(self._validate_field(type_, value) for type_ in expected_type.__args__)
+        elif isclass(expected_type) and issubclass(expected_type, JsonObject):
+            # if the object is already decoded, determine whether it's
+            # a subtype of what the field expects
+            if isinstance(value, JsonObject):
+                return isinstance(value, expected_type)
+            # XXX: otherwise, expand objects to run their own validation.
+            #   this is *slow*, but needed to validate deeply nested types
+            expected_type.from_json(value)
+            return True
+        elif islist(expected_type) and isinstance(value, list):
+            if not value:
+                return True  # empty lists are always valid
+            expected_type = expected_type.__args__[0]
+            return all(self._validate_field(expected_type, o) for o in value)
+        return False
 
     def to_json(self) -> Any:
         return deep_encode(self)
