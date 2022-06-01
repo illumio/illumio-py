@@ -231,7 +231,7 @@ class PolicyComputeEngine:
         try:
             headers = kwargs.get('headers', {})
             kwargs['headers'] = {**headers, **{'Prefer': 'respond-async'}}
-            response = self._session.get(self._build_url(endpoint), **kwargs)
+            response = self.get(endpoint, **kwargs)
             response.raise_for_status()
             location = response.headers['Location']
             retry_after = int(response.headers['Retry-After'])
@@ -812,7 +812,7 @@ class PolicyComputeEngine:
             kwargs['json'] = traffic_query.to_json()
             headers = kwargs.get('headers', {})
             kwargs['headers'] = {**headers, **{'Content-Type': 'application/json', 'Prefer': 'respond-async'}}
-            response = self._session.post(self._build_url('/traffic_flows/async_queries'), **kwargs)
+            response = self.post('/traffic_flows/async_queries', **kwargs)
             response.raise_for_status()
             query_status = response.json()
             location = query_status['href']
