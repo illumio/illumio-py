@@ -1,8 +1,9 @@
 import json
 import re
 from copy import copy
-from urllib.parse import unquote_plus
+from random import randint
 from typing import Any
+from urllib.parse import unquote_plus
 from uuid import uuid4
 
 from illumio.util import ACTIVE, DRAFT
@@ -10,6 +11,12 @@ from illumio.util import ACTIVE, DRAFT
 
 def _gen_uuid():
     return uuid4()
+
+
+def _gen_sid():
+    # see https://docs.microsoft.com/en-US/windows/security/identity-protection/access-control/security-identifiers
+    Y = '-'.join([str(randint(1, 9999999999)) for _ in range(randint(1, 5))])
+    return 'S-1-{}-{}-{}'.format(randint(1, 5), randint(1, 99), Y)
 
 
 def _id_seq_generator():
@@ -25,12 +32,20 @@ def _gen_int_id():
     return next(_id_sequence)
 
 OBJECT_TYPE_REF_MAP = {
+    'container_clusters': _gen_uuid,
+    'enforcement_boundaries': _gen_int_id,
     'ip_lists': _gen_int_id,
-    'rule_sets': _gen_int_id,
+    'label_groups': _gen_uuid,
     'labels': _gen_int_id,
     'pairing_profiles': _gen_int_id,
-    'workloads': _gen_uuid,
-    'virtual_services': _gen_uuid
+    'rule_sets': _gen_int_id,
+    'sec_rules': _gen_int_id,
+    'security_principals': _gen_sid,
+    'service_bindings': _gen_int_id,
+    'services': _gen_int_id,
+    'vens': _gen_uuid,
+    'virtual_services': _gen_uuid,
+    'workloads': _gen_uuid
 }
 
 
@@ -137,5 +152,6 @@ class PCEObjectMock(object):
             for o in _mock_objects:
                 if match.group(1) == o['href']:
                     self.mock_objects.remove(o)
+                    return
             raise Exception("Attempting to delete invalid or missing object")
         raise Exception("Invalid HREF passed to delete_mock_object")
