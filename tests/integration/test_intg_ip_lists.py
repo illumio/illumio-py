@@ -1,7 +1,7 @@
 import pytest
 
 from illumio.policyobjects import IPList, IPRange, FQDN
-from illumio.util import DRAFT
+from illumio.util import DRAFT, ACTIVE, convert_draft_href_to_active
 
 
 @pytest.fixture
@@ -45,6 +45,21 @@ def test_get_by_partial_name(pce, object_prefix, ip_list):
     assert len(ip_lists) == 1
 
 
+def test_get_by_ip(pce, ip_list):
+    ip_lists = pce.ip_lists.get(params={'ip_list': '192.168.123.255'}, policy_version=DRAFT)
+    assert len(ip_lists) == 2  # should include the default Any IP list
+
+
+def test_get_by_fqdn(pce, ip_list):
+    ip_lists = pce.ip_lists.get(params={'fqdn': 'internal.labs.io'}, policy_version=DRAFT)
+    assert len(ip_lists) == 1
+
+
+def test_get_async(pce, object_prefix, ip_list):
+    ip_lists = pce.ip_lists.get_async(params={'name': object_prefix}, policy_version=DRAFT)
+    assert len(ip_lists) == 1
+
+
 def test_update_ip_list(pce, ip_list):
     pce.ip_lists.update(
         ip_list.href,
@@ -72,6 +87,9 @@ def test_provision_ip_list(pce, object_prefix, random_string):
         hrefs=[ip_list.href]
     )
     assert policy_version
+
+    ip_lists = pce.ip_lists.get(params={'name': object_prefix}, policy_version=ACTIVE)
+    assert len(ip_lists) == 1 and ip_lists[0].href == convert_draft_href_to_active(ip_list.href)
 
     pce.ip_lists.delete(ip_list.href)
     policy_version = pce.provision_policy_changes(
