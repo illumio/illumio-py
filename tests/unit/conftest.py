@@ -8,7 +8,7 @@ from mocks import PCEObjectMock
 
 @pytest.fixture(scope='session')
 def pce():
-    return PolicyComputeEngine('test.pce.com', port=443)
+    return PolicyComputeEngine('test.pce.com')
 
 
 @pytest.fixture

@@ -1,6 +1,7 @@
 import json
 import os
 import re
+from this import d
 
 import pytest
 
@@ -33,6 +34,23 @@ def test_int_org_id():
     assert pce.base_url == 'https://my.pce.com:443/api/v2'
 
 
+@pytest.mark.parametrize(
+    "endpoint,include_org,expected", [
+        ('/health', False, 'https://test.pce.com:443/api/v2/health'),
+        ('labels', True, 'https://test.pce.com:443/api/v2/orgs/1/labels'),
+        ('/labels', True, 'https://test.pce.com:443/api/v2/orgs/1/labels'),
+        ('//labels', True, 'https://test.pce.com:443/api/v2/orgs/1/labels'),
+        ('/sec_policy/active//ip_lists', True, 'https://test.pce.com:443/api/v2/orgs/1/sec_policy/active/ip_lists'),
+        ('/sec_policy/active//ip_lists', True, 'https://test.pce.com:443/api/v2/orgs/1/sec_policy/active/ip_lists'),
+        ('/orgs/1/workloads/ef7f0f53-2295-4416-aaaf-965146934c53', True, 'https://test.pce.com:443/api/v2/orgs/1/workloads/ef7f0f53-2295-4416-aaaf-965146934c53'),
+        ('/orgs/1/workloads/ef7f0f53-2295-4416-aaaf-965146934c53', False, 'https://test.pce.com:443/api/v2/orgs/1/workloads/ef7f0f53-2295-4416-aaaf-965146934c53'),
+        ('/orgs/1/sec_policy/rule_sets/1/sec_rules/1', True, 'https://test.pce.com:443/api/v2/orgs/1/sec_policy/rule_sets/1/sec_rules/1')
+    ]
+)
+def test_url_building(endpoint, include_org, expected, pce):
+    assert pce._build_url(endpoint, include_org) == expected
+
+
 def load_data_file(type_):
     filename = os.path.join(pytest.DATA_DIR, '{}.json'.format(type_))
     with open(filename, 'r') as f:
@@ -40,14 +58,14 @@ def load_data_file(type_):
 
 
 @pytest.mark.parametrize(
-    "api_name,endpoint,cls,is_sec_policy",
+    "api_name,endpoint,ObjectClass,is_sec_policy",
     [
-        (name, api_args[0], api_args[1], api_args[2])
-        for name, api_args in PCE_APIS.items()
+        (name, api.endpoint, api.object_class, api.is_sec_policy)
+        for name, api in PCE_APIS.items()
     ]
 )
-def test_pce_apis(api_name, endpoint, cls, is_sec_policy, pce, requests_mock,
-        get_callback, post_callback, put_callback, delete_callback):
+def test_pce_apis(api_name, endpoint, ObjectClass, is_sec_policy, pce,
+        requests_mock, get_callback, post_callback, put_callback, delete_callback):
     api = getattr(pce, api_name)
 
     pattern = re.compile(endpoint)
@@ -56,7 +74,7 @@ def test_pce_apis(api_name, endpoint, cls, is_sec_policy, pce, requests_mock,
     requests_mock.register_uri('PUT', pattern, json=put_callback)
     requests_mock.register_uri('DELETE', pattern, json=delete_callback)
 
-    obj = api.create(cls(name='test object'))
+    obj = api.create(ObjectClass(name='test object'))
     assert obj.href
 
     policy_version = DRAFT if is_sec_policy else None
