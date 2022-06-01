@@ -8,7 +8,7 @@ Copyright:
 License:
     Apache2, see LICENSE for more details.
 """
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import List, Union
 
 from illumio.util import JsonObject, Reference, ModifiableObject, pce_api
@@ -19,7 +19,7 @@ from .actor import Actor
 
 @dataclass
 class BaseRule(ModifiableObject):
-    ingress_services: List[Union[Service, ServicePort]] = None
+    ingress_services: List[Union[Service, ServicePort]] = field(default_factory=list)
     providers: List[Actor] = None
     consumers: List[Actor] = None
 
