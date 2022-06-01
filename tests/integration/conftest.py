@@ -23,5 +23,5 @@ Make sure ILLUMIO_PCE_HOST, ILLUMIO_API_KEY_USERNAME, and ILLUMIO_API_KEY_SECRET
 
 
 @pytest.fixture(scope='session')
-def test_prefix():
+def object_prefix():
     return 'TEST-INTEGRATION'

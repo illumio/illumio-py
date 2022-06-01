@@ -1,5 +1,3 @@
-import pytest
-
 from illumio import PolicyComputeEngine
 
 
