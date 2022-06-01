@@ -118,7 +118,7 @@ class PolicyComputeEngine:
         Args:
             method (str): the HTTP request method. Supports the same verbs as `requests.request`.
             endpoint (str): the API endpoint to call.
-            include_org (bool, optional): whether or not to include /orgs/ in the API call.
+            include_org (bool, optional): whether or not to include /orgs/{org_id} in the API call.
                 Defaults to True.
 
         Raises:
@@ -140,10 +140,11 @@ class PolicyComputeEngine:
                 message = self._get_error_message_from_response(response)
             raise IllumioApiException(message) from e
 
-    def _build_url(self, endpoint: str, include_org=True) -> str:
-        """Constructs request URL with optional organization ID."""
-        org_str = '/orgs/{}'.format(self.org_id) if include_org else ''
-        return self.base_url + org_str + endpoint
+    def _build_url(self, endpoint: str, include_org: bool):
+        endpoint = endpoint.lstrip('/').replace('//', '/')
+        if include_org and not endpoint.startswith('orgs/'):
+            endpoint = 'orgs/{}/{}'.format(self.org_id, endpoint)
+        return '{}/{}'.format(self.base_url, endpoint)
 
     def _get_error_message_from_response(self, response: Response) -> str:
         message = "API call returned error code {}. Errors:".format(response.status_code)
@@ -263,7 +264,7 @@ class PolicyComputeEngine:
         while True:
             time.sleep(retry_time)
             retry_time *= 1.5  # slight backoff to avoid spamming the PCE for long-running jobs
-            response = self.get(job_location, include_org=False)
+            response = self.get(job_location)
             response.raise_for_status()
             poll_result = response.json()
             poll_status = poll_result['status']
@@ -295,39 +296,30 @@ class PolicyComputeEngine:
             return False
 
     class _PCEObjectAPI:
-        def __init__(self, pce: 'PolicyComputeEngine', endpoint: str,
-                object_cls: IllumioObject, is_sec_policy=False) -> None:
-            self.endpoint = endpoint
-            self.object_cls = object_cls
-            self.is_sec_policy = is_sec_policy
+        """Generic API for registered PCE objects."""
+        def __init__(self, pce: 'PolicyComputeEngine', api_data: object) -> None:
+            self.endpoint = api_data.endpoint
+            self.object_cls = api_data.object_class
+            self.is_sec_policy = api_data.is_sec_policy
+            self.is_global = api_data.is_global
             self.pce = pce
 
         def _build_endpoint(self, policy_version: str, parent: Union[Reference, str]) -> str:
-            """Build request endpoint.
-
-            Args:
-                policy_version (str): if fetching security policy objects, specifies
-                    whether to fetch 'draft' or 'active' objects.
-                parent_href (Union[Reference, str], optional): HREF of the created
-                    object's parent object. Required for some object types, such
-                    as Security Rules which must be created as children of
-                    existing RuleSets.
-
-            Raises:
-                IllumioApiException: if a policy_version value other than 'active' or 'draft' is given.
-
-            Returns:
-                str: the constructed request endpoint.
-            """
+            """Builds the PCE request endpoint."""
             endpoint = self.endpoint
-            if parent:
+
+            if parent:  # e.g. /sec_policy/active/rulesets/1/sec_rules
                 parent_href = parent if type(parent) is str else parent.href
                 parent_draft_href = convert_active_href_to_draft(parent_href)
-                endpoint = '{}{}'.format(parent_draft_href, self.endpoint)
+                endpoint = '{}/{}'.format(parent_draft_href, endpoint)
+            # mutually exclusive as the parent HREF will have the sec_policy prefix already
             elif self.is_sec_policy:
                 if policy_version not in [ACTIVE, DRAFT]:
                     raise IllumioApiException("Invalid policy_version passed to get: {}".format(policy_version))
-                endpoint = '/sec_policy/{}{}'.format(policy_version, self.endpoint)
+                endpoint = '/sec_policy/{}/{}'.format(policy_version, endpoint)
+
+            if not self.is_global:
+                endpoint = '/orgs/{}/{}'.format(self.pce.org_id, endpoint)
             return endpoint
 
         def get_by_href(self, href: str, **kwargs) -> IllumioObject:
@@ -386,7 +378,6 @@ class PolicyComputeEngine:
                 List[IllumioObject]: the returned list of decoded objects.
             """
             params = kwargs.get('params', {})
-            kwargs['include_org'] = parent_href is None
             endpoint = self._build_endpoint(policy_version, parent_href)
 
             if 'max_results' not in params:
@@ -395,7 +386,7 @@ class PolicyComputeEngine:
                 filtered_object_count = response.headers['X-Total-Count']
                 kwargs['params'] = {**params, **{'max_results': int(filtered_object_count)}}
 
-            response = self.pce.get(endpoint, **kwargs)
+            response = self.pce.get(endpoint, include_org=False, **kwargs)
             return [self.object_cls.from_json(o) for o in response.json()]
 
         def get_async(self, policy_version: str = DRAFT, parent_href: Union[Reference, str] = None, **kwargs) -> List[IllumioObject]:
@@ -412,7 +403,6 @@ class PolicyComputeEngine:
             Returns:
                 List[IllumioObject]: the returned list of decoded objects.
             """
-            kwargs['include_org'] = parent_href is None
             endpoint = self._build_endpoint(policy_version, parent_href)
             response = self.pce.get_collection(endpoint, **kwargs)
             return [self.object_cls.from_json(o) for o in response.json()]
@@ -445,9 +435,8 @@ class PolicyComputeEngine:
                 IllumioObject: the created object.
             """
             kwargs['json'] = body if type(body) is dict else body.to_json()
-            kwargs['include_org'] = parent_href is None
             endpoint = self._build_endpoint(DRAFT, parent_href)
-            response = self.pce.post(endpoint, **kwargs)
+            response = self.pce.post(endpoint, include_org=False, **kwargs)
             return self.object_cls.from_json(response.json())
 
         def update(self, href: str, body: Union[dict, IllumioObject], **kwargs) -> None:
@@ -489,7 +478,8 @@ class PolicyComputeEngine:
             while objects:
                 kwargs['json'] = [o.to_json() for o in objects[:BULK_CHANGE_LIMIT]]
                 objects = objects[BULK_CHANGE_LIMIT:]
-                response = self.pce.put('{}/{}'.format(self.endpoint, method), **kwargs)
+                endpoint = self._build_endpoint(DRAFT, None)
+                response = self.pce.put('{}/{}'.format(endpoint, method), include_org=False, **kwargs)
                 for result in response.json():
                     errors = result.get('errors', [])
                     if success_status and result['status'] != success_status:
@@ -580,24 +570,12 @@ class PolicyComputeEngine:
             return self._bulk_change(objects_to_delete, method='bulk_delete', success_status=None, **kwargs)
 
     def __getattr__(self, name: str) -> _PCEObjectAPI:
-        """Instantiates a generic API interface for attribute names matching a registered type.
-
-        Compatible `IllumioObject`s are registered with the `illumio.util.functions.pce_api` decorator.
-
-        Caches APIs for future use.
-
-        Raises:
-            AttributeError: if the given attribute name is not registered as an API.
-
-        Returns:
-            _PCEObjectAPI: generic interface class for registered endpoints.
-        """
+        """Instantiates a generic API for registered PCE objects."""
         if name in self._apis:
             return self._apis[name]
         if name not in PCE_APIS:
             raise AttributeError("No such PCE API object: {}".format(name))
-        endpoint, object_cls, is_sec_policy = PCE_APIS[name]
-        api = self._PCEObjectAPI(pce=self, endpoint=endpoint, object_cls=object_cls, is_sec_policy=is_sec_policy)
+        api = self._PCEObjectAPI(pce=self, api_data=PCE_APIS[name])
         self._apis[name] = api
         return api
 
@@ -681,9 +659,8 @@ class PolicyComputeEngine:
         Returns:
             str: the pairing key value.
         """
-        uri = '{}/pairing_key'.format(pairing_profile_href)
         kwargs['json'] = {}
-        response = self.post(uri, include_org=False, **kwargs)
+        response = self.post('{}/pairing_key'.format(pairing_profile_href), include_org=False, **kwargs)
         return response.json().get('activation_code')
 
     def get_traffic_flows(self, traffic_query: TrafficQuery, **kwargs) -> List[TrafficFlow]:

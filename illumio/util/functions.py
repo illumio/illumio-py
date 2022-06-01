@@ -11,6 +11,7 @@ License:
 import functools
 import typing
 import warnings
+from dataclasses import dataclass
 
 from illumio._version import version
 from .constants import ACTIVE, DRAFT, PCE_APIS
@@ -46,7 +47,7 @@ def deprecated(deprecated_in, message=None):
     return _deprecated
 
 
-def pce_api(name: str, endpoint: str = None, is_sec_policy=False):
+def pce_api(name: str, endpoint: str = None, is_sec_policy=False, is_global=False):
     """Decorates an IllumioObject subclass to denote it as a PCE API object type.
 
     This registers the type in the PCE_APIS mapping used to determine whether
@@ -82,23 +83,37 @@ def pce_api(name: str, endpoint: str = None, is_sec_policy=False):
         name (str): the name of the API. used as a PolicyComputeEngine attribute name
             to generate the API interface.
         endpoint (str, optional): _description_. Defaults to None.
-        is_sec_policy (bool, optional): whether or not the object reflects a security policy
-            API with the sec_policy/{pversion} prefix. Defaults to False.
+        is_sec_policy (bool, optional): whether or not the object reflects a security
+            policy API with the sec_policy/{pversion} prefix. Defaults to False.
+        is_global (bool, optional): whether or not the object reflects a global API,
+            such as /health or /users. These APIs operate on the entire PCE rather
+            than a single tenant, and don't need the /orgs/{org_id} prefix.
     """
     def _decorator(cls):
-        PCE_APIS[name] = (endpoint or '/{}'.format(name), cls, is_sec_policy)
+        @dataclass
+        class __PCEApi:
+            endpoint: str
+            object_class: object
+            is_sec_policy: bool
+            is_global: bool
+        PCE_APIS[name] = __PCEApi(
+            endpoint=endpoint or '/{}'.format(name),
+            object_class=cls,
+            is_sec_policy=is_sec_policy,
+            is_global=is_global
+        )
         return cls
     return _decorator
 
 
 def parse_url(url: str) -> tuple:
     protocol = None
-    url = url.strip()        # remove leading/trailing whitespace
-    if '://' in url:         # use provided protocol if included
+    url = url.strip().lower()  # remove leading/trailing whitespace
+    if '://' in url:           # use provided protocol if included
         protocol, url = url.split('://')
     if protocol not in ('http', 'https'):
-        protocol = 'https'   # only support http(s)
-    url = url.split('/')[0]  # remove any provided path
+        protocol = 'https'     # only support http(s)
+    url = url.split('/')[0]    # remove any provided path
     return protocol, url
 
 
