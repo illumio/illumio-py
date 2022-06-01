@@ -1,54 +1,31 @@
-import json
 import os
+import random
+from string import ascii_letters, digits
 
 import pytest
-
-from illumio import PolicyComputeEngine
-from mocks import PceObjectMock
 
 TEST_DIR = os.path.abspath(os.path.dirname(__file__))
 
 
-def pytest_configure():
+def pytest_addoption(parser):
+    parser.addoption("--integration", action="store_true", default=False, help="run integration tests")
+
+
+def pytest_configure(config):
     pytest.DATA_DIR = os.path.join(TEST_DIR, 'data')
+    config.addinivalue_line("markers", "integration: mark integration tests")
 
 
-@pytest.fixture(scope='session')
-def pce():
-    return PolicyComputeEngine('test.pce.com', port=443)
-
-
-@pytest.fixture
-def pce_object_mock():
-    yield PceObjectMock()
-
-
-@pytest.fixture
-def get_callback(pce_object_mock):
-    def _callback_fn(request, context):
-        context.headers['X-Total-Count'] = str(len(pce_object_mock.mock_objects))
-        return pce_object_mock.get_mock_objects(request.path_url)
-    return _callback_fn
+def pytest_collection_modifyitems(config, items):
+    if config.getoption("--integration"):
+        return
+    integration_skip_marker = pytest.mark.skip(reason="use --integration marker to run")
+    for item in items:
+        filename = str(item.fspath).split(os.path.sep)[-1]
+        if "integration" in item.keywords or filename.startswith('test_intg'):
+            item.add_marker(integration_skip_marker)
 
 
 @pytest.fixture
-def post_callback(pce_object_mock):
-    def _callback_fn(request, context):
-        json_body = json.loads(request.body.decode('utf-8'))
-        return pce_object_mock.create_mock_object(request.path_url, json_body)
-    return _callback_fn
-
-
-@pytest.fixture
-def put_callback(pce_object_mock):
-    def _callback_fn(request, context):
-        json_body = json.loads(request.body.decode('utf-8'))
-        pce_object_mock.update_mock_object(request.path_url, json_body)
-    return _callback_fn
-
-
-@pytest.fixture
-def delete_callback(pce_object_mock):
-    def _callback_fn(request, context):
-        pce_object_mock.delete_mock_object(request.path_url)
-    return _callback_fn
+def random_string():
+    yield ''.join([random.choice(ascii_letters + digits) for _ in range(8)])
