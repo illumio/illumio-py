@@ -6,7 +6,7 @@ from typing import List
 import pytest
 
 from illumio.rules import RuleSet
-from illumio.util import DRAFT
+from illumio.util import DRAFT, ACTIVE
 
 RULESETS = os.path.join(pytest.DATA_DIR, 'rule_sets.json')
 
@@ -40,7 +40,7 @@ def mock_requests(requests_mock, get_callback, post_callback, put_callback, dele
 
 @pytest.fixture()
 def mock_rule_set(pce) -> RuleSet:
-    yield pce.rule_sets.get_by_href("/orgs/1/sec_policy/draft/rule_sets/1")
+    yield pce.rule_sets.get_by_href("/orgs/1/sec_policy/active/rule_sets/1")
 
 
 def test_encoded_scopes(mock_rule_set):
@@ -49,12 +49,12 @@ def test_encoded_scopes(mock_rule_set):
 
 
 def test_get_by_name(pce):
-    rule_sets = pce.rule_sets.get(params={'name': 'RS-'})
-    assert len(rule_sets) == 1
+    rule_sets = pce.rule_sets.get(params={'name': 'RS-'}, policy_version=DRAFT)
+    assert len(rule_sets) == 2
 
 
-def test_get_draft_rule_sets(pce, mock_rule_set):
-    rule_set = pce.rule_sets.get(params={'name': 'RS-RINGFENCE', 'max_results': 1}, policy_version=DRAFT)[0]
+def test_get_active_rule_sets(pce, mock_rule_set):
+    rule_set = pce.rule_sets.get(params={'name': 'RS-RINGFENCE', 'max_results': 1}, policy_version=ACTIVE)[0]
     assert rule_set == mock_rule_set
 
 

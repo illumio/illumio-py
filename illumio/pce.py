@@ -350,7 +350,7 @@ class PolicyComputeEngine:
             response = self.pce.get(href, include_org=False, **kwargs)
             return self.object_cls.from_json(response.json())
 
-        def get(self, policy_version: str = ACTIVE, parent_href: Union[Reference, str] = None, **kwargs) -> List[IllumioObject]:
+        def get(self, policy_version: str = DRAFT, parent_href: Union[Reference, str] = None, **kwargs) -> List[IllumioObject]:
             """Retrieves objects from the PCE based on the given parameters.
 
             Keyword arguments to this function are passed to the `requests.get` call.
@@ -376,7 +376,7 @@ class PolicyComputeEngine:
 
             Args:
                 policy_version (str, optional): if fetching security policy objects, specifies
-                    whether to fetch 'draft' or 'active' objects. Defaults to 'active'.
+                    whether to fetch 'draft' or 'active' objects. Defaults to 'draft'.
                 parent_href (Union[Reference, str], optional): HREF of the created
                     object's parent object. Required for some object types, such
                     as Security Rules which must be created as children of
@@ -398,12 +398,12 @@ class PolicyComputeEngine:
             response = self.pce.get(endpoint, **kwargs)
             return [self.object_cls.from_json(o) for o in response.json()]
 
-        def get_async(self, policy_version: str = ACTIVE, parent_href: Union[Reference, str] = None, **kwargs) -> List[IllumioObject]:
+        def get_async(self, policy_version: str = DRAFT, parent_href: Union[Reference, str] = None, **kwargs) -> List[IllumioObject]:
             """Retrieves objects asynchronously from the PCE based on the given parameters.
 
             Args:
                 policy_version (str, optional): if fetching security policy objects, specifies
-                    whether to fetch 'draft' or 'active' objects. Defaults to 'active'.
+                    whether to fetch 'draft' or 'active' objects. Defaults to 'draft'.
                 parent_href (Union[Reference, str], optional): HREF of the created
                     object's parent object. Required for some object types, such
                     as Security Rules which must be created as children of

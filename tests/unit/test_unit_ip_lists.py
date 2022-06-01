@@ -6,7 +6,7 @@ from typing import List
 import pytest
 
 from illumio.policyobjects import IPList, IPRange
-from illumio.util import ANY_IP_LIST_NAME, DRAFT
+from illumio.util import ANY_IP_LIST_NAME, DRAFT, ACTIVE
 
 IP_LISTS = os.path.join(pytest.DATA_DIR, 'ip_lists.json')
 
@@ -54,17 +54,17 @@ def test_get_by_href(pce):
 
 
 def test_get_by_name(pce):
-    ip_lists = pce.ip_lists.get(params={"name": "IPL-"})
-    repeated_ip_lists = [ip_list for ip_list in ip_lists if ip_list.name == "IPL-4"]
-    assert len(repeated_ip_lists) == 1
-    assert '/active/' in repeated_ip_lists[0].href
-
-
-def test_get_draft_ip_list(pce):
     ip_lists = pce.ip_lists.get(params={"name": "IPL-"}, policy_version=DRAFT)
     repeated_ip_lists = [ip_list for ip_list in ip_lists if ip_list.name == "IPL-4"]
     assert len(repeated_ip_lists) == 1
     assert '/draft/' in repeated_ip_lists[0].href
+
+
+def test_get_active_ip_list(pce):
+    ip_lists = pce.ip_lists.get(params={"name": "IPL-"}, policy_version=ACTIVE)
+    repeated_ip_lists = [ip_list for ip_list in ip_lists if ip_list.name == "IPL-4"]
+    assert len(repeated_ip_lists) == 1
+    assert '/active/' in repeated_ip_lists[0].href
 
 
 def test_create_ip_list(pce, new_ip_list):
