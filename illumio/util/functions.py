@@ -9,15 +9,21 @@ License:
     Apache2, see LICENSE for more details.
 """
 import functools
+import socket
 import typing
 import warnings
 from dataclasses import dataclass
 
 from illumio._version import version
+from illumio.exceptions import IllumioException
 from .constants import ACTIVE, DRAFT, PCE_APIS
 
 
-def ignore_empty_keys(o):
+def ignore_empty_keys(o: dict):
+    """Removes keys with None-type values from the provided dict.
+
+    Used for JSON encoding to avoid schema errors due to empty or invalid parameters.
+    """
     return {k: v for (k, v) in o if v is not None}
 
 
@@ -107,6 +113,9 @@ def pce_api(name: str, endpoint: str = None, is_sec_policy=False, is_global=Fals
 
 
 def parse_url(url: str) -> tuple:
+    """Parses given URL into its scheme and hostname, stripping port and path."""
+    # XXX: we're not using urlparse here because it expects a scheme prefix.
+    #   urlparse('my.pce.com') does not work as expected, so handle it manually
     protocol = None
     url = url.strip().lower()  # remove leading/trailing whitespace
     if '://' in url:           # use provided protocol if included
@@ -115,6 +124,28 @@ def parse_url(url: str) -> tuple:
         protocol = 'https'     # only support http(s)
     url = url.split('/')[0]    # remove any provided path
     return protocol, url
+
+
+def convert_protocol(protocol: str) -> int:
+    """Given a protocol name, returns the integer ID of that protocol.
+
+    Usage:
+        >>> convert_protocol('tcp')
+        6
+
+    Args:
+        protocol (str): case-insensitive protocol string, e.g. 'tcp', 'UDP'
+
+    Raises:
+        IllumioException: if an invalid protocol name is provided.
+
+    Returns:
+        int: the integer ID of the given protocol, e.g. 17 for 'udp'
+    """
+    try:
+        return socket.getprotobyname(protocol)
+    except:
+        raise IllumioException('Invalid protocol name: {}'.format(protocol))
 
 
 if hasattr(typing, 'get_origin'):
