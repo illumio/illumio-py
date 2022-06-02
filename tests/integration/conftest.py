@@ -27,7 +27,7 @@ Make sure ILLUMIO_PCE_HOST, ILLUMIO_API_KEY_USERNAME, and ILLUMIO_API_KEY_SECRET
 
 @pytest.fixture(scope='session')
 def session_identifier():
-    return 'illumio-py-integration-'.format(random_string())
+    return 'illumio-py-integration-{}'.format(random_string())
 
 
 @pytest.fixture(scope='session', autouse=True)
