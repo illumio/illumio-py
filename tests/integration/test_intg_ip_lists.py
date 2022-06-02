@@ -75,7 +75,7 @@ def test_update_ip_list(pce, ip_list):
     assert ipl.fqdns == []
 
 
-def test_provision_ip_list(pce, session_identifier):
+def test_provision_ip_list(pce, session_identifier, request):
     identifier = random_string()
     ip_list = pce.ip_lists.create(
         {
@@ -86,18 +86,19 @@ def test_provision_ip_list(pce, session_identifier):
             'external_data_reference': identifier
         }
     )
-    policy_version = pce.provision_policy_changes(
+    pce.provision_policy_changes(
         change_description='Test IP List provisioning',
         hrefs=[ip_list.href]
     )
-    assert policy_version
+
+    def _teardown():
+        pce.ip_lists.delete(ip_list.href)
+        pce.provision_policy_changes(
+            change_description='Remove provisioned IP list',
+            hrefs=[ip_list.href]
+        )
+
+    request.addfinalizer(_teardown)
 
     ip_lists = pce.ip_lists.get(params={'name': session_identifier}, policy_version=ACTIVE)
     assert len(ip_lists) == 1 and ip_lists[0].href == convert_draft_href_to_active(ip_list.href)
-
-    pce.ip_lists.delete(ip_list.href)
-    policy_version = pce.provision_policy_changes(
-        change_description='Remove provisioned IP list',
-        hrefs=[ip_list.href]
-    )
-    assert policy_version
