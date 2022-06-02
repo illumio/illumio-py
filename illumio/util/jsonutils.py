@@ -37,9 +37,38 @@ class IllumioEncoder(json.JSONEncoder):
 class JsonObject(ABC):
 
     def __post_init__(self):
+        self._flatten_refs()
         self._validate()
 
+    def _flatten_refs(self):
+        """Replaces Reference subclasses with a simplified Reference object.
+
+        This allows clients to pass a Reference subclass instance without
+        breaking the encoded object for API calls.
+        """
+        for field in fields(self):
+            value = getattr(self, field.name)
+            if value is None:
+                continue
+            if field.type is Reference:
+                if isinstance(value, Reference):
+                    setattr(self, field.name, Reference(value.href))
+            elif islist(field.type):
+                if field.type.__args__[0] is Reference:
+                    ref_list = []
+                    for ref in value:
+                        if isinstance(ref, Reference):
+                            ref_list.append(Reference(href=ref.href))
+                        else:
+                            ref_list.append(ref)
+                    setattr(self, field.name, ref_list)
+            elif isunion(field.type):
+                if Reference in field.type.__args__:
+                    if isinstance(value, Reference):
+                        setattr(self, field.name, Reference(value.href))
+
     def _validate(self):
+        """Validates fields by comparing their values to their registered dataclass types."""
         for field in fields(self):
             value = getattr(self, field.name)
             if not self._validate_field(field.type, value):
