@@ -570,7 +570,10 @@ class PolicyComputeEngine:
             return self._bulk_change(objects_to_delete, method='bulk_delete', success_status=None, **kwargs)
 
     def __getattr__(self, name: str) -> _PCEObjectAPI:
-        """Instantiates a generic API for registered PCE objects."""
+        """Instantiates a generic API for registered PCE objects.
+
+        Inspired by the Zabbix API: https://pypi.org/project/zabbix-api/
+        """
         if name in self._apis:
             return self._apis[name]
         if name not in PCE_APIS:
