@@ -8,12 +8,10 @@ Copyright:
 License:
     Apache2, see LICENSE for more details.
 """
-import socket
 from dataclasses import dataclass
 from typing import List
 
-from illumio import IllumioException
-from illumio.util import JsonObject, ModifiableObject, pce_api
+from illumio.util import JsonObject, ModifiableObject, pce_api, convert_protocol
 
 
 @dataclass
@@ -23,10 +21,7 @@ class BaseService(JsonObject):
 
     def __post_init__(self):
         if type(self.proto) is str:
-            try:
-                self.proto = socket.getprotobyname(self.proto)
-            except:
-                raise IllumioException("Invalid protocol name: {}".format(self.proto))
+            self.proto = convert_protocol(self.proto)
         super().__post_init__()
 
 
