@@ -9,7 +9,7 @@ License:
     Apache2, see LICENSE for more details.
 """
 from dataclasses import dataclass
-from typing import List
+from typing import List, Union
 
 from illumio import IllumioException
 from illumio.util import (
@@ -29,17 +29,17 @@ class PairingProfile(ModifiableObject):
     enabled: bool = True
     agent_software_release: str = None
     enforcement_mode: str = None
-    enforcement_mode_lock: bool = None
+    enforcement_mode_lock: bool = True
     visibility_level: str = None
-    visibility_level_lock: bool = None
-    allowed_uses_per_key: str = None
-    key_lifespan: str = None
+    visibility_level_lock: bool = True
+    allowed_uses_per_key: Union[str, int] = 'unlimited'
+    key_lifespan: Union[str, int] = 'unlimited'
 
     labels: List[Reference] = None
-    role_label_lock: bool = None
-    app_label_lock: bool = None
-    env_label_lock: bool = None
-    loc_label_lock: bool = None
+    role_label_lock: bool = True
+    app_label_lock: bool = True
+    env_label_lock: bool = True
+    loc_label_lock: bool = True
 
     total_use_count: int = None
     is_default: bool = None
