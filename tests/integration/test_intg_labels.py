@@ -6,35 +6,35 @@ def test_get_by_href(pce, role_label):
     assert label == role_label
 
 
-def test_get_by_partial_name(pce, object_prefix, role_label, app_label, env_label, loc_label):
-    labels = pce.labels.get(params={'value': object_prefix})
+def test_get_by_partial_name(pce, session_identifier, role_label, app_label, env_label, loc_label):
+    labels = pce.labels.get(params={'value': session_identifier})
     assert len(labels) == 4
 
 
-def test_get_by_key(pce, object_prefix, role_label, app_label):
-    labels = pce.labels.get(params={'key': 'role', 'value': object_prefix})
+def test_get_by_key(pce, session_identifier, role_label, app_label):
+    labels = pce.labels.get(params={'key': 'role', 'value': session_identifier})
     assert len(labels) == 1
 
 
-def test_get_async(pce, object_prefix, role_label):
-    labels = pce.labels.get_async(params={'value': object_prefix})
+def test_get_async(pce, session_identifier, role_label):
+    labels = pce.labels.get_async(params={'value': session_identifier})
     assert len(labels) == 1
 
 
-def test_create_label(pce, object_prefix):
+def test_create_label(pce, session_identifier):
     identifier = random_string()
     label = pce.labels.create({
         'key': 'role',
-        'value': '{}-R-{}'.format(object_prefix, identifier),
-        'external_data_set': 'illumio-py-integration-tests',
+        'value': '{}-R-{}'.format(session_identifier, identifier),
+        'external_data_set': session_identifier,
         'external_data_reference': identifier
     })
     assert label.href
     pce.labels.delete(label.href)
 
 
-def test_update_label(pce, object_prefix, env_label):
-    updated_value = '{}-A-UPDATED'.format(object_prefix)
+def test_update_label(pce, session_identifier, env_label):
+    updated_value = '{}-E-UPDATED'.format(session_identifier)
     pce.labels.update(
         env_label.href,
         {

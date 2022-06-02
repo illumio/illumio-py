@@ -7,11 +7,11 @@ from helpers import random_string
 
 
 @pytest.fixture
-def ip_list(pce, object_prefix):
+def ip_list(pce, session_identifier):
     identifier = random_string()
     ip_list = pce.ip_lists.create(
         IPList(
-            name='{}-IPL-{}'.format(object_prefix, identifier),
+            name='{}-IPL-{}'.format(session_identifier, identifier),
             description='Created by illumio python library integration tests',
             ip_ranges=[
                 IPRange(
@@ -30,7 +30,7 @@ def ip_list(pce, object_prefix):
                 FQDN(fqdn='*.internal.labs.io', description='Internal lab domains'),
                 {'fqdn': 'localhost', 'description': 'Local hostname'}
             ],
-            external_data_set='illumio-py-integration-tests',
+            external_data_set=session_identifier,
             external_data_reference=identifier
         )
     )
@@ -43,8 +43,8 @@ def test_get_by_href(pce, ip_list):
     assert ipl == ip_list
 
 
-def test_get_by_partial_name(pce, object_prefix, ip_list):
-    ip_lists = pce.ip_lists.get(params={'name': object_prefix}, policy_version=DRAFT)
+def test_get_by_partial_name(pce, session_identifier, ip_list):
+    ip_lists = pce.ip_lists.get(params={'name': session_identifier}, policy_version=DRAFT)
     assert len(ip_lists) == 1
 
 
@@ -58,8 +58,8 @@ def test_get_by_fqdn(pce, ip_list):
     assert len(ip_lists) == 1
 
 
-def test_get_async(pce, object_prefix, ip_list):
-    ip_lists = pce.ip_lists.get_async(params={'name': object_prefix}, policy_version=DRAFT)
+def test_get_async(pce, session_identifier, ip_list):
+    ip_lists = pce.ip_lists.get_async(params={'name': session_identifier}, policy_version=DRAFT)
     assert len(ip_lists) == 1
 
 
@@ -75,14 +75,14 @@ def test_update_ip_list(pce, ip_list):
     assert ipl.fqdns == []
 
 
-def test_provision_ip_list(pce, object_prefix):
+def test_provision_ip_list(pce, session_identifier):
     identifier = random_string()
     ip_list = pce.ip_lists.create(
         {
-            'name': '{}-IPL-{}'.format(object_prefix, identifier),
+            'name': '{}-IPL-{}'.format(session_identifier, identifier),
             'description': 'Test IP List provisioning',
             'ip_ranges': [{'from_ip': '10.0.0.0/8'}],
-            'external_data_set': 'illumio-py-integration-tests',
+            'external_data_set': session_identifier,
             'external_data_reference': identifier
         }
     )
@@ -92,7 +92,7 @@ def test_provision_ip_list(pce, object_prefix):
     )
     assert policy_version
 
-    ip_lists = pce.ip_lists.get(params={'name': object_prefix}, policy_version=ACTIVE)
+    ip_lists = pce.ip_lists.get(params={'name': session_identifier}, policy_version=ACTIVE)
     assert len(ip_lists) == 1 and ip_lists[0].href == convert_draft_href_to_active(ip_list.href)
 
     pce.ip_lists.delete(ip_list.href)

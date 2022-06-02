@@ -3,6 +3,9 @@ import os
 import pytest
 
 from illumio import PolicyComputeEngine, IllumioException
+from illumio.util import PCE_APIS
+
+from helpers import random_string
 
 # environment variables for integration tests
 pce_host = os.getenv('ILLUMIO_PCE_HOST')
@@ -23,8 +26,24 @@ Make sure ILLUMIO_PCE_HOST, ILLUMIO_API_KEY_USERNAME, and ILLUMIO_API_KEY_SECRET
 
 
 @pytest.fixture(scope='session')
-def object_prefix():
-    return 'TEST-INTEGRATION'
+def session_identifier():
+    return 'illumio-py-integration-'.format(random_string())
+
+
+@pytest.fixture(scope='session', autouse=True)
+def cleanup(pce, session_identifier, request):
+    def _teardown():
+        for name in PCE_APIS.keys():
+            api = getattr(pce, name)
+            try:
+                leftover_integration_objects = api.get(
+                    params={'external_data_set': session_identifier}
+                )
+                for o in leftover_integration_objects:
+                    api.delete(o.href)
+            except IllumioException:
+                pass
+    request.addfinalizer(_teardown)
 
 
 # prepare common fixtures
