@@ -3,12 +3,15 @@ import pytest
 from illumio.policyobjects import IPList, IPRange, FQDN
 from illumio.util import DRAFT, ACTIVE, convert_draft_href_to_active
 
+from helpers import random_string
+
 
 @pytest.fixture
-def ip_list(pce, object_prefix, random_string):
+def ip_list(pce, object_prefix):
+    identifier = random_string()
     ip_list = pce.ip_lists.create(
         IPList(
-            name='{}-IPL-{}'.format(object_prefix, random_string),
+            name='{}-IPL-{}'.format(object_prefix, identifier),
             description='Created by illumio python library integration tests',
             ip_ranges=[
                 IPRange(
@@ -28,7 +31,7 @@ def ip_list(pce, object_prefix, random_string):
                 {'fqdn': 'localhost', 'description': 'Local hostname'}
             ],
             external_data_set='illumio-py-integration-tests',
-            external_data_reference=random_string
+            external_data_reference=identifier
         )
     )
     yield ip_list
@@ -72,14 +75,15 @@ def test_update_ip_list(pce, ip_list):
     assert ipl.fqdns == []
 
 
-def test_provision_ip_list(pce, object_prefix, random_string):
+def test_provision_ip_list(pce, object_prefix):
+    identifier = random_string()
     ip_list = pce.ip_lists.create(
         {
-            'name': '{}-IPL-{}'.format(object_prefix, random_string),
+            'name': '{}-IPL-{}'.format(object_prefix, identifier),
             'description': 'Test IP List provisioning',
             'ip_ranges': [{'from_ip': '10.0.0.0/8'}],
             'external_data_set': 'illumio-py-integration-tests',
-            'external_data_reference': random_string
+            'external_data_reference': identifier
         }
     )
     policy_version = pce.provision_policy_changes(
