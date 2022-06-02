@@ -24,6 +24,7 @@ Copyright:
 License:
     Apache2, see LICENSE for more details.
 """
+import json
 import time
 from typing import List, Union
 
@@ -43,6 +44,7 @@ from .util import (
     parse_url,
     Reference,
     IllumioObject,
+    IllumioEncoder,
     ACTIVE,
     DRAFT,
     ANY_IP_LIST_NAME,
@@ -72,6 +74,7 @@ class PolicyComputeEngine:
             org_id (str, optional): The PCE organization ID. Defaults to '1'.
         """
         self._apis = {}
+        self._encoder = IllumioEncoder()
         self._session = Session()
         self._session.headers.update({'Accept': 'application/json'})
         protocol, url = parse_url(url)
@@ -130,6 +133,7 @@ class PolicyComputeEngine:
         try:
             response = None  # avoid reference before assignment errors in case of cxn failure
             url = self._build_url(endpoint, include_org)
+            self._encode_body(kwargs)
             response = self._session.request(method, url, **kwargs)
             response.raise_for_status()
             return response
@@ -145,6 +149,15 @@ class PolicyComputeEngine:
         if include_org and not endpoint.startswith('orgs/'):
             endpoint = 'orgs/{}/{}'.format(self.org_id, endpoint)
         return '{}/{}'.format(self.base_url, endpoint)
+
+    def _encode_body(self, kwargs):
+        """Encodes request body data to JSON."""
+        body = kwargs.pop('data', None)
+        if 'json' in kwargs:
+            # json overrides data if both are provided
+            body = kwargs.pop('json')
+        if body is not None:
+            kwargs['json'] = json.loads(self._encoder.encode(body))
 
     def _get_error_message_from_response(self, response: Response) -> str:
         message = "API call returned error code {}. Errors:".format(response.status_code)
@@ -434,7 +447,7 @@ class PolicyComputeEngine:
             Returns:
                 IllumioObject: the created object.
             """
-            kwargs['json'] = body if type(body) is dict else body.to_json()
+            kwargs['json'] = body
             endpoint = self._build_endpoint(DRAFT, parent_href)
             response = self.pce.post(endpoint, include_org=False, **kwargs)
             return self.object_cls.from_json(response.json())
@@ -458,9 +471,9 @@ class PolicyComputeEngine:
 
             Args:
                 href (str): the HREF of the pairing profile to update.
-                pairing_profile (PairingProfile): the updated pairing profile.
+                body (Union[dict, IllumioObject]): the update data.
             """
-            kwargs['json'] = body if type(body) is dict else body.to_json()
+            kwargs['json'] = body
             self.pce.put(href, include_org=False, **kwargs)
 
         def delete(self, href: str, **kwargs) -> None:
@@ -476,7 +489,7 @@ class PolicyComputeEngine:
         def _bulk_change(self, objects: List[IllumioObject], method: str, success_status: str, **kwargs) -> List[dict]:
             results = []
             while objects:
-                kwargs['json'] = [o.to_json() for o in objects[:BULK_CHANGE_LIMIT]]
+                kwargs['json'] = objects[:BULK_CHANGE_LIMIT]
                 objects = objects[BULK_CHANGE_LIMIT:]
                 endpoint = self._build_endpoint(DRAFT, None)
                 response = self.pce.put('{}/{}'.format(endpoint, method), include_org=False, **kwargs)
@@ -631,7 +644,7 @@ class PolicyComputeEngine:
                 service bindings as well as any errors returned from the PCE.
                 Has the form {'service_bindings': [], 'errors': []}.
         """
-        kwargs['json'] = [service_binding.to_json() for service_binding in service_bindings]
+        kwargs['json'] = service_bindings
         response = self.post('/service_bindings', **kwargs)
         results = {'service_bindings': [], 'errors': []}
         for binding in response.json():
@@ -685,7 +698,7 @@ class PolicyComputeEngine:
             List[TrafficFlow]: list of `TrafficFlow` objects found using the
                 provided query.
         """
-        kwargs['json'] = traffic_query.to_json()
+        kwargs['json'] = traffic_query
         response = self.post('/traffic_flows/traffic_analysis_queries', **kwargs)
         return [TrafficFlow.from_json(flow) for flow in response.json()]
 
@@ -789,7 +802,7 @@ class PolicyComputeEngine:
         """
         try:
             traffic_query.query_name = query_name
-            kwargs['json'] = traffic_query.to_json()
+            kwargs['json'] = traffic_query
             headers = kwargs.get('headers', {})
             kwargs['headers'] = {**headers, **{'Content-Type': 'application/json', 'Prefer': 'respond-async'}}
             response = self.post('/traffic_flows/async_queries', **kwargs)
@@ -841,7 +854,7 @@ class PolicyComputeEngine:
             PolicyVersion: the decoded policy version object including the changeset.
         """
         policy_changeset = PolicyChangeset.build(hrefs)
-        kwargs['json'] = {'update_description': change_description, 'change_subset': policy_changeset.to_json()}
+        kwargs['json'] = {'update_description': change_description, 'change_subset': policy_changeset}
         response = self.post('/sec_policy', **kwargs)
         return PolicyVersion.from_json(response.json())
 
