@@ -1,6 +1,4 @@
 import os
-import random
-from string import ascii_letters, digits
 
 import pytest
 
@@ -24,8 +22,3 @@ def pytest_collection_modifyitems(config, items):
         filename = str(item.fspath).split(os.path.sep)[-1]
         if "integration" in item.keywords or filename.startswith('test_intg'):
             item.add_marker(integration_skip_marker)
-
-
-@pytest.fixture
-def random_string():
-    yield ''.join([random.choice(ascii_letters + digits) for _ in range(8)])
