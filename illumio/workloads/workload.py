@@ -30,7 +30,7 @@ from .ven import VEN, VENAgent
 
 @dataclass
 class Interface(JsonObject):
-    name: str
+    name: str = None
     link_state: str = None
     address: str = None
     cidr_block: int = None
@@ -38,7 +38,7 @@ class Interface(JsonObject):
     network: Reference = None
     network_detection_mode: str = None
     friendly_name: str = None
-    loopback: bool = False
+    loopback: bool = None
 
     def _validate(self):
         if self.link_state and not self.link_state in LinkState:

@@ -19,7 +19,7 @@ from .actor import Actor
 
 @dataclass
 class BaseRule(ModifiableObject):
-    ingress_services: List[Union[Service, ServicePort]] = field(default_factory=list)
+    ingress_services: List[Union[Service, ServicePort]] = None
     providers: List[Actor] = None
     consumers: List[Actor] = None
 
@@ -44,9 +44,10 @@ class BaseRule(ModifiableObject):
 
     def _decode_complex_types(self):
         decoded_ingress_services = []
-        for service in self.ingress_services:
-            service_type = Service if 'href' in service else ServicePort
-            decoded_ingress_services.append(service_type.from_json(service))
+        if self.ingress_services:
+            for service in self.ingress_services:
+                service_type = Service if 'href' in service else ServicePort
+                decoded_ingress_services.append(service_type.from_json(service))
         self.ingress_services = decoded_ingress_services
         super()._decode_complex_types()
 

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-"""This module provides classes related to workload objects.
+"""This module provides classes related to pairing profile objects.
 
 Copyright:
     (c) 2022 Illumio
@@ -24,22 +24,20 @@ from illumio.util import (
 @dataclass
 @pce_api('pairing_profiles')
 class PairingProfile(ModifiableObject):
-    # the enabled flag is required when creating
-    # pairing profiles, so set it to default to True
-    enabled: bool = True
+    enabled: bool = None
     agent_software_release: str = None
     enforcement_mode: str = None
-    enforcement_mode_lock: bool = True
+    enforcement_mode_lock: bool = None
     visibility_level: str = None
-    visibility_level_lock: bool = True
-    allowed_uses_per_key: Union[str, int] = 'unlimited'
-    key_lifespan: Union[str, int] = 'unlimited'
+    visibility_level_lock: bool = None
+    allowed_uses_per_key: Union[str, int] = None
+    key_lifespan: Union[str, int] = None
 
     labels: List[Reference] = None
-    role_label_lock: bool = True
-    app_label_lock: bool = True
-    env_label_lock: bool = True
-    loc_label_lock: bool = True
+    role_label_lock: bool = None
+    app_label_lock: bool = None
+    env_label_lock: bool = None
+    loc_label_lock: bool = None
 
     total_use_count: int = None
     is_default: bool = None
