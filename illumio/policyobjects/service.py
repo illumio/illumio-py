@@ -11,7 +11,12 @@ License:
 from dataclasses import dataclass
 from typing import List
 
-from illumio.util import JsonObject, ModifiableObject, pce_api, convert_protocol
+from illumio.util import (
+    JsonObject,
+    ModifiableObject,
+    pce_api,
+    convert_protocol
+)
 
 
 @dataclass
@@ -34,13 +39,6 @@ class ServicePort(BaseService):
     process_name: str = None
     windows_service_name: str = None
     user_name: str = None
-
-
-@dataclass
-class ServiceAddress(BaseService):
-    ip: str = None
-    fqdn: str = None
-    description: str = None
 
 
 @dataclass
