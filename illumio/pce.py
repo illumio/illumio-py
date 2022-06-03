@@ -37,6 +37,7 @@ from .exceptions import IllumioApiException
 from .policyobjects import IPList
 from .explorer import TrafficQuery, TrafficFlow
 from .util import (
+    deprecated,
     convert_active_href_to_draft,
     parse_url,
     Reference,
@@ -643,8 +644,11 @@ class PolicyComputeEngine:
         response = self.post('{}/pairing_key'.format(pairing_profile_href), include_org=False, **kwargs)
         return response.json().get('activation_code')
 
+    @deprecated(deprecated_in='1.0.0')
     def get_traffic_flows(self, traffic_query: TrafficQuery, **kwargs) -> List[TrafficFlow]:
-        """Retrieves Explorer traffic flows using the provided query.
+        """DEPRECATED (v1.0.0). Use `get_traffic_flows_async` instead.
+
+        Retrieves Explorer traffic flows using the provided query.
 
         NOTE: this function is deprecated in the Illumio REST API, and is
         only provided for compatibility. The Illumio Explorer REST API
