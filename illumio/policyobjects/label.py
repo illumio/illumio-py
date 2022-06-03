@@ -44,7 +44,7 @@ class LabelGroup(Label):
 
 @dataclass
 class LabelSet(JsonObject):
-    labels: List[Label] = None
+    labels: List[Reference] = None
 
     def _encode(self):
         json_array = []
