@@ -26,7 +26,7 @@ License:
 """
 import json
 import time
-from typing import List, Union
+from typing import Any, List, Union
 
 from requests import Session, Response
 from requests.adapters import HTTPAdapter
@@ -34,14 +34,12 @@ from urllib3.util.retry import Retry
 
 from .secpolicy import PolicyChangeset, PolicyVersion
 from .exceptions import IllumioApiException
-from .policyobjects import (
-    IPList,
-    ServiceBinding
-)
+from .policyobjects import IPList
 from .explorer import TrafficQuery, TrafficFlow
 from .util import (
     convert_active_href_to_draft,
     parse_url,
+    islist,
     Reference,
     IllumioObject,
     IllumioEncoder,
@@ -311,6 +309,7 @@ class PolicyComputeEngine:
     class _PCEObjectAPI:
         """Generic API for registered PCE objects."""
         def __init__(self, pce: 'PolicyComputeEngine', api_data: object) -> None:
+            self.name = api_data.name
             self.endpoint = api_data.endpoint
             self.object_cls = api_data.object_class
             self.is_sec_policy = api_data.is_sec_policy
@@ -335,11 +334,11 @@ class PolicyComputeEngine:
                 endpoint = '/orgs/{}/{}'.format(self.pce.org_id, endpoint)
             return endpoint
 
-        def get_by_href(self, href: str, **kwargs) -> IllumioObject:
+        def get_by_reference(self, reference: Union[str, Reference, dict], **kwargs) -> IllumioObject:
             """Retrieves an object from the PCE using its HREF.
 
             Usage:
-                >>> ip_list = pce.ip_lists.get_by_href('/orgs/1/sec_policy/active/ip_lists/1')
+                >>> ip_list = pce.ip_lists.get_by_reference('/orgs/1/sec_policy/active/ip_lists/1')
                 >>> ip_list
                 IPList(
                     name='Any (0.0.0.0/0 and ::/0)',
@@ -352,8 +351,19 @@ class PolicyComputeEngine:
             Returns:
                 IllumioObject: the object json, decoded to its IllumioObject equivalent.
             """
-            response = self.pce.get(href, include_org=False, **kwargs)
+            response = self.pce.get(self._parse_href(reference), include_org=False, **kwargs)
             return self.object_cls.from_json(response.json())
+
+        def _parse_href(self, reference):
+            """Attempts to parse HREF value from a provided source."""
+            if isinstance(reference, Reference):
+                return reference.href
+            elif type(reference) is dict:
+                if 'href' in reference:
+                    return reference['href']
+            elif type(reference) is str:
+                return reference
+            raise IllumioApiException('Failed to parse reference value: {}'.format(reference))
 
         def get(self, policy_version: str = DRAFT, parent_href: Union[Reference, str] = None, **kwargs) -> List[IllumioObject]:
             """Retrieves objects from the PCE based on the given parameters.
@@ -420,7 +430,7 @@ class PolicyComputeEngine:
             response = self.pce.get_collection(endpoint, **kwargs)
             return [self.object_cls.from_json(o) for o in response.json()]
 
-        def create(self, body: Union[dict, IllumioObject], parent_href: Union[Reference, str] = None, **kwargs) -> dict:
+        def create(self, body: Any, parent_href: Union[Reference, str] = None, **kwargs) -> Any:
             """Creates a virtual service object in the PCE.
 
             See https://docs.illumio.com/core/21.5/API-Reference/index.html
@@ -438,7 +448,7 @@ class PolicyComputeEngine:
                 )
 
             Args:
-                body (Union[dict, IllumioObject]): the parameters for the newly created object.
+                body (Any): the parameters for the newly created object.
                 parent_href (Union[Reference, str], optional): HREF of the created
                     object's parent object. Required for some object types, such
                     as Security Rules which must be created as children of
@@ -450,9 +460,23 @@ class PolicyComputeEngine:
             kwargs['json'] = body
             endpoint = self._build_endpoint(DRAFT, parent_href)
             response = self.pce.post(endpoint, include_org=False, **kwargs)
-            return self.object_cls.from_json(response.json())
+            return self._parse_response_body(response.json())
 
-        def update(self, href: str, body: Union[dict, IllumioObject], **kwargs) -> None:
+        def _parse_response_body(self, json_response):
+            # XXX: workaround for Service Bindings. Multiple bindings
+            #   can be created in the same POST, so we need to accommodate
+            #   this case by checking the response body type
+            if islist(json_response):
+                results = {self.name: [], 'errors': []}
+                for o in json_response:
+                    if 'href' in o:
+                        results[self.name].append(self.object_cls.from_json(o))
+                    else:
+                        results['errors'].append(o)
+                return results
+            return self.object_cls.from_json(json_response)
+
+        def update(self, reference: Union[str, Reference, dict], body: Any, **kwargs) -> None:
             """Updates an object in the PCE.
 
             Successful PUT requests return a 204 No Content response.
@@ -470,21 +494,21 @@ class PolicyComputeEngine:
                 >>> pce.pairing_profile.update(existing_profile['href'], update)
 
             Args:
-                href (str): the HREF of the pairing profile to update.
-                body (Union[dict, IllumioObject]): the update data.
+                reference (Union[str, Reference, dict]): the HREF of the pairing profile to update.
+                body (Any): the update data.
             """
             kwargs['json'] = body
-            self.pce.put(href, include_org=False, **kwargs)
+            self.pce.put(self._parse_href(reference), include_org=False, **kwargs)
 
-        def delete(self, href: str, **kwargs) -> None:
+        def delete(self, reference: Union[str, Reference, dict], **kwargs) -> None:
             """Deletes an object in the PCE.
 
             Successful DELETE requests return a 204 No Content response.
 
             Args:
-                href (str): the HREF of the object to delete.
+                reference (Union[str, Reference, dict]): the HREF of the object to delete.
             """
-            self.pce.delete(href, include_org=False, **kwargs)
+            self.pce.delete(self._parse_href(reference), include_org=False, **kwargs)
 
         def _bulk_change(self, objects: List[IllumioObject], method: str, success_status: str, **kwargs) -> List[dict]:
             results = []
@@ -594,65 +618,6 @@ class PolicyComputeEngine:
         api = self._PCEObjectAPI(pce=self, api_data=PCE_APIS[name])
         self._apis[name] = api
         return api
-
-    def create_service_bindings(self, service_bindings: List[ServiceBinding], **kwargs) -> dict:
-        """Binds one or more workloads to a virtual service in the PCE.
-
-        If one or more service bindings fail to create - even if all of them
-        fail - a 201 response is returned with error statuses for each failing
-        binding. Due to this, the response is wrapped to simplify processing.
-
-        Usage:
-            >>> from illumio.policyobjects import ServiceBinding
-            >>> virtual_service_ref = Reference(
-            ...     href='/orgs/1/sec_policy/active/virtual_services/9177c75f-7b21-4bf0-8c16-2c47c1ca3252'
-            ... )
-            >>> workload = pce.workloads.get_by_href(href='/orgs/1/workloads/a1a2bd2f-b74b-4068-a177-11b0cb1c92c4')
-            >>> service_bindings = pce.create_service_bindings(
-            ...     service_bindings=[
-            ...         ServiceBinding(
-            ...             virtual_service=virtual_service_ref,
-            ...             workload=workload
-            ...         )
-            ...     ]
-            ... )
-            >>> service_bindings
-            {
-                'service_bindings': [
-                    ServiceBinding(
-                        href='/orgs/1/service_bindings/7005192b-97a3-4072-96ab-d584544d032f',
-                        virtual_service=Reference(
-                            href='/orgs/1/sec_policy/active/virtual_services/9177c75f-7b21-4bf0-8c16-2c47c1ca3252'
-                        ),
-                        workload=Workload(
-                            href='/orgs/1/workloads/a1a2bd2f-b74b-4068-a177-11b0cb1c92c4',
-                            ...
-                        ),
-                        ...
-                    )
-                ],
-                'errors': []
-            }
-
-        Args:
-            service_bindings (List[ServiceBinding]): list of service binding
-                objects to create. Each object is encoded as JSON for the POST
-                request payload.
-
-        Returns:
-            dict: a dictionary containing a list of successfully created
-                service bindings as well as any errors returned from the PCE.
-                Has the form {'service_bindings': [], 'errors': []}.
-        """
-        kwargs['json'] = service_bindings
-        response = self.post('/service_bindings', **kwargs)
-        results = {'service_bindings': [], 'errors': []}
-        for binding in response.json():
-            if binding['status'] == 'created':
-                results['service_bindings'].append(ServiceBinding(href=binding['href']))
-            else:
-                results['errors'].append({'error': binding['status']})
-        return results
 
     def get_default_ip_list(self, **kwargs) -> IPList:
         """Retrieves the "Any (0.0.0.0/0 and ::/0)" default global IP list.
