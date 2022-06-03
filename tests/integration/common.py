@@ -1,6 +1,12 @@
 import pytest
 
-from illumio.policyobjects import Label, Service, ServicePort
+from illumio.policyobjects import (
+    Label,
+    LabelSet,
+    Service,
+    ServicePort
+)
+from illumio.rules import RuleSet
 
 from helpers import random_string
 
@@ -119,3 +125,20 @@ def rdp_service(pce, session_identifier):
     )
     yield service
     pce.services.delete(service.href)
+
+
+@pytest.fixture
+def rule_set(pce, session_identifier, app_label, env_label, loc_label):
+    identifier = random_string()
+    rule_set = pce.rule_sets.create(
+        RuleSet(
+            name='{}-IPL-{}'.format(session_identifier, identifier),
+            description='Created by illumio python library integration tests',
+            enabled=True,
+            scopes=[LabelSet(labels=[app_label, env_label, loc_label])],
+            external_data_set=session_identifier,
+            external_data_reference=identifier
+        )
+    )
+    yield rule_set
+    pce.rule_sets.delete(rule_set.href)

@@ -32,6 +32,14 @@ from helpers import random_string
                 'description': 'Test service provisioning',
                 'service_ports': [{'port': 3306, 'proto': convert_protocol('tcp')}]
             }
+        ),
+        (
+            'rule_sets',
+            {
+                'description': 'Test rule set provisioning',
+                'enabled': True,
+                'scopes': []
+            }
         )
     ]
 )
