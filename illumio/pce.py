@@ -688,8 +688,8 @@ class PolicyComputeEngine:
             ... )
             >>> traffic_query
             TrafficQuery(
-                start_date='2021-09-28T00:00:00Z',
-                end_date='2021-10-05T00:00:00Z',
+                start_date='2022-02-01T00:00:00Z',
+                end_date='2022-03-01T00:00:00Z',
                 sources=TrafficQueryFilterBlock(
                     include=[],
                     exclude=[]
@@ -715,7 +715,7 @@ class PolicyComputeEngine:
                 ...
             )
             >>> traffic_flows = pce.get_traffic_flows_async(
-            ...     query_name='',
+            ...     query_name='rdp-traffic-feb-22',
             ...     traffic_query=traffic_query
             ... )
             >>> traffic_flows
