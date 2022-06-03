@@ -22,8 +22,8 @@ def label_group(pce, session_identifier, role_label):
     pce.label_groups.delete(label_group.href)
 
 
-def test_get_by_href(pce, label_group):
-    lg = pce.label_groups.get_by_href(label_group.href)
+def test_get_by_reference(pce, label_group):
+    lg = pce.label_groups.get_by_reference(label_group.href)
     assert lg == label_group
 
 
@@ -57,5 +57,5 @@ def test_add_label_to_group(pce, session_identifier, label_group, request):
         'labels': label_group.labels
     })
 
-    lg = pce.label_groups.get_by_href(label_group.href)
+    lg = pce.label_groups.get_by_reference(label_group.href)
     assert len(lg.labels) == 2

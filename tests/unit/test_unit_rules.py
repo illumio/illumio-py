@@ -34,7 +34,7 @@ def mock_requests(requests_mock, get_callback, post_callback, put_callback, dele
 
 @pytest.fixture()
 def mock_rule(pce) -> Rule:
-    yield pce.rules.get_by_href('{}/sec_rules/1'.format(MOCK_RULE_SET_HREF))
+    yield pce.rules.get_by_reference('{}/sec_rules/1'.format(MOCK_RULE_SET_HREF))
 
 
 def test_label_resolution_block(mock_rule):

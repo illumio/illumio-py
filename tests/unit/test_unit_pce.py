@@ -78,13 +78,13 @@ def test_pce_apis(api_name, endpoint, ObjectClass, is_sec_policy, pce,
     assert obj.href
 
     policy_version = DRAFT if is_sec_policy else None
-    assert api.get_by_href(obj.href) == obj
+    assert api.get_by_reference(obj.href) == obj
 
     objs = api.get(params={'name': 'test object'}, policy_version=policy_version)
     assert objs[0] == obj
 
     api.update(obj.href, {'description': 'updated description'})
-    obj = api.get_by_href(obj.href)
+    obj = api.get_by_reference(obj.href)
     assert obj.description == 'updated description'
 
     api.delete(obj.href)

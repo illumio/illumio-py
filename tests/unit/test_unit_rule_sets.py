@@ -40,7 +40,7 @@ def mock_requests(requests_mock, get_callback, post_callback, put_callback, dele
 
 @pytest.fixture()
 def mock_rule_set(pce) -> RuleSet:
-    yield pce.rule_sets.get_by_href("/orgs/1/sec_policy/active/rule_sets/1")
+    yield pce.rule_sets.get_by_reference("/orgs/1/sec_policy/active/rule_sets/1")
 
 
 def test_encoded_scopes(mock_rule_set):
@@ -61,11 +61,11 @@ def test_get_active_rule_sets(pce, mock_rule_set):
 def test_create_rule_set(pce, new_rule_set):
     created_rule_set = pce.rule_sets.create(new_rule_set)
     assert created_rule_set.href != ''
-    rule_set = pce.rule_sets.get_by_href(created_rule_set.href)
+    rule_set = pce.rule_sets.get_by_reference(created_rule_set.href)
     assert created_rule_set == rule_set
 
 
 def test_update_rule_set(pce, mock_rule_set):
     pce.rule_sets.update(mock_rule_set.href, {'enabled': False})
-    updated_rule_set = pce.rule_sets.get_by_href(mock_rule_set.href)
+    updated_rule_set = pce.rule_sets.get_by_reference(mock_rule_set.href)
     assert updated_rule_set.enabled is False

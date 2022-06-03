@@ -2,8 +2,8 @@ from illumio.policyobjects import ServicePort
 from illumio.util import convert_protocol, DRAFT
 
 
-def test_get_by_href(pce, web_service):
-    service = pce.services.get_by_href(web_service.href)
+def test_get_by_reference(pce, web_service):
+    service = pce.services.get_by_reference(web_service.href)
     assert service == web_service
 
 
@@ -31,5 +31,5 @@ def test_update_service(pce, well_known_service):
     updated_service_ports = well_known_service.service_ports
     updated_service_ports.append(ServicePort.from_json({'port': 1, 'to_port': 1023, 'proto': 'udp'}))
     pce.services.update(well_known_service.href, {'service_ports': updated_service_ports})
-    service = pce.services.get_by_href(well_known_service.href)
+    service = pce.services.get_by_reference(well_known_service.href)
     assert service.service_ports == updated_service_ports

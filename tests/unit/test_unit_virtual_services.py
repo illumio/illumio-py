@@ -6,8 +6,8 @@ from typing import List
 import pytest
 
 from illumio import IllumioException
-from illumio.policyobjects import VirtualService, ServicePort, ServiceAddress, Label
-from illumio.util import DRAFT
+from illumio.policyobjects import VirtualService, ServicePort, ServiceAddress
+from illumio.util import Reference, DRAFT
 
 VIRTUAL_SERVICES = os.path.join(pytest.DATA_DIR, 'virtual_services.json')
 
@@ -44,7 +44,7 @@ def mock_requests(requests_mock, get_callback, post_callback, put_callback, dele
 
 @pytest.fixture()
 def mock_virtual_service(pce):
-    yield pce.virtual_services.get_by_href("/orgs/1/sec_policy/draft/virtual_services/14d7ff69-2fa4-458b-a299-e3f11ffa9b01")
+    yield pce.virtual_services.get_by_reference("/orgs/1/sec_policy/draft/virtual_services/14d7ff69-2fa4-458b-a299-e3f11ffa9b01")
 
 
 def test_decoded_service_ports(mock_virtual_service: VirtualService):
@@ -56,7 +56,7 @@ def test_decoded_service_addresses(mock_virtual_service: VirtualService):
 
 
 def test_decoded_labels(mock_virtual_service: VirtualService):
-    assert type(mock_virtual_service.labels[0]) is Label
+    assert type(mock_virtual_service.labels[0]) is Reference
 
 
 def test_create_virtual_service(pce, new_virtual_service: VirtualService):
@@ -91,11 +91,11 @@ def test_get_draft_virtual_services(pce, mock_virtual_service):
 def test_create_virtual_service(pce, new_virtual_service):
     created_virtual_service = pce.virtual_services.create(new_virtual_service)
     assert created_virtual_service.href != ''
-    virtual_service = pce.virtual_services.get_by_href(created_virtual_service.href)
+    virtual_service = pce.virtual_services.get_by_reference(created_virtual_service.href)
     assert created_virtual_service == virtual_service
 
 
 def test_update_virtual_service(pce, mock_virtual_service):
     pce.virtual_services.update(mock_virtual_service.href, {'enabled': False})
-    updated_virtual_service = pce.virtual_services.get_by_href(mock_virtual_service.href)
+    updated_virtual_service = pce.virtual_services.get_by_reference(mock_virtual_service.href)
     assert updated_virtual_service.enabled is False

@@ -41,7 +41,7 @@ def mock_requests(requests_mock, get_callback, post_callback, put_callback, dele
 
 @pytest.fixture()
 def mock_workload(pce):
-    yield pce.workloads.get_by_href("/orgs/1/workloads/ef7f0f53-2295-4416-aaaf-965146934c53")
+    yield pce.workloads.get_by_reference("/orgs/1/workloads/ef7f0f53-2295-4416-aaaf-965146934c53")
 
 
 def test_selectively_enforced_services(mock_workload):
@@ -58,11 +58,11 @@ def test_get_by_enforcement_mode(pce):
 def test_create_workload(pce, new_workload):
     created_workload = pce.workloads.create(new_workload)
     assert created_workload.href != ''
-    workload = pce.workloads.get_by_href(created_workload.href)
+    workload = pce.workloads.get_by_reference(created_workload.href)
     assert created_workload == workload
 
 
 def test_update_workload(pce, mock_workload):
     pce.workloads.update(mock_workload.href, {'enforcement_mode': 'selective'})
-    updated_workload = pce.workloads.get_by_href(mock_workload.href)
+    updated_workload = pce.workloads.get_by_reference(mock_workload.href)
     assert updated_workload.enforcement_mode == 'selective'

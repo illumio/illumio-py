@@ -38,8 +38,8 @@ def ip_list(pce, session_identifier):
     pce.ip_lists.delete(ip_list.href)
 
 
-def test_get_by_href(pce, ip_list):
-    ipl = pce.ip_lists.get_by_href(ip_list.href)
+def test_get_by_reference(pce, ip_list):
+    ipl = pce.ip_lists.get_by_reference(ip_list.href)
     assert ipl == ip_list
 
 
@@ -71,5 +71,5 @@ def test_update_ip_list(pce, ip_list):
             'fqdns': []
         }
     )
-    ipl = pce.ip_lists.get_by_href(ip_list.href)
+    ipl = pce.ip_lists.get_by_reference(ip_list.href)
     assert ipl.fqdns == []

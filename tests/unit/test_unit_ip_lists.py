@@ -48,8 +48,8 @@ def test_get_default_ip_list(pce):
     assert default_ip_list.name == ANY_IP_LIST_NAME
 
 
-def test_get_by_href(pce):
-    any_ip_list = pce.ip_lists.get_by_href('/orgs/1/sec_policy/active/ip_lists/1')
+def test_get_by_reference(pce):
+    any_ip_list = pce.ip_lists.get_by_reference('/orgs/1/sec_policy/active/ip_lists/1')
     assert any_ip_list.name == ANY_IP_LIST_NAME
 
 
@@ -70,13 +70,13 @@ def test_get_active_ip_list(pce):
 def test_create_ip_list(pce, new_ip_list):
     ip_list = pce.ip_lists.create(new_ip_list)
     assert ip_list.href != ''
-    fetched_ip_list = pce.ip_lists.get_by_href(ip_list.href)
+    fetched_ip_list = pce.ip_lists.get_by_reference(ip_list.href)
     assert fetched_ip_list == ip_list
 
 
 def test_update_ip_list(pce):
     ip_list = pce.ip_lists.get(params={"name": "IPL-4", 'max_results': 1})[0]
     pce.ip_lists.update(ip_list.href, {'fqdns': [{'fqdn': 'test.example.com'}]})
-    updated_ip_list = pce.ip_lists.get_by_href(ip_list.href)
+    updated_ip_list = pce.ip_lists.get_by_reference(ip_list.href)
     assert len(updated_ip_list.fqdns) > 0
     assert updated_ip_list.fqdns[0].fqdn == 'test.example.com'

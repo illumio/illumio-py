@@ -77,7 +77,7 @@ def test_pairing_profile_update(pce):
     pairing_profile = pairing_profiles[0]
     pairing_profile.description = test_description
     pce.pairing_profiles.update(pairing_profile.href, pairing_profile)
-    pairing_profile = pce.pairing_profiles.get_by_href(pairing_profile.href)
+    pairing_profile = pce.pairing_profiles.get_by_reference(pairing_profile.href)
     assert pairing_profile.description == test_description
 
 

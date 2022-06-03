@@ -1,8 +1,8 @@
 from helpers import random_string
 
 
-def test_get_by_href(pce, role_label):
-    label = pce.labels.get_by_href(role_label.href)
+def test_get_by_reference(pce, role_label):
+    label = pce.labels.get_by_reference(role_label.href)
     assert label == role_label
 
 
@@ -41,5 +41,5 @@ def test_update_label(pce, session_identifier, env_label):
             'value': updated_value
         }
     )
-    label = pce.labels.get_by_href(env_label.href)
+    label = pce.labels.get_by_reference(env_label.href)
     assert label.value == updated_value

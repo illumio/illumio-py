@@ -34,8 +34,8 @@ def pairing_profile(pce, session_identifier, env_label):
     pce.pairing_profiles.delete(pairing_profile.href)
 
 
-def test_get_by_href(pce, pairing_profile):
-    profile = pce.pairing_profiles.get_by_href(pairing_profile.href)
+def test_get_by_reference(pce, pairing_profile):
+    profile = pce.pairing_profiles.get_by_reference(pairing_profile.href)
     assert profile == pairing_profile
 
 
@@ -48,6 +48,6 @@ def test_update_pairing_profile(pce, pairing_profile):
     pce.pairing_profiles.update(pairing_profile.href, {
         'enforcement_mode': 'selective'
     })
-    profile = pce.pairing_profiles.get_by_href(pairing_profile.href)
+    profile = pce.pairing_profiles.get_by_reference(pairing_profile.href)
     assert pairing_profile.href == profile.href
     assert profile.enforcement_mode == 'selective'
