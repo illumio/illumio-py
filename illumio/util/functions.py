@@ -98,11 +98,13 @@ def pce_api(name: str, endpoint: str = None, is_sec_policy=False, is_global=Fals
     def _decorator(cls):
         @dataclass
         class __PCEApi:
+            name: str
             endpoint: str
             object_class: object
             is_sec_policy: bool
             is_global: bool
         PCE_APIS[name] = __PCEApi(
+            name=name,
             endpoint=endpoint or '/{}'.format(name),
             object_class=cls,
             is_sec_policy=is_sec_policy,
