@@ -8,7 +8,7 @@ Copyright:
 License:
     Apache2, see LICENSE for more details.
 """
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import List, Union
 
 from illumio.util import JsonObject, Reference, MutableObject, pce_api
@@ -18,17 +18,17 @@ from .actor import Actor
 
 
 @dataclass
-class BaseRule(MutableObject):
+class BaseRule(JsonObject):
     ingress_services: List[Union[Service, ServicePort]] = None
     providers: List[Actor] = None
     consumers: List[Actor] = None
 
     @classmethod
-    def build(cls, providers: List[str], consumers: List[str],
+    def build(cls, providers: List[Union[str, Reference, dict]], consumers: List[Union[str, Reference, dict]],
             ingress_services: List[Union[JsonObject, dict, str]], **kwargs) -> 'BaseRule':
         services = []
         for service in ingress_services:
-            if issubclass(service.__class__, JsonObject):
+            if isinstance(service, JsonObject):
                 services.append(service)
             elif type(service) is str:
                 services.append(Service(href=service))
@@ -36,8 +36,8 @@ class BaseRule(MutableObject):
                 service_type = Service if 'href' in service else ServicePort
                 services.append(service_type.from_json(service))
         return cls(
-            providers=[Actor.from_href(provider) for provider in providers],
-            consumers=[Actor.from_href(consumer) for consumer in consumers],
+            providers=[Actor.from_reference(provider) for provider in providers],
+            consumers=[Actor.from_reference(consumer) for consumer in consumers],
             ingress_services=services,
             **kwargs
         )
@@ -60,7 +60,7 @@ class LabelResolutionBlock(JsonObject):
 
 @dataclass
 @pce_api('rules', endpoint='/sec_rules')
-class Rule(BaseRule):
+class Rule(BaseRule, MutableObject):
     enabled: bool = None
     resolve_labels_as: LabelResolutionBlock = None
     sec_connect: bool = None
@@ -71,7 +71,8 @@ class Rule(BaseRule):
     network_type: str = None
 
     @classmethod
-    def build(cls, providers: List[str], consumers: List[str], ingress_services: List[dict],
+    def build(cls, providers: List[Union[str, Reference, dict]], consumers: List[Union[str, Reference, dict]],
+            ingress_services: List[Union[JsonObject, dict, str]],
             resolve_providers_as: List[str], resolve_consumers_as: List[str], **kwargs) -> 'Rule':
         resolve_labels_as = LabelResolutionBlock(providers=resolve_providers_as, consumers=resolve_consumers_as)
         return super().build(providers, consumers, ingress_services, resolve_labels_as=resolve_labels_as, **kwargs)

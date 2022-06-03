@@ -18,4 +18,4 @@ from .rule import BaseRule
 @dataclass
 @pce_api('enforcement_boundaries', is_sec_policy=True)
 class EnforcementBoundary(BaseRule):
-    pass
+    name: str = None
