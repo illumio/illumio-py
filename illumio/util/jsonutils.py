@@ -19,6 +19,8 @@ from dataclasses import dataclass, fields
 from inspect import signature, isclass
 from typing import List, Any
 
+from illumio.exceptions import IllumioException
+
 from .functions import ignore_empty_keys, isunion, islist
 
 _default = json.JSONEncoder()  # fall back to the default encoder for non-Illumio API objects
@@ -183,6 +185,18 @@ def deep_encode(o: Any) -> Any:
 @dataclass
 class Reference(JsonObject):
     href: str = None
+
+
+def href_from(reference: Any):
+    """Attempts to parse HREF value from a provided source."""
+    if isinstance(reference, Reference):
+        return reference.href
+    elif type(reference) is dict:
+        if 'href' in reference:
+            return reference['href']
+    elif type(reference) is str:
+        return reference
+    raise IllumioException('Failed to extract HREF from value: {}'.format(reference))
 
 
 @dataclass

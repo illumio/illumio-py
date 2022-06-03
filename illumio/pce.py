@@ -40,6 +40,7 @@ from .util import (
     deprecated,
     convert_active_href_to_draft,
     parse_url,
+    href_from,
     Reference,
     IllumioObject,
     IllumioEncoder,
@@ -351,19 +352,8 @@ class PolicyComputeEngine:
             Returns:
                 IllumioObject: the object json, decoded to its IllumioObject equivalent.
             """
-            response = self.pce.get(self._parse_href(reference), include_org=False, **kwargs)
+            response = self.pce.get(href_from(reference), include_org=False, **kwargs)
             return self.object_cls.from_json(response.json())
-
-        def _parse_href(self, reference):
-            """Attempts to parse HREF value from a provided source."""
-            if isinstance(reference, Reference):
-                return reference.href
-            elif type(reference) is dict:
-                if 'href' in reference:
-                    return reference['href']
-            elif type(reference) is str:
-                return reference
-            raise IllumioApiException('Failed to parse reference value: {}'.format(reference))
 
         def get(self, policy_version: str = DRAFT, parent_href: Union[Reference, str] = None, **kwargs) -> List[IllumioObject]:
             """Retrieves objects from the PCE based on the given parameters.
@@ -498,7 +488,7 @@ class PolicyComputeEngine:
                 body (Any): the update data.
             """
             kwargs['json'] = body
-            self.pce.put(self._parse_href(reference), include_org=False, **kwargs)
+            self.pce.put(href_from(reference), include_org=False, **kwargs)
 
         def delete(self, reference: Union[str, Reference, dict], **kwargs) -> None:
             """Deletes an object in the PCE.
@@ -508,7 +498,7 @@ class PolicyComputeEngine:
             Args:
                 reference (Union[str, Reference, dict]): the HREF of the object to delete.
             """
-            self.pce.delete(self._parse_href(reference), include_org=False, **kwargs)
+            self.pce.delete(href_from(reference), include_org=False, **kwargs)
 
         def _bulk_change(self, objects: List[IllumioObject], method: str, success_status: str, **kwargs) -> List[dict]:
             results = []
