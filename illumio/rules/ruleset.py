@@ -11,7 +11,7 @@ License:
 from dataclasses import dataclass
 from typing import List
 
-from illumio.util import ModifiableObject, pce_api
+from illumio.util import MutableObject, pce_api
 from illumio.policyobjects import LabelSet
 
 from .rule import Rule
@@ -20,7 +20,7 @@ from .iptablesrule import IPTablesRule
 
 @dataclass
 @pce_api('rule_sets', is_sec_policy=True)
-class RuleSet(ModifiableObject):
+class RuleSet(MutableObject):
     enabled: bool = None
     scopes: List[LabelSet] = None
     rules: List[Rule] = None

@@ -14,7 +14,7 @@ from typing import List, Union
 from illumio import IllumioException
 from illumio.util import (
     Reference,
-    ModifiableObject,
+    MutableObject,
     EnforcementMode,
     VisibilityLevel,
     pce_api
@@ -23,7 +23,7 @@ from illumio.util import (
 
 @dataclass
 @pce_api('pairing_profiles')
-class PairingProfile(ModifiableObject):
+class PairingProfile(MutableObject):
     enabled: bool = None
     agent_software_release: str = None
     enforcement_mode: str = None

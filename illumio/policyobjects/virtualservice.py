@@ -12,7 +12,7 @@ from dataclasses import dataclass
 from typing import List
 
 from illumio import IllumioException
-from illumio.util import IllumioObject, Reference, ModifiableObject, pce_api
+from illumio.util import IllumioObject, Reference, MutableObject, pce_api
 
 from .service import BaseService, ServicePort
 
@@ -40,7 +40,7 @@ class ServiceAddress(BaseService):
 
 @dataclass
 @pce_api('virtual_services', is_sec_policy=True)
-class VirtualService(ModifiableObject):
+class VirtualService(MutableObject):
     apply_to: str = None
     pce_fqdn: str = None
     service: Reference = None

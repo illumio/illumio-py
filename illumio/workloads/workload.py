@@ -18,7 +18,7 @@ from illumio.vulnerabilities import Vulnerability
 from illumio.util import (
     JsonObject,
     Reference,
-    ModifiableObject,
+    MutableObject,
     LinkState,
     EnforcementMode,
     VisibilityLevel,
@@ -96,7 +96,7 @@ class IKEAuthenticationCertificate(JsonObject):
 
 @dataclass
 @pce_api('workloads')
-class Workload(ModifiableObject):
+class Workload(MutableObject):
     hostname: str = None
     os_type: str = None
     service_principal_name: str = None

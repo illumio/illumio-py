@@ -12,7 +12,7 @@ import json
 from dataclasses import dataclass
 from typing import List
 
-from illumio.util import JsonObject, Reference, ModifiableObject, pce_api
+from illumio.util import JsonObject, Reference, MutableObject, pce_api
 
 
 @dataclass
@@ -28,7 +28,7 @@ class LabelUsage(JsonObject):
 
 @dataclass
 @pce_api('labels')
-class Label(ModifiableObject):
+class Label(MutableObject):
     key: str = None
     value: str = None
     deleted: bool = None

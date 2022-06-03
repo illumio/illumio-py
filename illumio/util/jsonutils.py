@@ -194,7 +194,7 @@ class IllumioObject(Reference):
 
 
 @dataclass
-class ModifiableObject(IllumioObject):
+class MutableObject(IllumioObject):
     created_at: str = None
     updated_at: str = None
     deleted_at: str = None
@@ -207,6 +207,6 @@ class ModifiableObject(IllumioObject):
 
 
 @dataclass
-class UnmodifiableObject(IllumioObject):
+class ImmutableObject(IllumioObject):
     created_at: str = None
     created_by: Reference = None

@@ -11,14 +11,14 @@ License:
 from dataclasses import dataclass, field
 from typing import List, Union
 
-from illumio.util import JsonObject, Reference, ModifiableObject, pce_api
+from illumio.util import JsonObject, Reference, MutableObject, pce_api
 from illumio.policyobjects import Service, ServicePort
 
 from .actor import Actor
 
 
 @dataclass
-class BaseRule(ModifiableObject):
+class BaseRule(MutableObject):
     ingress_services: List[Union[Service, ServicePort]] = None
     providers: List[Actor] = None
     consumers: List[Actor] = None

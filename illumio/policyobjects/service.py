@@ -13,7 +13,7 @@ from typing import List
 
 from illumio.util import (
     JsonObject,
-    ModifiableObject,
+    MutableObject,
     pce_api,
     convert_protocol
 )
@@ -43,5 +43,5 @@ class ServicePort(BaseService):
 
 @dataclass
 @pce_api('services', is_sec_policy=True)
-class Service(ModifiableObject):
+class Service(MutableObject):
     service_ports: List[ServicePort] = None

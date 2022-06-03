@@ -10,9 +10,9 @@ License:
 """
 from dataclasses import dataclass
 
-from illumio.util import ModifiableObject
+from illumio.util import MutableObject
 
 
 @dataclass
-class Network(ModifiableObject):
+class Network(MutableObject):
     pass

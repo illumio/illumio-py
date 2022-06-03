@@ -12,7 +12,7 @@ from dataclasses import dataclass, field
 from typing import List
 
 from illumio import IllumioException
-from illumio.util import JsonObject, ModifiableObject, VisibilityLevel, pce_api
+from illumio.util import JsonObject, MutableObject, VisibilityLevel, pce_api
 
 
 @dataclass
@@ -66,7 +66,7 @@ class AgentStatus(JsonObject):
 
 
 @dataclass
-class VENAgent(ModifiableObject):
+class VENAgent(MutableObject):
     config: AgentConfig = None
     secure_connect: SecureConnect = None
     status: AgentStatus = None
@@ -78,7 +78,7 @@ class VENAgent(ModifiableObject):
 
 @dataclass
 @pce_api('vens')
-class VEN(ModifiableObject):
+class VEN(MutableObject):
     hostname: str = None
     name: str = None
     status: str = None
