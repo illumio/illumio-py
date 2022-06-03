@@ -39,7 +39,6 @@ from .explorer import TrafficQuery, TrafficFlow
 from .util import (
     convert_active_href_to_draft,
     parse_url,
-    islist,
     Reference,
     IllumioObject,
     IllumioEncoder,
@@ -466,7 +465,7 @@ class PolicyComputeEngine:
             # XXX: workaround for Service Bindings. Multiple bindings
             #   can be created in the same POST, so we need to accommodate
             #   this case by checking the response body type
-            if islist(json_response):
+            if type(json_response) is list:
                 results = {self.name: [], 'errors': []}
                 for o in json_response:
                     if 'href' in o:
