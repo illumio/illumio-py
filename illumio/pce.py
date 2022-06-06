@@ -389,12 +389,36 @@ class PolicyComputeEngine:
             Returns:
                 List[IllumioObject]: the returned list of decoded objects.
             """
+            endpoint = self._build_endpoint(policy_version, parent)
+            response = self.pce.get(endpoint, include_org=False, **kwargs)
+            return [self.object_cls.from_json(o) for o in response.json()]
+
+        def get_all(self, policy_version: str = DRAFT, parent: Union[str, Reference, dict] = None, **kwargs) -> List[IllumioObject]:
+            """Retrieves all objects of a given type from the PCE.
+
+            This function makes two requests, using the `X-Total-Count` header
+            in the response to set the `max_results` parameter on the follow-up
+            request.
+
+            Args:
+                policy_version (str, optional): if fetching security policy objects, specifies
+                    whether to fetch 'draft' or 'active' objects. Defaults to 'draft'.
+                parent (Union[str, Reference, dict], optional): HREF of the created
+                    object's parent object. Required for some object types, such
+                    as Security Rules which must be created as children of
+                    existing RuleSets.
+
+            Returns:
+                List[IllumioObject]: the returned list of decoded objects.
+            """
             params = kwargs.get('params', {})
             endpoint = self._build_endpoint(policy_version, parent)
 
             if 'max_results' not in params:
                 kwargs['params'] = {**params, **{'max_results': 0}}
                 response = self.pce.get(endpoint, **kwargs)
+                if len(response.json()) > 0:  # for endpoints that don't support max_results
+                    return [self.object_cls.from_json(o) for o in response.json()]
                 filtered_object_count = response.headers['X-Total-Count']
                 kwargs['params'] = {**params, **{'max_results': int(filtered_object_count)}}
 
@@ -410,7 +434,7 @@ class PolicyComputeEngine:
                 parent (Union[str, Reference, dict], optional): HREF of the created
                     object's parent object. Required for some object types, such
                     as Security Rules which must be created as children of
-                    existing RuleSets.
+                    existing Rule Sets.
 
             Returns:
                 List[IllumioObject]: the returned list of decoded objects.
