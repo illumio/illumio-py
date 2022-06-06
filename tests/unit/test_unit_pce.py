@@ -1,12 +1,13 @@
 import json
 import os
 import re
-from this import d
+from collections import namedtuple
 
 import pytest
 
 from illumio import PolicyComputeEngine
-from illumio.util import PCE_APIS, DRAFT
+from illumio.rules import Rule
+from illumio.util import PCE_APIS, DRAFT, ACTIVE
 
 
 def test_custom_protocol():
@@ -32,6 +33,36 @@ def test_path_parsing():
 def test_int_org_id():
     pce = PolicyComputeEngine('my.pce.com', org_id=1)
     assert pce.base_url == 'https://my.pce.com:443/api/v2'
+
+
+_API = namedtuple('API', [
+    'name',
+    'endpoint',
+    'object_class',
+    'is_sec_policy',
+    'is_global'
+])
+
+
+@pytest.mark.parametrize(
+    "api,policy_version,parent,expected", [
+        (
+            _API(name='rules', endpoint='/sec_rules', object_class=Rule, is_sec_policy=True, is_global=False),
+            DRAFT,
+            '/orgs/1/sec_policy/active/rule_sets/1',
+            '/orgs/1/sec_policy/draft/rule_sets/1/sec_rules'
+        ),
+        (
+            _API(name='rules', endpoint='/sec_rules', object_class=Rule, is_sec_policy=True, is_global=False),
+            ACTIVE,
+            '/orgs/1/sec_policy/active/rule_sets/1',
+            '/orgs/1/sec_policy/draft/rule_sets/1/sec_rules'
+        )
+    ]
+)
+def test_endpoint_building(api, policy_version, parent, expected, pce):
+    endpoint = PolicyComputeEngine._PCEObjectAPI(pce, api)._build_endpoint(policy_version, parent)
+    assert endpoint == expected
 
 
 @pytest.mark.parametrize(
