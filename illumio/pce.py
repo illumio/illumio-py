@@ -317,23 +317,22 @@ class PolicyComputeEngine:
             self.is_global = api_data.is_global
             self.pce = pce
 
-        def _build_endpoint(self, policy_version: str, parent: Union[Reference, str]) -> str:
+        def _build_endpoint(self, policy_version: str, parent: Any) -> str:
             """Builds the PCE request endpoint."""
             endpoint = self.endpoint
 
             if parent:  # e.g. /sec_policy/active/rulesets/1/sec_rules
-                parent_href = parent if type(parent) is str else parent.href
-                parent_draft_href = convert_active_href_to_draft(parent_href)
+                parent_draft_href = convert_active_href_to_draft(href_from(parent))
                 endpoint = '{}/{}'.format(parent_draft_href, endpoint)
-            # mutually exclusive as the parent HREF will have the sec_policy prefix already
-            elif self.is_sec_policy:
-                if policy_version not in [ACTIVE, DRAFT]:
-                    raise IllumioApiException("Invalid policy_version passed to get: {}".format(policy_version))
-                endpoint = '/sec_policy/{}/{}'.format(policy_version, endpoint)
+            else:  # mutually exclusive as the parent HREF will have the sec_policy and orgs prefix already
+                if self.is_sec_policy:
+                    if policy_version not in [ACTIVE, DRAFT]:
+                        raise IllumioApiException("Invalid policy_version passed to get: {}".format(policy_version))
+                    endpoint = '/sec_policy/{}/{}'.format(policy_version, endpoint)
 
-            if not self.is_global:
-                endpoint = '/orgs/{}/{}'.format(self.pce.org_id, endpoint)
-            return endpoint
+                if not self.is_global:
+                    endpoint = '/orgs/{}/{}'.format(self.pce.org_id, endpoint)
+            return endpoint.replace('//', '/')
 
         def get_by_reference(self, reference: Union[str, Reference, dict], **kwargs) -> IllumioObject:
             """Retrieves an object from the PCE using its HREF.
@@ -355,7 +354,7 @@ class PolicyComputeEngine:
             response = self.pce.get(href_from(reference), include_org=False, **kwargs)
             return self.object_cls.from_json(response.json())
 
-        def get(self, policy_version: str = DRAFT, parent_href: Union[Reference, str] = None, **kwargs) -> List[IllumioObject]:
+        def get(self, policy_version: str = DRAFT, parent: Union[str, Reference, dict] = None, **kwargs) -> List[IllumioObject]:
             """Retrieves objects from the PCE based on the given parameters.
 
             Keyword arguments to this function are passed to the `requests.get` call.
@@ -382,7 +381,7 @@ class PolicyComputeEngine:
             Args:
                 policy_version (str, optional): if fetching security policy objects, specifies
                     whether to fetch 'draft' or 'active' objects. Defaults to 'draft'.
-                parent_href (Union[Reference, str], optional): HREF of the created
+                parent (Union[str, Reference, dict], optional): HREF of the created
                     object's parent object. Required for some object types, such
                     as Security Rules which must be created as children of
                     existing RuleSets.
@@ -391,7 +390,7 @@ class PolicyComputeEngine:
                 List[IllumioObject]: the returned list of decoded objects.
             """
             params = kwargs.get('params', {})
-            endpoint = self._build_endpoint(policy_version, parent_href)
+            endpoint = self._build_endpoint(policy_version, parent)
 
             if 'max_results' not in params:
                 kwargs['params'] = {**params, **{'max_results': 0}}
@@ -402,13 +401,13 @@ class PolicyComputeEngine:
             response = self.pce.get(endpoint, include_org=False, **kwargs)
             return [self.object_cls.from_json(o) for o in response.json()]
 
-        def get_async(self, policy_version: str = DRAFT, parent_href: Union[Reference, str] = None, **kwargs) -> List[IllumioObject]:
+        def get_async(self, policy_version: str = DRAFT, parent: Union[str, Reference, dict] = None, **kwargs) -> List[IllumioObject]:
             """Retrieves objects asynchronously from the PCE based on the given parameters.
 
             Args:
                 policy_version (str, optional): if fetching security policy objects, specifies
                     whether to fetch 'draft' or 'active' objects. Defaults to 'draft'.
-                parent_href (Union[Reference, str], optional): HREF of the created
+                parent (Union[str, Reference, dict], optional): HREF of the created
                     object's parent object. Required for some object types, such
                     as Security Rules which must be created as children of
                     existing RuleSets.
@@ -416,11 +415,11 @@ class PolicyComputeEngine:
             Returns:
                 List[IllumioObject]: the returned list of decoded objects.
             """
-            endpoint = self._build_endpoint(policy_version, parent_href)
+            endpoint = self._build_endpoint(policy_version, parent)
             response = self.pce.get_collection(endpoint, **kwargs)
             return [self.object_cls.from_json(o) for o in response.json()]
 
-        def create(self, body: Any, parent_href: Union[Reference, str] = None, **kwargs) -> Any:
+        def create(self, body: Any, parent: Union[str, Reference, dict] = None, **kwargs) -> Any:
             """Creates a virtual service object in the PCE.
 
             See https://docs.illumio.com/core/21.5/API-Reference/index.html
@@ -439,7 +438,7 @@ class PolicyComputeEngine:
 
             Args:
                 body (Any): the parameters for the newly created object.
-                parent_href (Union[Reference, str], optional): HREF of the created
+                parent (Union[str, Reference, dict], optional): HREF of the created
                     object's parent object. Required for some object types, such
                     as Security Rules which must be created as children of
                     existing RuleSets.
@@ -448,7 +447,7 @@ class PolicyComputeEngine:
                 IllumioObject: the created object.
             """
             kwargs['json'] = body
-            endpoint = self._build_endpoint(DRAFT, parent_href)
+            endpoint = self._build_endpoint(DRAFT, parent)
             response = self.pce.post(endpoint, include_org=False, **kwargs)
             return self._parse_response_body(response.json())
 
