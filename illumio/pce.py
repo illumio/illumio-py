@@ -569,13 +569,13 @@ class PolicyComputeEngine:
             """
             return self._bulk_change(objects_to_update, method='bulk_update', success_status='updated', **kwargs)
 
-        def bulk_delete(self, hrefs: List[str], **kwargs) -> List[dict]:
+        def bulk_delete(self, refs: List[Union[str, Reference, dict]], **kwargs) -> List[dict]:
             """Deletes a set of objects in the PCE.
 
             NOTE: Bulk updates can currently only be applied for Workloads.
 
             Args:
-                hrefs (List[str]): list of objects to delete.
+                hrefs (List[Union[str, Reference, dict]]): list of references to objects to delete.
 
             Returns:
                 List[dict]: a list containing any errors that occurred during
@@ -593,7 +593,7 @@ class PolicyComputeEngine:
                         }
                     ]
             """
-            objects_to_delete = [Reference(href=href) for href in hrefs]
+            objects_to_delete = [Reference(href=href_from(reference)) for reference in refs]
             return self._bulk_change(objects_to_delete, method='bulk_delete', success_status=None, **kwargs)
 
     def __getattr__(self, name: str) -> _PCEObjectAPI:
