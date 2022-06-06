@@ -7,6 +7,7 @@ from illumio.policyobjects import (
     ServicePort
 )
 from illumio.rules import RuleSet
+from illumio.workloads import Workload
 
 from helpers import random_string
 
@@ -142,3 +143,20 @@ def rule_set(pce, session_identifier, app_label, env_label, loc_label):
     )
     yield rule_set
     pce.rule_sets.delete(rule_set.href)
+
+
+@pytest.fixture
+def workload(pce, session_identifier):
+    identifier = random_string()
+    hostname = '{}.{}'.format(session_identifier, identifier)
+    workload = pce.workloads.create(
+        Workload(
+            name=hostname,
+            hostname=hostname,
+            description='Created by illumio python library integration tests',
+            external_data_set=session_identifier,
+            external_data_reference=identifier
+        )
+    )
+    yield workload
+    pce.workloads.delete(workload.href)
