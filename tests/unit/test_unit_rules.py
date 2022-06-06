@@ -52,6 +52,7 @@ def test_builder():
     )
     expected_result = json.loads('''
         {
+            "enabled": true,
             "ingress_services": [
                 {"port": 1234, "proto": 6}
             ],
@@ -71,5 +72,5 @@ def test_builder():
 
 
 def test_get_rules(pce):
-    rules = pce.rules.get(parent_href=MOCK_RULE_SET_HREF)
+    rules = pce.rules.get(parent=MOCK_RULE_SET_HREF)
     assert len(rules) > 0
