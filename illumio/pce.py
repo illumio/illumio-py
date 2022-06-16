@@ -61,8 +61,21 @@ class PolicyComputeEngine:
         base_url: the base URL for API calls to the PCE. Has the form
             http[s]://<DOMAIN_NAME>:<PORT>/api/<API_VERSION>
         org_id: the PCE organization ID.
+        container_clusters: Container Clusters API.
+        enforcement_boundaries: Enforcement Boundaries API.
+        ip_lists: IP Lists API.
+        label_groups: Label Groups API.
+        labels: Labels API.
+        pairing_profiles: Pairing Profiles API.
+        rule_sets: Rule Sets API.
+        sec_rules: Rules API.
+        security_principals: Security Principals API.
+        service_bindings: Service Bindings API.
+        services: Services API.
+        vens: VENs API.
+        virtual_services: Virtual Services API.
+        workloads: Workloads API.
     """
-
     def __init__(self, url: str, port: str = '443', version: str = 'v2', org_id: str = '1') -> None:
         """Initializes the PCE REST client.
 
@@ -308,7 +321,10 @@ class PolicyComputeEngine:
             return False
 
     class _PCEObjectAPI:
-        """Generic API for registered PCE objects."""
+        """Generic API for registered PCE objects.
+
+        Each registered API exposes CRUD operation functions through this common interface.
+        """
         def __init__(self, pce: 'PolicyComputeEngine', api_data: object) -> None:
             self.name = api_data.name
             self.endpoint = api_data.endpoint
@@ -381,8 +397,8 @@ class PolicyComputeEngine:
             Args:
                 policy_version (str, optional): if fetching security policy objects, specifies
                     whether to fetch 'draft' or 'active' objects. Defaults to 'draft'.
-                parent (Union[str, Reference, dict], optional): HREF of the created
-                    object's parent object. Required for some object types, such
+                parent (Union[str, Reference, dict], optional): Reference to the
+                    object's parent. Required for some object types, such
                     as Security Rules which must be created as children of
                     existing RuleSets.
 
@@ -403,8 +419,8 @@ class PolicyComputeEngine:
             Args:
                 policy_version (str, optional): if fetching security policy objects, specifies
                     whether to fetch 'draft' or 'active' objects. Defaults to 'draft'.
-                parent (Union[str, Reference, dict], optional): HREF of the created
-                    object's parent object. Required for some object types, such
+                parent (Union[str, Reference, dict], optional): Reference to the
+                    object's parent. Required for some object types, such
                     as Security Rules which must be created as children of
                     existing RuleSets.
 
@@ -431,8 +447,8 @@ class PolicyComputeEngine:
             Args:
                 policy_version (str, optional): if fetching security policy objects, specifies
                     whether to fetch 'draft' or 'active' objects. Defaults to 'draft'.
-                parent (Union[str, Reference, dict], optional): HREF of the created
-                    object's parent object. Required for some object types, such
+                parent (Union[str, Reference, dict], optional): Reference to the
+                    object's parent. Required for some object types, such
                     as Security Rules which must be created as children of
                     existing Rule Sets.
 
@@ -443,8 +459,8 @@ class PolicyComputeEngine:
             response = self.pce.get_collection(endpoint, **kwargs)
             return [self.object_cls.from_json(o) for o in response.json()]
 
-        def create(self, body: Any, parent: Union[str, Reference, dict] = None, **kwargs) -> Any:
-            """Creates a virtual service object in the PCE.
+        def create(self, body: Any, parent: Union[str, Reference, dict] = None, **kwargs) -> IllumioObject:
+            """Creates an object in the PCE.
 
             See https://docs.illumio.com/core/21.5/API-Reference/index.html
             for details on POST body parameters when creating objects.
@@ -462,8 +478,8 @@ class PolicyComputeEngine:
 
             Args:
                 body (Any): the parameters for the newly created object.
-                parent (Union[str, Reference, dict], optional): HREF of the created
-                    object's parent object. Required for some object types, such
+                parent (Union[str, Reference, dict], optional): Reference to the
+                    object's parent. Required for some object types, such
                     as Security Rules which must be created as children of
                     existing RuleSets.
 

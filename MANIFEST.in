@@ -1,0 +1,3 @@
+# exclude git files from setup_scm inclusions
+exclude .gitignore
+prune .github
