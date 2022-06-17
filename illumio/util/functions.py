@@ -9,10 +9,12 @@ License:
     Apache2, see LICENSE for more details.
 """
 import functools
+import re
 import socket
 import typing
 import warnings
 from dataclasses import dataclass
+from urllib.parse import urlparse
 
 from illumio._version import version
 from illumio.exceptions import IllumioException
@@ -116,16 +118,14 @@ def pce_api(name: str, endpoint: str = None, is_sec_policy=False, is_global=Fals
 
 def parse_url(url: str) -> tuple:
     """Parses given URL into its scheme and hostname, stripping port and path."""
-    # XXX: we're not using urlparse here because it expects a scheme prefix.
-    #   urlparse('my.pce.com') does not work as expected, so handle it manually
-    protocol = None
-    url = url.strip().lower()  # remove leading/trailing whitespace
-    if '://' in url:           # use provided protocol if included
-        protocol, url = url.split('://')
+    pattern = re.compile('^\w+://')
+    if not re.match(pattern, url):
+        url = 'https://{}'.format(url)
+    parsed = urlparse(url)
+    protocol = parsed.scheme
     if protocol not in ('http', 'https'):
         protocol = 'https'     # only support http(s)
-    url = url.split('/')[0]    # remove any provided path
-    return protocol, url
+    return protocol, parsed.hostname
 
 
 def convert_protocol(protocol: str) -> int:
