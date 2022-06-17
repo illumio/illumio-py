@@ -17,6 +17,9 @@ from illumio import (
 
 class PolicyComputeEngine:
 
+    base_url: str
+    org_id: str
+
     def __init__(self, url: str, port: str, version: str, org_id: str) -> None: ...
 
     def _setup_retry(self): ...
@@ -116,20 +119,20 @@ class PolicyComputeEngine:
     def __getattr__(self, name: str) -> _PCEObjectAPI: ...
 
     # Dynamic APIs stubbed here for auto-completion
-    container_clusters = _PCEObjectAPI
-    enforcement_boundaries = _PCEObjectAPI
-    ip_lists = _PCEObjectAPI
-    label_groups = _PCEObjectAPI
-    labels = _PCEObjectAPI
-    pairing_profiles = _PCEObjectAPI
-    rule_sets = _PCEObjectAPI
-    sec_rules = _PCEObjectAPI
-    security_principals = _PCEObjectAPI
-    service_bindings = _PCEObjectAPI
-    services = _PCEObjectAPI
-    vens = _PCEObjectAPI
-    virtual_services = _PCEObjectAPI
-    workloads = _PCEObjectAPI
+    container_clusters: _PCEObjectAPI
+    enforcement_boundaries: _PCEObjectAPI
+    ip_lists: _PCEObjectAPI
+    label_groups: _PCEObjectAPI
+    labels: _PCEObjectAPI
+    pairing_profiles: _PCEObjectAPI
+    rule_sets: _PCEObjectAPI
+    sec_rules: _PCEObjectAPI
+    security_principals: _PCEObjectAPI
+    service_bindings: _PCEObjectAPI
+    services: _PCEObjectAPI
+    vens: _PCEObjectAPI
+    virtual_services: _PCEObjectAPI
+    workloads: _PCEObjectAPI
 
     def get_default_ip_list(self, **kwargs) -> IPList: ...
 
