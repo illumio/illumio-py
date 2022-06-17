@@ -1,7 +1,7 @@
 Changelog
 =========
 
-Version 1.0.0 (Unreleased)
+Version 1.0.0 (2022-06-16)
 -------------
 
 MAJOR CHANGES:
