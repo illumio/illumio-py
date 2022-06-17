@@ -27,8 +27,12 @@ PCE_APIS = {}
 class IllumioEnumMeta(EnumMeta):
 
     def __contains__(cls, value):
+        if value is None:
+            return False
         if type(value) is str:
             value = value.lower()
+        if isinstance(type(value), IllumioEnumMeta):
+            value = value.value
         return value in cls._value2member_map_
 
 
