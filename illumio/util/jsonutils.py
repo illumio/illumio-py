@@ -21,6 +21,7 @@ from typing import List, Any
 
 from illumio.exceptions import IllumioException
 
+from .constants import IllumioEnumMeta
 from .functions import ignore_empty_keys, isunion, islist
 
 _default = json.JSONEncoder()  # fall back to the default encoder for non-Illumio API objects
@@ -39,35 +40,54 @@ class IllumioEncoder(json.JSONEncoder):
 class JsonObject(ABC):
 
     def __post_init__(self):
-        self._flatten_refs()
+        for field in fields(self):
+            value = getattr(self, field.name)
+            self._flatten_ref(field, value)
+            self._resolve_enum(field, value)
         self._validate()
 
-    def _flatten_refs(self):
+    def _resolve_enum(self, field, value):
+        """Replaces IllumioEnumMeta subtypes with their internal value.
+
+        This allows clients to pass enums directly as attribute values.
+
+        For example:
+
+        >>> Workload(..., enforcement_mode=EnforcementMode.SELECTIVE)
+
+        will be converted to
+
+        >>> Workload(..., enforcement_mode='selective')
+        """
+        if value is None:
+            return
+        if isinstance(type(value), IllumioEnumMeta):
+            setattr(self, field.name, value.value)
+
+    def _flatten_ref(self, field, value):
         """Replaces Reference subclasses with a simplified Reference object.
 
         This allows clients to pass a Reference subclass instance without
-        breaking the encoded object for API calls.
+        breaking the encoded object schema for API calls.
         """
-        for field in fields(self):
-            value = getattr(self, field.name)
-            if value is None:
-                continue
-            if field.type is Reference:
+        if value is None:
+            return
+        if field.type is Reference:
+            if isinstance(value, Reference):
+                setattr(self, field.name, Reference(value.href))
+        elif islist(field.type):
+            if field.type.__args__[0] is Reference:
+                ref_list = []
+                for ref in value:
+                    if isinstance(ref, Reference):
+                        ref_list.append(Reference(href=ref.href))
+                    else:
+                        ref_list.append(ref)
+                setattr(self, field.name, ref_list)
+        elif isunion(field.type):
+            if Reference in field.type.__args__:
                 if isinstance(value, Reference):
                     setattr(self, field.name, Reference(value.href))
-            elif islist(field.type):
-                if field.type.__args__[0] is Reference:
-                    ref_list = []
-                    for ref in value:
-                        if isinstance(ref, Reference):
-                            ref_list.append(Reference(href=ref.href))
-                        else:
-                            ref_list.append(ref)
-                    setattr(self, field.name, ref_list)
-            elif isunion(field.type):
-                if Reference in field.type.__args__:
-                    if isinstance(value, Reference):
-                        setattr(self, field.name, Reference(value.href))
 
     def _validate(self):
         """Validates fields by comparing their values to their registered dataclass types."""
@@ -79,11 +99,11 @@ class JsonObject(ABC):
     def _validate_field(self, expected_type, value) -> bool:
         if value is None:
             return True
-        if expected_type is object:
+        elif expected_type is object:
             return True
-        if type(value) == expected_type:
+        elif type(value) == expected_type:
             return True
-        if isunion(expected_type):
+        elif isunion(expected_type):
             return any(self._validate_field(type_, value) for type_ in expected_type.__args__)
         elif isclass(expected_type) and issubclass(expected_type, JsonObject):
             # if the object is already decoded, determine whether it's
