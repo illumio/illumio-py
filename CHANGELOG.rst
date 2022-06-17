@@ -1,6 +1,76 @@
 Changelog
 =========
 
+Version 1.0.0 (Unreleased)
+-------------
+
+MAJOR CHANGES:
+
+* change PolicyComputeEngine CRUD interfaces from static functions to a generic internal class (`illumio.pce._PCEObjectAPI`) that checks against dynamically registered endpoints
+
+NEW FEATURES:
+
+* CRUD operations for new model
+    * `illumio.pce._PCEObjectAPI::create`
+    * `illumio.pce._PCEObjectAPI::get`
+    * `illumio.pce._PCEObjectAPI::update`
+    * `illumio.pce._PCEObjectAPI::delete`
+* `illumio.pce._PCEObjectAPI::get_by_reference` - given a type that can be decomposed in an HREF, get the single object it represents
+* `illumio.pce._PCEObjectAPI::get_async` - async collection get
+* `illumio.pce._PCEObjectAPI::get_all` - fetch all objects of the specified type by checking X-Total-Count
+* add bulk operation functions
+    * `illumio.pce._PCEObjectAPI::bulk_create` - can be used with workloads, virtual services, and security principals
+    * `illumio.pce._PCEObjectAPI::bulk_update` - can be used with workloads and virtual services
+    * `illumio.pce._PCEObjectAPI::bulk_delete` - can be used with workloads
+
+REMOVED:
+
+* `illumio.util.constants.Mode` - deprecated in PCE . replaced by `illumio.util.constants.EnforcementMode` in later versions of the PCE
+* `illumio.rules.Ruleset` - renamed `illumio.rules.RuleSet` for internal consistency
+* `illumio.pce.PolicyComputeEngine` functions
+    * `_get_policy_objects` - change /sec_policy request behaviour for new functions to only return draft or active objects based on policy_version parameter
+    * `get_virtual_service` - replaced by `PolicyComputeEngine.virtual_services::get_by_reference`
+    * `get_virtual_services` - replaced by `PolicyComputeEngine.virtual_services::get`
+    * `get_virtual_services_by_name` - deprecated in v0.8.0
+    * `create_virtual_service` - replaced by `PolicyComputeEngine.virtual_services::create`
+    * `create_service_binding` - deprecated in v0.8.2
+    * `create_service_bindings` - replaced by `PolicyComputeEngine.service_bindings::create`
+    * `get_ip_list` - replaced by `PolicyComputeEngine.ip_lists::get_by_reference`
+    * `get_ip_lists` - replaced by `PolicyComputeEngine.ip_lists::get`
+    * `get_ip_lists_by_name` - deprecated in v0.8.0
+    * `create_ip_list` - replaced by `PolicyComputeEngine.ip_lists::create`
+    * `get_ruleset` - replaced by `PolicyComputeEngine.rule_sets::get_by_reference`
+    * `get_rulesets` - replaced by `PolicyComputeEngine.rule_sets::get`
+    * `get_rulesets_by_name` - deprecated in v0.8.0
+    * `create_ruleset` - replaced by `PolicyComputeEngine.rule_sets::create`
+    * `create_rule` - replaced by `PolicyComputeEngine.rules::create`
+    * `get_enforcement_boundary` - replaced by `PolicyComputeEngine.enforcement_boundaries::get_by_reference`
+    * `get_enforcement_boundaries` - replaced by `PolicyComputeEngine.enforcement_boundaries::get`
+    * `get_enforcement_boundaries_by_name` - deprecated in v0.8.0
+    * `create_enforcement_boundary` - replaced by `PolicyComputeEngine.enforcement_boundaries::create`
+    * `get_pairing_profile` - replaced by `PolicyComputeEngine.pairing_profiles::get_by_reference`
+    * `get_pairing_profiles` - replaced by `PolicyComputeEngine.pairing_profiles::get`
+    * `get_pairing_profiles_by_name` - deprecated in v0.8.0
+    * `create_pairing_profile` - replaced by `PolicyComputeEngine.pairing_profiles::create`
+    * `update_pairing_profile` - replaced by `PolicyComputeEngine.pairing_profiles::update`
+    * `delete_pairing_profile` - replaced by `PolicyComputeEngine.pairing_profiles::delete`
+    * `get_workload` - replaced by `PolicyComputeEngine.workloads::get_by_reference`
+    * `get_workloads` - replaced by `PolicyComputeEngine.workloads::get`
+    * `update_workload_enforcement_modes` - replaced with a more generic `bulk_update`
+* `illumio.util.jsonutils.ModifiableObject` - changed name to `MutableObject`
+* `illumio.util.jsonutils.UnmodifiableObject` - changed name to `ImmutableObject`
+
+IMPROVEMENTS:
+
+* update core JsonObject logic to perform type-based validation
+* improve handling of reference types for JSON encoding
+* improve URL building to be less strict
+* improve tests and add integration test suite
+
+NOTES:
+
+* remove deprecation warning from `illumio.util.functions::convert_protocol`
+
 Version 0.8.4 (2022-05-27)
 -------------
 
