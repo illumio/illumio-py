@@ -11,7 +11,7 @@ coverage:
 	pytest --cov-config .coveragerc --verbose --cov-report term --cov-report xml --cov=illumio tests
 
 ci:
-	pytest tests --junitxml=report.xml
+	pytest tests --junitxml=report.xml --assert=plain
 
 publish:
 	pip install --upgrade twine

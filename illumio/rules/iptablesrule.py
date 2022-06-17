@@ -11,7 +11,7 @@ License:
 from dataclasses import dataclass
 from typing import List
 
-from illumio.util import JsonObject, ModifiableObject
+from illumio.util import JsonObject, MutableObject
 
 from .actor import Actor
 
@@ -24,7 +24,7 @@ class IPTablesStatement(JsonObject):
 
 
 @dataclass
-class IPTablesRule(ModifiableObject):
+class IPTablesRule(MutableObject):
     ip_version: str = None
     enabled: bool = None
     statements: List[IPTablesStatement] = None

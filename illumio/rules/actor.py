@@ -12,7 +12,7 @@ import re
 from dataclasses import dataclass
 
 from illumio.exceptions import IllumioException
-from illumio.util import JsonObject, Reference, HREF_REGEX
+from illumio.util import href_from, JsonObject, Reference, HREF_REGEX
 
 AMS = 'ams'
 
@@ -28,7 +28,8 @@ class Actor(JsonObject):
     ip_list: Reference = None
 
     @staticmethod
-    def from_href(href):
+    def from_reference(reference):
+        href = href_from(reference)
         if href.lower() == AMS:  # special case for all objects
             return Actor(actors=AMS)
         actor = Actor()

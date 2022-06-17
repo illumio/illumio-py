@@ -11,24 +11,24 @@ License:
 from dataclasses import dataclass
 from typing import List, Union
 
-from illumio.util import JsonObject, Reference, ModifiableObject
+from illumio.util import JsonObject, Reference, MutableObject, pce_api
 from illumio.policyobjects import Service, ServicePort
 
 from .actor import Actor
 
 
 @dataclass
-class BaseRule(ModifiableObject):
+class BaseRule(JsonObject):
     ingress_services: List[Union[Service, ServicePort]] = None
     providers: List[Actor] = None
     consumers: List[Actor] = None
 
     @classmethod
-    def build(cls, providers: List[str], consumers: List[str],
+    def build(cls, providers: List[Union[str, Reference, dict]], consumers: List[Union[str, Reference, dict]],
             ingress_services: List[Union[JsonObject, dict, str]], **kwargs) -> 'BaseRule':
         services = []
         for service in ingress_services:
-            if type(service) is JsonObject:
+            if isinstance(service, JsonObject):
                 services.append(service)
             elif type(service) is str:
                 services.append(Service(href=service))
@@ -36,17 +36,18 @@ class BaseRule(ModifiableObject):
                 service_type = Service if 'href' in service else ServicePort
                 services.append(service_type.from_json(service))
         return cls(
-            providers=[Actor.from_href(provider) for provider in providers],
-            consumers=[Actor.from_href(consumer) for consumer in consumers],
+            providers=[Actor.from_reference(provider) for provider in providers],
+            consumers=[Actor.from_reference(consumer) for consumer in consumers],
             ingress_services=services,
             **kwargs
         )
 
     def _decode_complex_types(self):
         decoded_ingress_services = []
-        for service in self.ingress_services:
-            service_type = Service if 'href' in service else ServicePort
-            decoded_ingress_services.append(service_type.from_json(service))
+        if self.ingress_services:
+            for service in self.ingress_services:
+                service_type = Service if 'href' in service else ServicePort
+                decoded_ingress_services.append(service_type.from_json(service))
         self.ingress_services = decoded_ingress_services
         super()._decode_complex_types()
 
@@ -58,7 +59,79 @@ class LabelResolutionBlock(JsonObject):
 
 
 @dataclass
-class Rule(BaseRule):
+@pce_api('rules', endpoint='/sec_rules')
+class Rule(BaseRule, MutableObject):
+    """Represents a security rule in the PCE.
+
+    Each security rule defines one or more services on which traffic will be
+    allowed from the defined providers to the defined consumers.
+
+    Providers and consumers can be defined using static (workload HREF) or
+    dynamic (label, IP list) references. By default, providers and consumers
+    are resolved as workloads.
+
+    See https://docs.illumio.com/core/21.5/Content/Guides/security-policy/create-security-policy/rules.htm
+
+    Usage:
+        >>> from illumio import PolicyComputeEngine, Rule, RuleSet, LabelSet
+        >>> any_ip_list = pce.get_default_ip_list()
+        >>> role_label = pce.labels.create({'key': 'role', 'value': 'Web'})
+        >>> app_label = pce.labels.create({'key': 'app', 'value': 'App'})
+        >>> env_label = pce.labels.create({'key': 'env', 'value': 'Production'})
+        >>> loc_label = pce.labels.create({'key': 'loc', 'value': 'AWS'})
+        >>> ruleset = RuleSet(
+        ...     name='RS-LAB-ALLOWLIST',
+        ...     scopes=[
+        ...         LabelSet(
+        ...             labels=[app_label, env_label, loc_label]
+        ...         )
+        ...     ]
+        ... )
+        >>> ruleset = pce.rule_sets.create(ruleset)
+        >>> rule = Rule.build(
+        ...     providers=[role_label],
+        ...     consumers=[any_ip_list],
+        ...     ingress_services=[
+        ...         {'port': 80, 'proto': 'tcp'},
+        ...         {'port': 443, 'proto': 'tcp'}
+        ...     ],
+        ...     resolve_providers_as=['workloads'],
+        ...     resolve_consumers_as=['workloads'],
+        ...     unscoped_consumers=True  # creates an extra-scope rule
+        ... )
+        >>> rule = pce.rules.create(rule, parent=ruleset)
+        >>> rule
+        Rule(
+            href='/orgs/1/sec_policy/rule_sets/19/rules/sec_rules/34',
+            enabled=True,
+            providers=[
+                Actor(
+                    label=Reference(
+                        href='/orgs/1/labels/21'
+                    ),
+                    ...
+                )
+            ],
+            consumers=[
+                Actor(
+                    ip_list=Reference(
+                        href='/orgs/1/sec_policy/draft/ip_lists/1'
+                    ),
+                    ...
+                )
+            ],
+            ingress_services=[
+                ServicePort(port=80, proto=6, ...),
+                ServicePort(port=443, proto=6, ...)
+            ],
+            resolve_labels_as=LabelResolutionBlock(
+                providers=['workloads'],
+                consumers=['workloads']
+            ),
+            unscoped_consumers=True,
+            ...
+        )
+    """
     enabled: bool = None
     resolve_labels_as: LabelResolutionBlock = None
     sec_connect: bool = None
@@ -69,7 +142,8 @@ class Rule(BaseRule):
     network_type: str = None
 
     @classmethod
-    def build(cls, providers: List[str], consumers: List[str], ingress_services: List[dict],
-            resolve_providers_as: List[str], resolve_consumers_as: List[str], **kwargs) -> 'Rule':
+    def build(cls, providers: List[Union[str, Reference, dict]], consumers: List[Union[str, Reference, dict]],
+            ingress_services: List[Union[JsonObject, dict, str]],
+            resolve_providers_as: List[str], resolve_consumers_as: List[str], enabled=True, **kwargs) -> 'Rule':
         resolve_labels_as = LabelResolutionBlock(providers=resolve_providers_as, consumers=resolve_consumers_as)
-        return super().build(providers, consumers, ingress_services, resolve_labels_as=resolve_labels_as, **kwargs)
+        return super().build(providers, consumers, ingress_services, resolve_labels_as=resolve_labels_as, enabled=enabled, **kwargs)

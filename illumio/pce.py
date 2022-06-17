@@ -6,7 +6,7 @@ Usage:
     >>> from illumio import PolicyComputeEngine
     >>> pce = PolicyComputeEngine('my.pce.com', port='8443', org_id='12')
     >>> pce.set_credentials('<API_KEY>', '<API_SECRET>')
-    >>> workloads = pce.get_workloads(
+    >>> workloads = pce.workloads.get(
     ...     params={
     ...         'managed': True,
     ...         'enforcement_mode': 'visibility_only'
@@ -24,8 +24,9 @@ Copyright:
 License:
     Apache2, see LICENSE for more details.
 """
+import json
 import time
-from typing import List, Union
+from typing import Any, List, Union
 
 from requests import Session, Response
 from requests.adapters import HTTPAdapter
@@ -33,26 +34,22 @@ from urllib3.util.retry import Retry
 
 from .secpolicy import PolicyChangeset, PolicyVersion
 from .exceptions import IllumioApiException
-from .policyobjects import (
-    IPList,
-    ServiceBinding,
-    VirtualService
-)
+from .policyobjects import IPList
 from .explorer import TrafficQuery, TrafficFlow
-from .rules import Ruleset, Rule, EnforcementBoundary
 from .util import (
     deprecated,
     convert_active_href_to_draft,
     parse_url,
+    href_from,
+    Reference,
     IllumioObject,
-    PolicyObjectType,
-    EnforcementMode,
+    IllumioEncoder,
     ACTIVE,
     DRAFT,
     ANY_IP_LIST_NAME,
-    WORKLOAD_BULK_UPDATE_MAX
+    BULK_CHANGE_LIMIT,
+    PCE_APIS
 )
-from .workloads import Workload, PairingProfile
 
 
 class PolicyComputeEngine:
@@ -64,8 +61,21 @@ class PolicyComputeEngine:
         base_url: the base URL for API calls to the PCE. Has the form
             http[s]://<DOMAIN_NAME>:<PORT>/api/<API_VERSION>
         org_id: the PCE organization ID.
+        container_clusters: Container Clusters API.
+        enforcement_boundaries: Enforcement Boundaries API.
+        ip_lists: IP Lists API.
+        label_groups: Label Groups API.
+        labels: Labels API.
+        pairing_profiles: Pairing Profiles API.
+        rule_sets: Rule Sets API.
+        sec_rules: Rules API.
+        security_principals: Security Principals API.
+        service_bindings: Service Bindings API.
+        services: Services API.
+        vens: VENs API.
+        virtual_services: Virtual Services API.
+        workloads: Workloads API.
     """
-
     def __init__(self, url: str, port: str = '443', version: str = 'v2', org_id: str = '1') -> None:
         """Initializes the PCE REST client.
 
@@ -75,6 +85,8 @@ class PolicyComputeEngine:
             version (str, optional): The PCE API version to use. Defaults to 'v2'.
             org_id (str, optional): The PCE organization ID. Defaults to '1'.
         """
+        self._apis = {}
+        self._encoder = IllumioEncoder()
         self._session = Session()
         self._session.headers.update({'Accept': 'application/json'})
         protocol, url = parse_url(url)
@@ -121,7 +133,7 @@ class PolicyComputeEngine:
         Args:
             method (str): the HTTP request method. Supports the same verbs as `requests.request`.
             endpoint (str): the API endpoint to call.
-            include_org (bool, optional): whether or not to include /orgs/ in the API call.
+            include_org (bool, optional): whether or not to include /orgs/{org_id} in the API call.
                 Defaults to True.
 
         Raises:
@@ -133,6 +145,7 @@ class PolicyComputeEngine:
         try:
             response = None  # avoid reference before assignment errors in case of cxn failure
             url = self._build_url(endpoint, include_org)
+            self._encode_body(kwargs)
             response = self._session.request(method, url, **kwargs)
             response.raise_for_status()
             return response
@@ -140,23 +153,37 @@ class PolicyComputeEngine:
             message = str(e)
             # Response objects are falsy if the request failed so do a null check
             if response is not None and response.headers.get('Content-Type', '') == 'application/json':
-                message = "API call returned error code {}. Errors:".format(response.status_code)
-                for error in response.json():
-                    if error and 'token' in error and 'message' in error:
-                        message += '\n{}: {}'.format(error['token'], error['message'])
-                    elif error and 'error' in error:
-                        message += '\n{}'.format(error['error'])
+                message = self._get_error_message_from_response(response)
             raise IllumioApiException(message) from e
 
-    def _build_url(self, endpoint: str, include_org=True) -> str:
-        """Constructs request URL with optional organization ID."""
-        org_str = '/orgs/{}'.format(self.org_id) if include_org else ''
-        return self.base_url + org_str + endpoint
+    def _build_url(self, endpoint: str, include_org: bool):
+        endpoint = endpoint.lstrip('/').replace('//', '/')
+        if include_org and not endpoint.startswith('orgs/'):
+            endpoint = 'orgs/{}/{}'.format(self.org_id, endpoint)
+        return '{}/{}'.format(self.base_url, endpoint)
+
+    def _encode_body(self, kwargs):
+        """Encodes request body data to JSON."""
+        body = kwargs.pop('data', None)
+        if 'json' in kwargs:
+            # json overrides data if both are provided
+            body = kwargs.pop('json')
+        if body is not None:
+            kwargs['json'] = json.loads(self._encoder.encode(body))
+
+    def _get_error_message_from_response(self, response: Response) -> str:
+        message = "API call returned error code {}. Errors:".format(response.status_code)
+        for error in response.json():
+            if error and 'token' in error and 'message' in error:
+                message += '\n{}: {}'.format(error['token'], error['message'])
+            elif error and 'error' in error:
+                message += '\n{}'.format(error['error'])
+        return message
 
     def get(self, endpoint: str, **kwargs) -> Response:
         """Makes a GET call to a given PCE endpoint.
 
-        Additional keyword arguments are passed to the requests call.
+        Additional keyword arguments are passed to the `requests.Request` object.
 
         Args:
             endpoint (str): the PCE endpoint to call.
@@ -170,7 +197,7 @@ class PolicyComputeEngine:
         """Makes a POST call to a given PCE endpoint.
 
         Appends 'Content-Type: application/json' to the request headers by default.
-        Additional keyword arguments are passed to the requests call.
+        Additional keyword arguments are passed to the `requests.Request` object.
 
         Args:
             endpoint (str): the PCE endpoint to call.
@@ -186,7 +213,7 @@ class PolicyComputeEngine:
         """Makes a PUT call to a given PCE endpoint.
 
         Appends 'Content-Type: application/json' to the request headers by default.
-        Additional keyword arguments are passed to the requests call.
+        Additional keyword arguments are passed to the `requests.Request` object.
 
         Args:
             endpoint (str): the PCE endpoint to call.
@@ -201,7 +228,7 @@ class PolicyComputeEngine:
     def delete(self, endpoint: str, **kwargs) -> Response:
         """Makes a DELETE call to a given PCE endpoint.
 
-        Additional keyword arguments are passed to the requests call.
+        Additional keyword arguments are passed to the `requests.Request` object.
 
         Args:
             endpoint (str): the PCE endpoint to call.
@@ -230,7 +257,7 @@ class PolicyComputeEngine:
         try:
             headers = kwargs.get('headers', {})
             kwargs['headers'] = {**headers, **{'Prefer': 'respond-async'}}
-            response = self._session.get(self._build_url(endpoint), **kwargs)
+            response = self.get(endpoint, **kwargs)
             response.raise_for_status()
             location = response.headers['Location']
             retry_after = int(response.headers['Retry-After'])
@@ -262,7 +289,7 @@ class PolicyComputeEngine:
         while True:
             time.sleep(retry_time)
             retry_time *= 1.5  # slight backoff to avoid spamming the PCE for long-running jobs
-            response = self.get(job_location, include_org=False)
+            response = self.get(job_location)
             response.raise_for_status()
             poll_result = response.json()
             poll_status = poll_result['status']
@@ -293,265 +320,333 @@ class PolicyComputeEngine:
         except IllumioApiException:
             return False
 
-    def _get_policy_objects(self, object_type: PolicyObjectType, **kwargs) -> List[IllumioObject]:
-        """Retrieves all policy objects of a given type.
+    class _PCEObjectAPI:
+        """Generic API for registered PCE objects.
 
-        Args:
-            object_type (PolicyObjectType): policy object type enum.
-
-        Returns:
-            List[IllumioObject]: list of decoded draft and active policy objects of the
-                given type. Active records override draft if both exist for a given object.
+        Each registered API exposes CRUD operation functions through this common interface.
         """
-        results = []
-        response = self.get('/sec_policy/{}/{}'.format(ACTIVE, object_type.endpoint), **kwargs)
-        results += list(response.json())
-        # a draft version of an active object will still be returned from GET queries
-        # against the /draft/ policy version endpoints. because of this, we check and
-        # only return the active version if it exists
-        response = self.get('/sec_policy/{}/{}'.format(DRAFT, object_type.endpoint), **kwargs)
-        active_objects = {active_object['name'] for active_object in results}
-        for draft_object in response.json():
-            if draft_object['name'] not in active_objects:
-                results.append(draft_object)
-        return results
+        def __init__(self, pce: 'PolicyComputeEngine', api_data: object) -> None:
+            self.name = api_data.name
+            self.endpoint = api_data.endpoint
+            self.object_cls = api_data.object_class
+            self.is_sec_policy = api_data.is_sec_policy
+            self.is_global = api_data.is_global
+            self.pce = pce
 
-    def get_virtual_service(self, href: str, **kwargs) -> VirtualService:
-        """Retrieves a virtual service from the PCE using its HREF.
+        def _build_endpoint(self, policy_version: str, parent: Any) -> str:
+            """Builds the PCE request endpoint."""
+            endpoint = self.endpoint
 
-        Args:
-            href (str): the HREF of the virtual service object to fetch.
+            if parent:  # e.g. /sec_policy/active/rulesets/1/sec_rules
+                parent_draft_href = convert_active_href_to_draft(href_from(parent))
+                endpoint = '{}/{}'.format(parent_draft_href, endpoint)
+            else:  # mutually exclusive as the parent HREF will have the sec_policy and orgs prefix already
+                if self.is_sec_policy:
+                    if policy_version not in [ACTIVE, DRAFT]:
+                        raise IllumioApiException("Invalid policy_version passed to get: {}".format(policy_version))
+                    endpoint = '/sec_policy/{}/{}'.format(policy_version, endpoint)
 
-        Returns:
-            VirtualService: the decoded virtual service.
-        """
-        response = self.get(href, include_org=False, **kwargs)
-        return VirtualService.from_json(response.json())
+                if not self.is_global:
+                    endpoint = '/orgs/{}/{}'.format(self.pce.org_id, endpoint)
+            return endpoint.replace('//', '/')
 
-    def get_virtual_services(self, **kwargs) -> List[VirtualService]:
-        """Retrieves virtual service objects from the PCE based on the given parameters.
+        def get_by_reference(self, reference: Union[str, Reference, dict], **kwargs) -> IllumioObject:
+            """Retrieves an object from the PCE using its HREF.
 
-        Keyword arguments to this function are passed to the `requests.get` call.
-        See https://docs.illumio.com/core/21.5/API-Reference/index.html#get-virtual-services
-        for details on filter parameters for virtual service collection queries.
-
-        Usage:
-            >>> virtual_services = pce.get_virtual_services(
-            ...     params={
-            ...         'name': 'VS-'
-            ...     }
-            ... )
-            >>> virtual_services
-            [
-                VirtualService(
-                    href='/orgs/1/sec_policy/active/virtual_services/9177c75f-7b21-4bf0-8c16-2c47c1ca3252',
-                    name='VS-LAB-SERVICES'
+            Usage:
+                >>> ip_list = pce.ip_lists.get_by_reference('/orgs/1/sec_policy/active/ip_lists/1')
+                >>> ip_list
+                IPList(
+                    name='Any (0.0.0.0/0 and ::/0)',
                     ...
-                ),
-                ...
-            ]
+                )
 
-        Returns:
-            List[VirtualService]: the returned list of decoded virtual services.
-        """
-        results = self._get_policy_objects(object_type=PolicyObjectType.VIRTUAL_SERVICE, **kwargs)
-        return [VirtualService.from_json(o) for o in results]
+            Args:
+                href (str): the HREF of the object to fetch.
 
-    @deprecated(deprecated_in='0.8.0')
-    def get_virtual_services_by_name(self, name: str, **kwargs) -> List[VirtualService]:
-        """DEPRECATED (v0.8.0). Use get_virtual_services with params={'name': name} instead.
+            Returns:
+                IllumioObject: the object json, decoded to its IllumioObject equivalent.
+            """
+            response = self.pce.get(href_from(reference), include_org=False, **kwargs)
+            return self.object_cls.from_json(response.json())
 
-        Retrieves virtual service objects from the PCE by name.
+        def get(self, policy_version: str = DRAFT, parent: Union[str, Reference, dict] = None, **kwargs) -> List[IllumioObject]:
+            """Retrieves objects from the PCE based on the given parameters.
 
-        Supports partial matches, e.g., "VS-" will match "VS-LAB-SERVICES".
+            Keyword arguments to this function are passed to the `requests.get` call.
+            See https://docs.illumio.com/core/21.5/API-Reference/index.html
+            for details on filter parameters for collection queries.
 
-        Args:
-            name (str): full or partial virtual service name to search by.
-
-        Returns:
-            List[VirtualService]: the returned list of decoded virtual services.
-        """
-        params = kwargs.get('params', {})
-        kwargs['params'] = {**params, **{'name': name}}
-        results = self._get_policy_objects(object_type=PolicyObjectType.VIRTUAL_SERVICE, **kwargs)
-        return [VirtualService.from_json(o) for o in results]
-
-    def create_virtual_service(self, virtual_service: VirtualService, **kwargs) -> VirtualService:
-        """Creates a virtual service object in the PCE.
-
-        See https://docs.illumio.com/core/21.5/API-Reference/index.html#create-a-virtual-service
-        for details on POST body parameters when creating virtual services.
-
-        Usage:
-            >>> from illumio.policyobjects import VirtualService
-            >>> virtual_service = VirtualService(
-            ...     name='VS-LAB-SERVICES',
-            ...     service_ports=[
-            ...         ServicePort(port=80, proto='tcp')
-            ...         ServicePort(port=443, proto='tcp')
-            ...     ]
-            ... )
-            >>> virtual_service = pce.create_virtual_service(virtual_service)
-            >>> virtual_service
-            VirtualService(
-                href='/orgs/1/sec_policy/active/virtual_services/9177c75f-7b21-4bf0-8c16-2c47c1ca3252',
-                name='VS-LAB-SERVICES',
-                service_ports=[
+            Usage:
+                >>> virtual_services = pce.virtual_services.get(
+                ...     policy_version='active',
+                ...     params={
+                ...         'name': 'VS-'
+                ...     }
+                ... )
+                >>> virtual_services
+                [
+                    VirtualService(
+                        href='/orgs/1/sec_policy/active/virtual_services/9177c75f-7b21-4bf0-8c16-2c47c1ca3252',
+                        name='VS-LAB-SERVICES'
+                        ...
+                    ),
                     ...
                 ]
-            )
 
-        Args:
-            virtual_service (VirtualService): the virtual service to create.
+            Args:
+                policy_version (str, optional): if fetching security policy objects, specifies
+                    whether to fetch 'draft' or 'active' objects. Defaults to 'draft'.
+                parent (Union[str, Reference, dict], optional): Reference to the
+                    object's parent. Required for some object types, such
+                    as Security Rules which must be created as children of
+                    existing RuleSets.
 
-        Returns:
-            VirtualService: the re-encoded virtual service object with valid HREF.
+            Returns:
+                List[IllumioObject]: the returned list of decoded objects.
+            """
+            endpoint = self._build_endpoint(policy_version, parent)
+            response = self.pce.get(endpoint, include_org=False, **kwargs)
+            return [self.object_cls.from_json(o) for o in response.json()]
+
+        def get_all(self, policy_version: str = DRAFT, parent: Union[str, Reference, dict] = None, **kwargs) -> List[IllumioObject]:
+            """Retrieves all objects of a given type from the PCE.
+
+            This function makes two requests, using the `X-Total-Count` header
+            in the response to set the `max_results` parameter on the follow-up
+            request.
+
+            Args:
+                policy_version (str, optional): if fetching security policy objects, specifies
+                    whether to fetch 'draft' or 'active' objects. Defaults to 'draft'.
+                parent (Union[str, Reference, dict], optional): Reference to the
+                    object's parent. Required for some object types, such
+                    as Security Rules which must be created as children of
+                    existing RuleSets.
+
+            Returns:
+                List[IllumioObject]: the returned list of decoded objects.
+            """
+            params = kwargs.get('params', {})
+            endpoint = self._build_endpoint(policy_version, parent)
+
+            if 'max_results' not in params:
+                kwargs['params'] = {**params, **{'max_results': 0}}
+                response = self.pce.get(endpoint, **kwargs)
+                if len(response.json()) > 0:  # for endpoints that don't support max_results
+                    return [self.object_cls.from_json(o) for o in response.json()]
+                filtered_object_count = response.headers['X-Total-Count']
+                kwargs['params'] = {**params, **{'max_results': int(filtered_object_count)}}
+
+            response = self.pce.get(endpoint, include_org=False, **kwargs)
+            return [self.object_cls.from_json(o) for o in response.json()]
+
+        def get_async(self, policy_version: str = DRAFT, parent: Union[str, Reference, dict] = None, **kwargs) -> List[IllumioObject]:
+            """Retrieves objects asynchronously from the PCE based on the given parameters.
+
+            Args:
+                policy_version (str, optional): if fetching security policy objects, specifies
+                    whether to fetch 'draft' or 'active' objects. Defaults to 'draft'.
+                parent (Union[str, Reference, dict], optional): Reference to the
+                    object's parent. Required for some object types, such
+                    as Security Rules which must be created as children of
+                    existing Rule Sets.
+
+            Returns:
+                List[IllumioObject]: the returned list of decoded objects.
+            """
+            endpoint = self._build_endpoint(policy_version, parent)
+            response = self.pce.get_collection(endpoint, **kwargs)
+            return [self.object_cls.from_json(o) for o in response.json()]
+
+        def create(self, body: Any, parent: Union[str, Reference, dict] = None, **kwargs) -> IllumioObject:
+            """Creates an object in the PCE.
+
+            See https://docs.illumio.com/core/21.5/API-Reference/index.html
+            for details on POST body parameters when creating objects.
+
+            Usage:
+                >>> from illumio.policyobjects import Label
+                >>> label = Label(key='role', value='R-DB')
+                >>> label = pce.labels.create(label)
+                >>> label
+                Label(
+                    'href': '/orgs/1/labels/14',
+                    'key': 'role',
+                    'value': 'R-DB
+                )
+
+            Args:
+                body (Any): the parameters for the newly created object.
+                parent (Union[str, Reference, dict], optional): Reference to the
+                    object's parent. Required for some object types, such
+                    as Security Rules which must be created as children of
+                    existing RuleSets.
+
+            Returns:
+                IllumioObject: the created object.
+            """
+            kwargs['json'] = body
+            endpoint = self._build_endpoint(DRAFT, parent)
+            response = self.pce.post(endpoint, include_org=False, **kwargs)
+            return self._parse_response_body(response.json())
+
+        def _parse_response_body(self, json_response):
+            # XXX: workaround for Service Bindings. Multiple bindings
+            #   can be created in the same POST, so we need to accommodate
+            #   this case by checking the response body type
+            if type(json_response) is list:
+                results = {self.name: [], 'errors': []}
+                for o in json_response:
+                    if 'href' in o:
+                        results[self.name].append(self.object_cls.from_json(o))
+                    else:
+                        results['errors'].append(o)
+                return results
+            return self.object_cls.from_json(json_response)
+
+        def update(self, reference: Union[str, Reference, dict], body: Any, **kwargs) -> None:
+            """Updates an object in the PCE.
+
+            Successful PUT requests return a 204 No Content response.
+
+            Usage:
+                >>> from illumio.workloads import PairingProfile
+                >>> pairing_profiles = pce.pairing_profile.get(
+                ...     params={'name': 'PP-DATABASE', 'max_results': 1}
+                ... )
+                >>> existing_profile = pairing_profiles[0]
+                >>> update = PairingProfile(
+                ...     name='PP-DATABASE-VENS',
+                ...     enabled=False  # disable this profile
+                ... )
+                >>> pce.pairing_profile.update(existing_profile['href'], update)
+
+            Args:
+                reference (Union[str, Reference, dict]): the HREF of the pairing profile to update.
+                body (Any): the update data.
+            """
+            kwargs['json'] = body
+            self.pce.put(href_from(reference), include_org=False, **kwargs)
+
+        def delete(self, reference: Union[str, Reference, dict], **kwargs) -> None:
+            """Deletes an object in the PCE.
+
+            Successful DELETE requests return a 204 No Content response.
+
+            Args:
+                reference (Union[str, Reference, dict]): the HREF of the object to delete.
+            """
+            self.pce.delete(href_from(reference), include_org=False, **kwargs)
+
+        def _bulk_change(self, objects: List[IllumioObject], method: str, success_status: str, **kwargs) -> List[dict]:
+            results = []
+            while objects:
+                kwargs['json'] = objects[:BULK_CHANGE_LIMIT]
+                objects = objects[BULK_CHANGE_LIMIT:]
+                endpoint = self._build_endpoint(DRAFT, None)
+                response = self.pce.put('{}/{}'.format(endpoint, method), include_org=False, **kwargs)
+                for result in response.json():
+                    errors = result.get('errors', [])
+                    if success_status and result['status'] != success_status:
+                        errors.append({'token': result['token'], 'message': result['message']})
+                    results.append({'href': result['href'], 'errors': errors})
+            return results
+
+        def bulk_create(self, objects_to_create: List[IllumioObject], **kwargs) -> List[dict]:
+            """Creates a set of objects in the PCE.
+
+            NOTE: Bulk creation can currently only be applied for Security Principals,
+                Virtual Services and Workloads.
+
+            Args:
+                objects_to_create (List[IllumioObject]): list of objects to update.
+
+            Returns:
+                List[dict]: a list containing HREFs of created objects
+                    as well as any errors returned from the PCE.
+                    Has the following form:
+
+                    [
+                        {
+                            'href': {object_href},
+                            'errors': [
+                                {
+                                    'token': {error_type},
+                                    'message': {error_message}
+                                }
+                            ]
+                        }
+                    ]
+            """
+            return self._bulk_change(objects_to_create, method='bulk_create', success_status='created', **kwargs)
+
+        def bulk_update(self, objects_to_update: List[IllumioObject], **kwargs) -> List[dict]:
+            """Updates a set of objects in the PCE.
+
+            NOTE: Bulk updates can currently only be applied for Virtual Services and Workloads.
+
+            Args:
+                objects_to_update (List[IllumioObject]): list of objects to update.
+
+            Returns:
+                List[dict]: a list containing HREFs of updated objects
+                    as well as any errors returned from the PCE.
+                    Has the following form:
+
+                    [
+                        {
+                            'href': {object_href},
+                            'errors': [
+                                {
+                                    'token': {error_type},
+                                    'message': {error_message}
+                                }
+                            ]
+                        }
+                    ]
+            """
+            return self._bulk_change(objects_to_update, method='bulk_update', success_status='updated', **kwargs)
+
+        def bulk_delete(self, refs: List[Union[str, Reference, dict]], **kwargs) -> List[dict]:
+            """Deletes a set of objects in the PCE.
+
+            NOTE: Bulk updates can currently only be applied for Workloads.
+
+            Args:
+                hrefs (List[Union[str, Reference, dict]]): list of references to objects to delete.
+
+            Returns:
+                List[dict]: a list containing any errors that occurred during
+                    the bulk operation. Has the following form:
+
+                    [
+                        {
+                            'href': {object_href},
+                            'errors': [
+                                {
+                                    'token': {error_type},
+                                    'message': {error_message}
+                                }
+                            ]
+                        }
+                    ]
+            """
+            objects_to_delete = [Reference(href=href_from(reference)) for reference in refs]
+            return self._bulk_change(objects_to_delete, method='bulk_delete', success_status=None, **kwargs)
+
+    def __getattr__(self, name: str) -> _PCEObjectAPI:
+        """Instantiates a generic API for registered PCE objects.
+
+        Inspired by the Zabbix API: https://pypi.org/project/zabbix-api/
         """
-        kwargs['json'] = virtual_service.to_json()
-        response = self.post('/sec_policy/draft/virtual_services', **kwargs)
-        return VirtualService.from_json(response.json())
-
-    @deprecated(deprecated_in='0.8.2')
-    def create_service_binding(self, service_binding: ServiceBinding, **kwargs) -> ServiceBinding:
-        """DEPRECATED (v0.8.2). Use create_service_bindings instead.
-
-        Binds a workload to a virtual service in the PCE.
-
-        Args:
-            service_binding (ServiceBinding): the service binding object to create.
-
-        Raises:
-            IllumioApiException: if creation is unsuccessful.
-
-        Returns:
-            ServiceBinding: the re-encoded service binding object with valid HREF.
-        """
-        kwargs['json'] = [service_binding.to_json()]
-        response = self.post('/service_bindings', **kwargs)
-        binding = response.json()[0]
-        if binding['status'] == 'created':
-            service_binding.href = binding['href']
-            return service_binding
-        raise IllumioApiException('Service binding creation failed with status: {}'.format(binding['status']))
-
-    def create_service_bindings(self, service_bindings: List[ServiceBinding], **kwargs) -> dict:
-        """Binds one or more workloads to a virtual service in the PCE.
-
-        If one or more service bindings fail to create - even if all of them
-        fail - a 201 response is returned with error statuses for each failing
-        binding. Due to this, the response is wrapped to simplify processing.
-
-        Usage:
-            >>> from illumio.policyobjects import ServiceBinding
-            >>> virtual_service_ref = Reference(
-            ...     href='/orgs/1/sec_policy/active/virtual_services/9177c75f-7b21-4bf0-8c16-2c47c1ca3252'
-            ... )
-            >>> workload = pce.get_workload(href='/orgs/1/workloads/a1a2bd2f-b74b-4068-a177-11b0cb1c92c4')
-            >>> service_bindings = pce.create_service_bindings(
-            ...     service_bindings=[
-            ...         ServiceBinding(
-            ...             virtual_service=virtual_service_ref,
-            ...             workload=workload
-            ...         )
-            ...     ]
-            ... )
-            >>> service_bindings
-            {
-                'service_bindings': [
-                    ServiceBinding(
-                        href='/orgs/1/service_bindings/7005192b-97a3-4072-96ab-d584544d032f',
-                        virtual_service=Reference(
-                            href='/orgs/1/sec_policy/active/virtual_services/9177c75f-7b21-4bf0-8c16-2c47c1ca3252'
-                        ),
-                        workload=Workload(
-                            href='/orgs/1/workloads/a1a2bd2f-b74b-4068-a177-11b0cb1c92c4',
-                            ...
-                        ),
-                        ...
-                    )
-                ],
-                'errors': []
-            }
-
-        Args:
-            service_bindings (List[ServiceBinding]): list of service binding
-                objects to create. Each object is encoded as JSON for the POST
-                request payload.
-
-        Returns:
-            dict: a dictionary containing a list of successfully created
-                service bindings as well as any errors returned from the PCE.
-                Has the form {'service_bindings': [], 'errors': []}.
-        """
-        kwargs['json'] = [service_binding.to_json() for service_binding in service_bindings]
-        response = self.post('/service_bindings', **kwargs)
-        results = {'service_bindings': [], 'errors': []}
-        for binding in response.json():
-            if binding['status'] == 'created':
-                results['service_bindings'].append(ServiceBinding(href=binding['href']))
-            else:
-                results['errors'].append({'error': binding['status']})
-        return results
-
-    def get_ip_list(self, href: str, **kwargs) -> IPList:
-        """Retrieves an IP list from the PCE using its HREF.
-
-        Args:
-            href (str): the HREF of the IP list object to fetch.
-
-        Returns:
-            IPList: the decoded IP list object.
-        """
-        response = self.get(href, include_org=False, **kwargs)
-        return IPList.from_json(response.json())
-
-    def get_ip_lists(self, **kwargs) -> List[IPList]:
-        """Retrieves IP list objects from the PCE based on the given parameters.
-
-        Keyword arguments to this function are passed to the `requests.get` call.
-        See https://docs.illumio.com/core/21.5/API-Reference/index.html#get-ip-lists
-        for details on filter parameters for IP list collection queries.
-
-        Usage:
-            >>> ip_lists = pce.get_ip_lists(
-            ...     params={
-            ...         'name': 'IPL-'
-            ...     }
-            ... )
-            >>> ip_lists
-            [
-                IPList(
-                    href='/orgs/1/sec_policy/active/ip_lists/5',
-                    name='IPL-INTERNAL',
-                    ...
-                ),
-                ...
-            ]
-
-        Returns:
-            List[IPList]: the returned list of decoded IP lists.
-        """
-        results = self._get_policy_objects(object_type=PolicyObjectType.IP_LIST, **kwargs)
-        return [IPList.from_json(o) for o in results]
-
-    @deprecated(deprecated_in='0.8.0')
-    def get_ip_lists_by_name(self, name: str, **kwargs) -> List[IPList]:
-        """DEPRECATED (v0.8.0). Use get_ip_lists with params={'name': name} instead.
-
-        Retrieves IP list objects from the PCE by name.
-
-        Supports partial matches, e.g., "IPL-" will match "IPL-INTERNAL".
-
-        Args:
-            name (str): full or partial IP list name to search by.
-
-        Returns:
-            List[IPList]: the returned list of decoded IP lists.
-        """
-        params = kwargs.get('params', {})
-        kwargs['params'] = {**params, **{'name': name}}
-        results = self._get_policy_objects(object_type=PolicyObjectType.IP_LIST, **kwargs)
-        return [IPList.from_json(o) for o in results]
+        if name in self._apis:
+            return self._apis[name]
+        if name not in PCE_APIS:
+            raise AttributeError("No such PCE API object: {}".format(name))
+        api = self._PCEObjectAPI(pce=self, api_data=PCE_APIS[name])
+        self._apis[name] = api
+        return api
 
     def get_default_ip_list(self, **kwargs) -> IPList:
         """Retrieves the "Any (0.0.0.0/0 and ::/0)" default global IP list.
@@ -565,428 +660,6 @@ class PolicyComputeEngine:
         response = self.get('/sec_policy/active/ip_lists', **kwargs)
         return IPList.from_json(response.json()[0])
 
-    def create_ip_list(self, ip_list: IPList, **kwargs) -> IPList:
-        """Creates an IP list object in the PCE.
-
-        See https://docs.illumio.com/core/21.5/API-Reference/index.html#create-an-ip-list
-        for details on POST body parameters when creating IP lists.
-
-        Usage:
-            >>> from illumio.policyobjects import IPList
-            >>> ip_list = IPList(
-            ...     name='IPL-INTERNAL',
-            ...     ip_ranges=[
-            ...         IPRange(from_ip='10.0.0.0/8')
-            ...     ]
-            ... )
-            >>> ip_list = pce.create_ip_list(ip_list)
-            >>> ip_list
-            IPList(
-                href='/orgs/1/sec_policy/draft/ip_lists/5',
-                name='IPL-INTERNAL',
-                ip_ranges=[
-                    IPRange(from_ip='10.0.0.0/8')
-                ]
-            )
-
-        Args:
-            ip_list (IPList): the IP list to create.
-
-        Returns:
-            IPList: the re-encoded IP list object with valid HREF.
-        """
-        kwargs['json'] = ip_list.to_json()
-        response = self.post('/sec_policy/draft/ip_lists', **kwargs)
-        return IPList.from_json(response.json())
-
-    def get_ruleset(self, href: str, **kwargs) -> Ruleset:
-        """Retrieves a ruleset from the PCE using its HREF.
-
-        Args:
-            href (str): the HREF of the ruleset object to fetch.
-
-        Returns:
-            Ruleset: the decoded ruleset object.
-        """
-        response = self.get(href, include_org=False, **kwargs)
-        return Ruleset.from_json(response.json())
-
-    def get_rulesets(self, **kwargs) -> List[Ruleset]:
-        """Retrieves ruleset objects from the PCE based on the given parameters.
-
-        Keyword arguments to this function are passed to the `requests.get` call.
-        See https://docs.illumio.com/core/21.5/API-Reference/index.html#get-rulesets
-        for details on filter parameters for ruleset collection queries.
-
-        Usage:
-            >>> rulesets = pce.get_rulesets(
-            ...     params={
-            ...         'name': 'RS-'
-            ...     }
-            ... )
-            >>> rulesets
-            [
-                Ruleset(
-                    href='/orgs/1/sec_policy/active/rule_sets/19',
-                    name='RS-RINGFENCE',
-                    ...
-                ),
-                ...
-            ]
-
-        Returns:
-            List[Ruleset]: the returned list of decoded rulesets.
-        """
-        results = self._get_policy_objects(object_type=PolicyObjectType.RULESET, **kwargs)
-        return [Ruleset.from_json(o) for o in results]
-
-    @deprecated(deprecated_in='0.8.0')
-    def get_rulesets_by_name(self, name: str, **kwargs) -> List[Ruleset]:
-        """DEPRECATED (v0.8.0). Use get_rulesets with params={'name': name} instead.
-
-        Retrieves ruleset objects from the PCE by name.
-
-        Supports partial matches, e.g., "RS-" will match "RS-RINGFENCE".
-
-        Args:
-            name (str): full or partial ruleset name to search by.
-
-        Returns:
-            List[Ruleset]: the returned list of decoded rulesets.
-        """
-        params = kwargs.get('params', {})
-        kwargs['params'] = {**params, **{'name': name}}
-        results = self._get_policy_objects(object_type=PolicyObjectType.RULESET, **kwargs)
-        return [Ruleset.from_json(o) for o in results]
-
-    def create_ruleset(self, ruleset: Ruleset, **kwargs) -> Ruleset:
-        """Creates a ruleset object in the PCE.
-
-        See https://docs.illumio.com/core/21.5/API-Reference/index.html#create-a-ruleset
-        for details on POST body parameters when creating rulesets.
-
-        Usage:
-            >>> from illumio.rules import Ruleset
-            >>> ruleset = Ruleset(name='RS-RINGFENCE')
-            >>> ruleset = pce.create_ruleset(ruleset)
-            >>> ruleset
-            Ruleset(
-                href='/orgs/1/sec_policy/draft/rule_sets/19',
-                name='RS-RINGFENCE'
-            )
-
-        Args:
-            ruleset (Ruleset): the ruleset to create.
-
-        Returns:
-            Ruleset: the re-encoded ruleset object with valid HREF.
-        """
-        if ruleset.scopes is None:
-            ruleset.scopes = []
-        kwargs['json'] = ruleset.to_json()
-        response = self.post('/sec_policy/draft/rule_sets', **kwargs)
-        return Ruleset.from_json(response.json())
-
-    def create_rule(self, ruleset_href: str, rule: Rule, **kwargs) -> Rule:
-        """Creates a rule object in the PCE.
-
-        See https://docs.illumio.com/core/21.5/API-Reference/index.html#create-a-security-rule
-        for details on POST body parameters when creating rules.
-
-        Rules can't be created in active rulesets, so if an active ruleset HREF
-        is provided, it is assumed the user wants to modify its draft version.
-
-        Usage:
-            >>> from illumio.rules import Rule
-            >>> virtual_service_href = '/orgs/1/sec_policy/active/virtual_services/9177c75f-7b21-4bf0-8c16-2c47c1ca3252'
-            >>> any_ip_list = pce.get_default_ip_list()
-            >>> rule = Rule.build(
-            ...     providers=[virtual_service_href],
-            ...     consumers=[any_ip_list.href],
-            ...     ingress_services=[],
-            ...     resolve_providers_as=['virtual_services'],
-            ...     resolve_consumers_as=['workloads']
-            ... )
-            >>> ruleset = Ruleset(name='RS-LAB-ALLOWLIST')
-            >>> ruleset = pce.create_ruleset(ruleset)
-            >>> rule = pce.create_rule(
-            ...     ruleset_href=ruleset.href,
-            ...     rule=rule
-            ... )
-            >>> rule
-            Rule(
-                href='/orgs/1/sec_policy/rule_sets/19/rules/sec_rules/1',
-                enabled=True,
-                providers=[
-                    Actor(
-                        virtual_service=Reference(
-                            href='/orgs/1/sec_policy/active/virtual_services/9177c75f-7b21-4bf0-8c16-2c47c1ca3252'
-                        ),
-                        ...
-                    )
-                ],
-                consumers=[
-                    Actor(
-                        ip_list=Reference(
-                            href='/orgs/1/sec_policy/active/ip_lists/1'
-                        ),
-                        ...
-                    )
-                ],
-                ingress_services=[],
-                resolve_labels_as=LabelResolutionBlock(
-                    providers=['virtual_services'],
-                    consumers=['workloads']
-                ),
-                ...
-            )
-
-
-        Args:
-            ruleset_href (str): the ruleset to create the rule in.
-            rule (Rule): the rule to create.
-
-        Returns:
-            Rule: the re-encoded rule object with valid HREF.
-        """
-        if rule.enabled is None:
-            rule.enabled = True
-        kwargs['json'] = rule.to_json()
-        ruleset_href = convert_active_href_to_draft(ruleset_href)
-        endpoint = '{}/sec_rules'.format(ruleset_href)
-        response = self.post(endpoint, include_org=False, **kwargs)
-        return Rule.from_json(response.json())
-
-    def get_enforcement_boundary(self, href: str, **kwargs) -> EnforcementBoundary:
-        """Retrieves an enforcement boundary from the PCE using its HREF.
-
-        Args:
-            href (str): the HREF of the enforcement boundary object to fetch.
-
-        Returns:
-            EnforcementBoundary: the decoded enforcement boundary object.
-        """
-        response = self.get(href, include_org=False, **kwargs)
-        return EnforcementBoundary.from_json(response.json())
-
-    def get_enforcement_boundaries(self, **kwargs) -> List[EnforcementBoundary]:
-        """Retrieves enforcement boundary objects from the PCE based on the given parameters.
-
-        Keyword arguments to this function are passed to the `requests.get` call.
-        See https://docs.illumio.com/core/21.5/API-Reference/index.html#tocSsec_policy_enforcement_boundaries_get
-        for details on filter parameters for enforcement boundary collection queries.
-
-        Usage:
-            >>> enforcement_boundaries = pce.get_enforcement_boundaries(
-            ...     params={
-            ...         'name': 'EB-'
-            ...     }
-            ... )
-            >>> enforcement_boundaries
-            [
-                EnforcementBoundary(
-                    href='/orgs/1/sec_policy/active/enforcement_boundary/8',
-                    name='EB-BLOCK-RDP',
-                    ...
-                ),
-                ...
-            ]
-
-        Returns:
-            List[EnforcementBoundary]: the returned list of decoded enforcement boundaries.
-        """
-        results = self._get_policy_objects(object_type=PolicyObjectType.ENFORCEMENT_BOUNDARY, **kwargs)
-        return [EnforcementBoundary.from_json(o) for o in results]
-
-    @deprecated(deprecated_in='0.8.0')
-    def get_enforcement_boundaries_by_name(self, name: str, **kwargs) -> List[EnforcementBoundary]:
-        """DEPRECATED (v0.8.0). Use get_enforcement_boundaries with params={'name': name} instead.
-
-        Retrieves enforcement boundary objects from the PCE by name.
-
-        Supports partial matches, e.g., "EB-" will match "EB-BLOCK-RDP".
-
-        Args:
-            name (str): full or partial enforcement boundary name to search by.
-
-        Returns:
-            List[EnforcementBoundary]: the returned list of decoded
-                enforcement boundaries.
-        """
-        params = kwargs.get('params', {})
-        kwargs['params'] = {**params, **{'name': name}}
-        results = self._get_policy_objects(object_type=PolicyObjectType.ENFORCEMENT_BOUNDARY, **kwargs)
-        return [EnforcementBoundary.from_json(o) for o in results]
-
-    def create_enforcement_boundary(self, enforcement_boundary: EnforcementBoundary, **kwargs) -> EnforcementBoundary:
-        """Creates an enforcement boundary object in the PCE.
-
-        See https://docs.illumio.com/core/21.5/API-Reference/index.html#tocSsec_policy_enforcement_boundaries_post
-        for details on POST body parameters when creating enforcement boundaries.
-
-        Usage:
-            >>> from illumio.rules import EnforcementBoundary, AMS
-            >>> any_ip_list = pce.get_default_ip_list()
-            >>> enforcement_boundary = EnforcementBoundary.build(
-            ...     name='EB-BLOCK-RDP',
-            ...     providers=[AMS],  # the special 'ams' literal denotes all workloads
-            ...     consumers=[any_ip_list.href],
-            ...     ingress_services=[
-            ...         {'port': 3389, 'proto': 'tcp'},
-            ...         {'port': 3389, 'proto': 'udp'},
-            ...     ]
-            ... )
-            >>> enforcement_boundary = pce.create_enforcement_boundary(enforcement_boundary)
-            >>> enforcement_boundary
-            EnforcementBoundary(
-                href='/orgs/1/sec_policy/draft/enforcement_boundary/8',
-                name='EB-BLOCK-RDP',
-                providers=[
-                    Actor(
-                        actors='ams',
-                        ...
-                    )
-                ],
-                consumers=[
-                    Actor(
-                        ip_list=Reference(
-                            href='/orgs/1/sec_policy/active/ip_lists/1'
-                        ),
-                        ...
-                    )
-                ],
-                ingress_services=[
-                    ServicePort(port=3389, proto=6),
-                    ServicePort(port=3389, proto=17)
-                ],
-                ...
-            )
-
-        Args:
-            enforcement_boundary (EnforcementBoundary): the enforcement boundary to create.
-
-        Returns:
-            EnforcementBoundary: the re-encoded enforcement boundary object with valid HREF.
-        """
-        kwargs['json'] = enforcement_boundary.to_json()
-        response = self.post('/sec_policy/draft/enforcement_boundaries', **kwargs)
-        return EnforcementBoundary.from_json(response.json())
-
-    def get_pairing_profile(self, href: str, **kwargs) -> PairingProfile:
-        """Retrieves a pairing profile from the PCE using its HREF.
-
-        Args:
-            href (str): the HREF of the pairing profile object to fetch.
-
-        Returns:
-            PairingProfile: the decoded pairing profile object.
-        """
-        response = self.get(href, include_org=False, **kwargs)
-        return PairingProfile.from_json(response.json())
-
-    def get_pairing_profiles(self, **kwargs) -> List[PairingProfile]:
-        """Retrieves pairing profile objects from the PCE based on the given parameters.
-
-        Keyword arguments to this function are passed to the `requests.get` call.
-        See https://docs.illumio.com/core/21.5/API-Reference/index.html#tocSpairing_profiles_get
-        for details on filter parameters for pairing profile collection queries.
-
-        Usage:
-            >>> pairing_profiles = pce.get_pairing_profiles(
-            ...     params={
-            ...         'name': 'PP-'
-            ...     }
-            ... )
-            >>> pairing_profiles
-            [
-                PairingProfile(
-                    href='/orgs/1/pairing_profiles/19',
-                    name='PP-DATABASE-VENS',
-                    ...
-                ),
-                ...
-            ]
-
-        Returns:
-            List[PairingProfile]: the returned list of decoded pairing profiles.
-        """
-        response = self.get('/pairing_profiles', **kwargs)
-        return [PairingProfile.from_json(o) for o in response.json()]
-
-    def create_pairing_profile(self, pairing_profile: PairingProfile, **kwargs) -> PairingProfile:
-        """Creates a pairing profile object in the PCE.
-
-        See https://docs.illumio.com/core/21.5/API-Reference/index.html#tocSpairing_profiles_post
-        for details on POST body parameters when creating pairing profiles.
-
-        Usage:
-            >>> from illumio.workloads import PairingProfile
-            >>> pairing_profile = PairingProfile(
-            ...     name='PP-DATABASE-VENS',
-            ...     enabled=True,
-            ...     enforcement_mode='visibility_only',
-            ...     visibility_level='flows_summary'
-            ... )
-            >>> pairing_profile = pce.create_pairing_profile(pairing_profile)
-            >>> pairing_profile
-            PairingProfile(
-                href='/orgs/1/pairing_profiles/19',
-                name='PP-DATABASE-VENS',
-                enabled=True,
-                enforcement_mode='visibility_only',
-                visibility_level='flows_summary',
-                ...
-            )
-
-        Args:
-            pairing_profile (PairingProfile): the pairing profile to create.
-
-        Returns:
-            PairingProfile: the re-encoded pairing profile object with valid HREF.
-        """
-        kwargs['json'] = pairing_profile.to_json()
-        response = self.post('/pairing_profiles', **kwargs)
-        return PairingProfile.from_json(response.json())
-
-    def update_pairing_profile(self, href: str, pairing_profile: PairingProfile, **kwargs) -> None:
-        """Updates a pairing profile object in the PCE.
-
-        Usage:
-            >>> from illumio.workloads import PairingProfile
-            >>> pairing_profiles = pce.get_pairing_profiles(
-            ...     params={'name': 'PP-DATABASE', 'max_results': 1}
-            ... )
-            >>> existing_profile = pairing_profiles[0]
-            >>> update = PairingProfile(
-            ...     name='PP-DATABASE-VENS',
-            ...     enabled=False  # disable this profile
-            ... )
-            >>> updated_profile = pce.update_pairing_profile(existing_profile.href, update)
-            >>> updated_profile
-            PairingProfile(
-                href='/orgs/1/pairing_profiles/19',
-                name='PP-DATABASE-VENS',
-                enabled=False,
-                enforcement_mode='visibility_only',
-                visibility_level='flows_summary',
-                ...
-            )
-
-        Args:
-            href (str): the HREF of the pairing profile to update.
-            pairing_profile (PairingProfile): the updated pairing profile.
-        """
-        kwargs['json'] = pairing_profile.to_json()
-        self.put(href, include_org=False, **kwargs)
-
-    def delete_pairing_profile(self, href: str, **kwargs) -> None:
-        """Deletes a pairing profile object in the PCE.
-
-        Args:
-            href (str): the HREF of the pairing profile to delete.
-        """
-        self.delete(href, include_org=False, **kwargs)
-
     def generate_pairing_key(self, pairing_profile_href: str, **kwargs) -> str:
         """Generates a pairing key using a pairing profile.
 
@@ -996,96 +669,15 @@ class PolicyComputeEngine:
         Returns:
             str: the pairing key value.
         """
-        uri = '{}/pairing_key'.format(pairing_profile_href)
         kwargs['json'] = {}
-        response = self.post(uri, include_org=False, **kwargs)
+        response = self.post('{}/pairing_key'.format(pairing_profile_href), include_org=False, **kwargs)
         return response.json().get('activation_code')
 
-    def get_workload(self, href: str, **kwargs) -> Workload:
-        """Retrieves a workload from the PCE using its HREF.
-
-        Args:
-            href (str): the HREF of the workload object to fetch.
-
-        Returns:
-            Workload: the decoded workload object.
-        """
-        response = self.get(href, include_org=False, **kwargs)
-        return Workload.from_json(response.json())
-
-    def get_workloads(self, **kwargs) -> List[Workload]:
-        """Retrieves workload objects from the PCE based on the given parameters.
-
-        The Illumio APIs don't use pagination, opting instead for an async
-        batch GET approach that can be slow. Instead, we accommodate large
-        numbers of workloads by first fetching 0 results to get the
-        X-Total-Count in the response, then fetching all results synchronously.
-        This approach should have an advantage over an async call up to over
-        100,000 workloads.
-
-        If the `max_results` parameter is provided, this behaviour is overridden
-        and the provided value is used instead.
-
-        See https://docs.illumio.com/core/21.5/API-Reference/index.html#get-workloads
-        for details on filter parameters for workload collection queries.
-
-        Usage:
-            >>> workloads = pce.get_workloads(
-            ...     params={
-            ...         'name': 'WIN-',
-            ...         'managed': True
-            ...     }
-            ... )
-            >>> workloads
-            [
-                Workload(
-                    href='/orgs/1/workloads/6567900a-b49f-43cc-93a7-c892da39aad1',
-                    name='WIN-JUMPBOX',
-                    ...
-                ),
-                ...
-            ]
-
-        Returns:
-            List[Workload]: the returned list of decoded workloads.
-        """
-        params = kwargs.get('params', {})
-
-        if 'max_results' not in params:
-            kwargs['params'] = {**params, **{'max_results': 0}}
-            response = self.get('/workloads', **kwargs)
-            filtered_workload_count = response.headers['X-Total-Count']
-            kwargs['params'] = {**params, **{'max_results': int(filtered_workload_count)}}
-
-        response = self.get('/workloads', **kwargs)
-        return [Workload.from_json(o) for o in response.json()]
-
-    def update_workload_enforcement_modes(self, enforcement_mode: EnforcementMode, workloads: List[Workload], **kwargs) -> dict:
-        """Updates a list of workloads in the PCE to the provided enforcement mode.
-
-        Args:
-            enforcement_mode (EnforcementMode): the enforcement mode to change to.
-            workloads (List[Workload]): list of workloads to update.
-
-        Returns:
-            dict: a dictionary containing a list of successfully updated
-                workloads, as well as any errors returned from the PCE.
-                Has the form {'workloads': [], 'errors': []}.
-        """
-        results = {'workloads': [], 'errors': []}
-        while workloads:
-            kwargs['json'] = [{'href': workload.href, 'enforcement_mode': enforcement_mode.value} for workload in workloads[:WORKLOAD_BULK_UPDATE_MAX]]
-            workloads = workloads[WORKLOAD_BULK_UPDATE_MAX:]
-            response = self.put('/workloads/bulk_update', **kwargs)
-            for binding in response.json():
-                if binding['status'] == 'updated':
-                    results['workloads'].append(Workload(href=binding['href']))
-                else:
-                    results['errors'].append({'error': binding['status']})
-        return results
-
+    @deprecated(deprecated_in='1.0.0')
     def get_traffic_flows(self, traffic_query: TrafficQuery, **kwargs) -> List[TrafficFlow]:
-        """Retrieves Explorer traffic flows using the provided query.
+        """DEPRECATED (v1.0.0). Use `get_traffic_flows_async` instead.
+
+        Retrieves Explorer traffic flows using the provided query.
 
         NOTE: this function is deprecated in the Illumio REST API, and is
         only provided for compatibility. The Illumio Explorer REST API
@@ -1103,7 +695,7 @@ class PolicyComputeEngine:
             List[TrafficFlow]: list of `TrafficFlow` objects found using the
                 provided query.
         """
-        kwargs['json'] = traffic_query.to_json()
+        kwargs['json'] = traffic_query
         response = self.post('/traffic_flows/traffic_analysis_queries', **kwargs)
         return [TrafficFlow.from_json(flow) for flow in response.json()]
 
@@ -1125,8 +717,8 @@ class PolicyComputeEngine:
             ... )
             >>> traffic_query
             TrafficQuery(
-                start_date='2021-09-28T00:00:00Z',
-                end_date='2021-10-05T00:00:00Z',
+                start_date='2022-02-01T00:00:00Z',
+                end_date='2022-03-01T00:00:00Z',
                 sources=TrafficQueryFilterBlock(
                     include=[],
                     exclude=[]
@@ -1152,7 +744,7 @@ class PolicyComputeEngine:
                 ...
             )
             >>> traffic_flows = pce.get_traffic_flows_async(
-            ...     query_name='',
+            ...     query_name='rdp-traffic-feb-22',
             ...     traffic_query=traffic_query
             ... )
             >>> traffic_flows
@@ -1207,10 +799,10 @@ class PolicyComputeEngine:
         """
         try:
             traffic_query.query_name = query_name
-            kwargs['json'] = traffic_query.to_json()
+            kwargs['json'] = traffic_query
             headers = kwargs.get('headers', {})
             kwargs['headers'] = {**headers, **{'Content-Type': 'application/json', 'Prefer': 'respond-async'}}
-            response = self._session.post(self._build_url('/traffic_flows/async_queries'), **kwargs)
+            response = self.post('/traffic_flows/async_queries', **kwargs)
             response.raise_for_status()
             query_status = response.json()
             location = query_status['href']
@@ -1227,18 +819,18 @@ class PolicyComputeEngine:
         """Provisions policy changes for draft objects with the given HREFs.
 
         Usage:
-            >>> from illumio.rules import Ruleset
-            >>> ruleset = pce.create_ruleset(
-            ...     Ruleset(name='RS-RINGFENCE')
+            >>> from illumio.rules import RuleSet
+            >>> rule_set = pce.rule_sets.create(
+            ...     RuleSet(name='RS-RINGFENCE')
             ... )
             >>> changeset = pce.provision_policy_changes(
-            ...     change_description='Provision ring-fence ruleset',
-            ...     hrefs=[ruleset.href]
+            ...     change_description='Provision ring-fence rule set',
+            ...     hrefs=[rule_set.href]
             ... )
             >>> changeset
             PolicyVersion(
                 href='/orgs/1/sec_policy/110',
-                commit_message='Provision ring-fence ruleset',
+                commit_message='Provision ring-fence rule set',
                 version=110,
                 workloads_affected=0,
                 object_counts=PolicyObjectCounts(
@@ -1256,11 +848,10 @@ class PolicyComputeEngine:
             IllumioException: if an invalid HREF is provided.
 
         Returns:
-            PolicyVersion: the decoded policy version object including the
-                changeset.
+            PolicyVersion: the decoded policy version object including the changeset.
         """
         policy_changeset = PolicyChangeset.build(hrefs)
-        kwargs['json'] = {'update_description': change_description, 'change_subset': policy_changeset.to_json()}
+        kwargs['json'] = {'update_description': change_description, 'change_subset': policy_changeset}
         response = self.post('/sec_policy', **kwargs)
         return PolicyVersion.from_json(response.json())
 

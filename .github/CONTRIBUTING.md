@@ -26,6 +26,26 @@ Make sure to add unit tests to cover any new functionality. When making changes 
 
 Run tests against all supported python versions with ```make test```. Tests are run using the `tox` library. It's recommended to install python environments with [`pyenv`](https://github.com/pyenv/pyenv) and install the [`tox-pyenv` library](https://pypi.org/project/tox-pyenv/) to test against multiple versions at once.  
 
+### Integration Tests  
+
+To run the library's integration tests, you will need to set the following environment variables to establish a connection to your PCE instance:  
+
+Environment variable     | Description         | Default
+------------------------ | ------------------- | -------
+ILLUMIO_PCE_HOST         | PCE hostname or URL | -
+ILLUMIO_PCE_PORT         | PCE HTTP(S) port    | 443
+ILLUMIO_PCE_ORG_ID       | PCE organization ID | 1
+ILLUMIO_API_KEY_USERNAME | PCE API key ID      | -
+ILLUMIO_API_KEY_SECRET   | PCE API key secret  | -
+
+> **NOTE:** the integration test suites make a large number of API calls and create database objects that are not cleaned up automatically. **Do not** run integration tests against a production Policy Compute Engine.  
+
+You can run the integration test suite with  
+
+```sh
+$ pytest --integration
+```
+
 ## Documentation  
 
 ### Project documentation  

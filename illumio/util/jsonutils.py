@@ -19,12 +19,19 @@ from dataclasses import dataclass, fields
 from inspect import signature, isclass
 from typing import List, Any
 
-from .functions import ignore_empty_keys
+from illumio.exceptions import IllumioException
+
+from .constants import IllumioEnumMeta
+from .functions import ignore_empty_keys, isunion, islist
 
 _default = json.JSONEncoder()  # fall back to the default encoder for non-Illumio API objects
 
 
 class IllumioEncoder(json.JSONEncoder):
+    """Convenience class for encoding JsonObjects.
+
+    >>> json.dumps(flow, cls=IllumioEncoder, indent=4)
+    """
     def default(self, o: Any) -> Any:
         return getattr(o.__class__, "to_json", _default.default)(o)
 
@@ -33,10 +40,86 @@ class IllumioEncoder(json.JSONEncoder):
 class JsonObject(ABC):
 
     def __post_init__(self):
+        for field in fields(self):
+            value = getattr(self, field.name)
+            self._flatten_ref(field, value)
+            self._resolve_enum(field, value)
         self._validate()
 
+    def _resolve_enum(self, field, value):
+        """Replaces IllumioEnumMeta subtypes with their internal value.
+
+        This allows clients to pass enums directly as attribute values.
+
+        For example:
+
+        >>> Workload(..., enforcement_mode=EnforcementMode.SELECTIVE)
+
+        will be converted to
+
+        >>> Workload(..., enforcement_mode='selective')
+        """
+        if value is None:
+            return
+        if isinstance(type(value), IllumioEnumMeta):
+            setattr(self, field.name, value.value)
+
+    def _flatten_ref(self, field, value):
+        """Replaces Reference subclasses with a simplified Reference object.
+
+        This allows clients to pass a Reference subclass instance without
+        breaking the encoded object schema for API calls.
+        """
+        if value is None:
+            return
+        if field.type is Reference:
+            if isinstance(value, Reference):
+                setattr(self, field.name, Reference(value.href))
+        elif islist(field.type):
+            if field.type.__args__[0] is Reference:
+                ref_list = []
+                for ref in value:
+                    if isinstance(ref, Reference):
+                        ref_list.append(Reference(href=ref.href))
+                    else:
+                        ref_list.append(ref)
+                setattr(self, field.name, ref_list)
+        elif isunion(field.type):
+            if Reference in field.type.__args__:
+                if isinstance(value, Reference):
+                    setattr(self, field.name, Reference(value.href))
+
     def _validate(self):
-        pass
+        """Validates fields by comparing their values to their registered dataclass types."""
+        for field in fields(self):
+            value = getattr(self, field.name)
+            if not self._validate_field(field.type, value):
+                raise AttributeError("Invalid value for {}: {}. Must be of type {}".format(field.name, value, field.type))
+
+    def _validate_field(self, expected_type, value) -> bool:
+        if value is None:
+            return True
+        elif expected_type is object:
+            return True
+        elif type(value) == expected_type:
+            return True
+        elif isunion(expected_type):
+            return any(self._validate_field(type_, value) for type_ in expected_type.__args__)
+        elif isclass(expected_type) and issubclass(expected_type, JsonObject):
+            # if the object is already decoded, determine whether it's
+            # a subtype of what the field expects
+            if isinstance(value, JsonObject):
+                return isinstance(value, expected_type)
+            # XXX: otherwise, expand objects to run their own validation.
+            #   this is *slow*, but needed to validate deeply nested types
+            expected_type.from_json(value)
+            return True
+        elif islist(expected_type) and isinstance(value, list):
+            if not value:
+                return True  # empty lists are always valid
+            expected_type = expected_type.__args__[0]
+            return all(self._validate_field(expected_type, o) for o in value)
+        return False
 
     def to_json(self) -> Any:
         return deep_encode(self)
@@ -124,6 +207,18 @@ class Reference(JsonObject):
     href: str = None
 
 
+def href_from(reference: Any):
+    """Attempts to parse HREF value from a provided source."""
+    if isinstance(reference, Reference):
+        return reference.href
+    elif type(reference) is dict:
+        if 'href' in reference:
+            return reference['href']
+    elif type(reference) is str:
+        return reference
+    raise IllumioException('Failed to extract HREF from value: {}'.format(reference))
+
+
 @dataclass
 class IllumioObject(Reference):
     name: str = None
@@ -133,7 +228,7 @@ class IllumioObject(Reference):
 
 
 @dataclass
-class ModifiableObject(IllumioObject):
+class MutableObject(IllumioObject):
     created_at: str = None
     updated_at: str = None
     deleted_at: str = None
@@ -146,6 +241,6 @@ class ModifiableObject(IllumioObject):
 
 
 @dataclass
-class UnmodifiableObject(IllumioObject):
+class ImmutableObject(IllumioObject):
     created_at: str = None
     created_by: Reference = None

@@ -18,11 +18,11 @@ from illumio.vulnerabilities import Vulnerability
 from illumio.util import (
     JsonObject,
     Reference,
-    ModifiableObject,
+    MutableObject,
     LinkState,
-    Mode,
     EnforcementMode,
-    VisibilityLevel
+    VisibilityLevel,
+    pce_api
 )
 
 from .ven import VEN, VENAgent
@@ -30,7 +30,7 @@ from .ven import VEN, VENAgent
 
 @dataclass
 class Interface(JsonObject):
-    name: str
+    name: str = None
     link_state: str = None
     address: str = None
     cidr_block: int = None
@@ -38,11 +38,12 @@ class Interface(JsonObject):
     network: Reference = None
     network_detection_mode: str = None
     friendly_name: str = None
-    loopback: str = None
+    loopback: bool = None
 
     def _validate(self):
         if self.link_state and not self.link_state in LinkState:
             raise IllumioException("Invalid link_state: {}".format(self.link_state))
+        super()._validate()
 
 
 @dataclass
@@ -59,7 +60,6 @@ class WorkloadServicePort(JsonObject):
 @dataclass
 class WorkloadServices(JsonObject):
     uptime_seconds: int = None
-    created_at: int = None
     open_service_ports: List[WorkloadServicePort] = None
 
 
@@ -95,7 +95,58 @@ class IKEAuthenticationCertificate(JsonObject):
 
 
 @dataclass
-class Workload(ModifiableObject):
+@pce_api('workloads')
+class Workload(MutableObject):
+    """Represents a workload in the PCE.
+
+    See https://docs.illumio.com/core/21.5/Content/Guides/security-policy/workloads/_ch-workloads.htm
+
+    Usage:
+        >>> from illumio import PolicyComputeEngine, Workload, Interface, EnforcementMode
+        >>> pce = PolicyComputeEngine('my.pce.com')
+        >>> pce.set_credentials('api_key_username', 'api_key_secret')
+        >>> role_label = pce.labels.create({'key': 'role', 'value': 'Web'})
+        >>> app_label = pce.labels.create({'key': 'app', 'value': 'App'})
+        >>> env_label = pce.labels.create({'key': 'env', 'value': 'Development'})
+        >>> loc_label = pce.labels.create({'key': 'loc', 'value': 'NYC-Datacenter'})
+        >>> workload = Workload(
+        ...     name='Web 01',
+        ...     hostname='web01.lab.company.com',
+        ...     public_ip='10.8.17.229',
+        ...     labels=[role_label, app_label, env_label, loc_label],
+        ...     interfaces=[
+        ...         Interface(
+        ...             name='lo0',
+        ...             address='127.0.0.1',
+        ...             link_state='up'
+        ...         )
+        ...     ],
+        ...     enforcement_mode=EnforcementMode.SELECTIVE,
+        ...     online=True
+        ... )
+        >>> workload = pce.workloads.create(workload)
+        >>> workload
+        Workload(
+            href='/orgs/1/workloads/572eb23e-a891-42b5-b488-cd9ffe3622f5',
+            name='Web 01',
+            hostname='web01.lab.company.com',
+            public_ip='10.8.17.229',
+            labels=[
+                Label(key='role', value='Web', ...),
+                ...
+            ],
+            interfaces=[
+                Interface(
+                    name='lo0',
+                    address='127.0.0.1',
+                    link_state='up'
+                )
+            ],
+            enforcement_mode='selective',
+            online=True,
+            ...
+        )
+    """
     hostname: str = None
     os_type: str = None
     service_principal_name: str = None
@@ -114,13 +165,12 @@ class Workload(ModifiableObject):
     firewall_coexistence: str = None
     containers_inherit_host_policy: bool = None
     blocked_connection_action: str = None
-    labels: List[Label] = None
+    labels: List[Reference] = None
     services: WorkloadServices = None
     vulnerabilities_summary: VulnerabilitiesSummary = None
     detected_vulnerabilities: List[DetectedVulnerability] = None
     agent: VENAgent = None
     ven: VEN = None
-    mode: str = None
     enforcement_mode: str = None
     visibility_level: str = None
     num_enforcement_boundaries: int = None
@@ -129,12 +179,11 @@ class Workload(ModifiableObject):
     ike_authentication_certificate: IKEAuthenticationCertificate = None
 
     def _validate(self):
-        if self.mode and not self.mode in Mode:
-            raise IllumioException("Invalid mode: {}".format(self.mode))
         if self.enforcement_mode and not self.enforcement_mode in EnforcementMode:
             raise IllumioException("Invalid enforcement_mode: {}".format(self.enforcement_mode))
         if self.visibility_level and not self.visibility_level in VisibilityLevel:
             raise IllumioException("Invalid visibility_level: {}".format(self.visibility_level))
+        super()._validate()
 
     def _decode_complex_types(self):
         enforced_services = []

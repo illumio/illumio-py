@@ -10,9 +10,10 @@ License:
 """
 from dataclasses import dataclass
 
-from illumio.util import ModifiableObject
+from illumio.util import MutableObject, pce_api
 
 
 @dataclass
-class SecurityPrincipal(ModifiableObject):
-    pass
+@pce_api('security_principals')
+class SecurityPrincipal(MutableObject):
+    sid: str = None

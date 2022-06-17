@@ -16,15 +16,15 @@ from .exceptions import IllumioException
 from .util import (
     JsonObject,
     Reference,
-    ModifiableObject,
-    UnmodifiableObject,
+    MutableObject,
+    ImmutableObject,
     HREF_REGEX
 )
 from .policyobjects import LabelSet
 
 
 @dataclass
-class FirewallSetting(ModifiableObject):
+class FirewallSetting(MutableObject):
     allow_dhcp_client: bool = None
     log_dropped_multicast: bool = None
     log_dropped_broadcast: bool = None
@@ -81,7 +81,7 @@ class PolicyObjectCounts(JsonObject):
 
 
 @dataclass
-class PolicyVersion(UnmodifiableObject):
+class PolicyVersion(ImmutableObject):
     commit_message: str = None
     version: int = None
     workloads_affected: int = None

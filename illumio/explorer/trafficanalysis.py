@@ -50,6 +50,7 @@ class TrafficQueryFilter(JsonObject):
     def _validate(self):
         if self.transmission and not self.transmission in Transmission:
             raise IllumioException("Invalid transmission: {}".format(self.transmission))
+        super()._validate()
 
 
 @dataclass
@@ -183,6 +184,7 @@ class TrafficQuery(JsonObject):
                 raise IllumioException("Invalid policy_decision: {}".format(policy_decision))
         if self.sources_destinations_query_op.lower() not in {AND, OR}:
             raise IllumioException("sources_destinations_query_op must be one of 'and' or 'or', was {}".format(self.sources_destinations_query_op))
+        super()._validate()
 
 
 @dataclass
@@ -227,3 +229,4 @@ class TrafficFlow(JsonObject):
             raise IllumioException("Invalid state: {}".format(self.state))
         if self.transmission and not self.transmission in Transmission:
             raise IllumioException("Invalid transmission: {}".format(self.transmission))
+        super()._validate()
