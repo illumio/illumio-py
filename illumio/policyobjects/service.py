@@ -44,4 +44,43 @@ class ServicePort(BaseService):
 @dataclass
 @pce_api('services', is_sec_policy=True)
 class Service(MutableObject):
+    """Represents a service in the PCE.
+
+    A service can be port-based or process-based (Windows services).
+
+    Each service contains one or more objects defining the port, protocol, and/or
+    process name used by an application running on a workload.
+
+    Service objects are used to write rules or enforcement boundaries to allow
+    or deny traffic on its defined ports and processes for workloads in the network.
+
+    See https://docs.illumio.com/core/21.5/Content/Guides/security-policy/security-policy-objects/services.htm
+
+    Usage:
+        >>> from illumio import PolicyComputeEngine, Service, ServicePort
+        >>> pce = PolicyComputeEngine('my.pce.com')
+        >>> pce.set_credentials('api_key_username', 'api_key_secret')
+        >>> service = Service(
+        ...     name='S-HTTP',
+        ...     service_ports=[
+        ...         ServicePort(port=80, proto='tcp'),
+        ...         ServicePort(port=443, proto='tcp')
+        ...     ]
+        ... )
+        >>> service = pce.services.create(service)
+        >>> service
+        Service(
+            href='/orgs/1/sec_policy/draft/services/15',
+            name='S-HTTP',
+            service_ports=[
+                ServicePort(
+                    port=80,
+                    proto=6,
+                    ...
+                ),
+                ...
+            ],
+            ...
+        )
+    """
     service_ports: List[ServicePort] = None

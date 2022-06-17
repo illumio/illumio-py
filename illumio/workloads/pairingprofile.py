@@ -24,6 +24,30 @@ from illumio.util import (
 @dataclass
 @pce_api('pairing_profiles')
 class PairingProfile(MutableObject):
+    """Represents a pairing profile in the PCE.
+
+    Pairing profiles are used to configure VEN defaults and generate keys
+    for VEN pairing  on workloads that will be managed by the PCE.
+
+    Usage:
+        >>> from illumio.workloads import PairingProfile
+        >>> pairing_profile = PairingProfile(
+        ...     name='PP-DATABASE-VENS',
+        ...     enabled=True,
+        ...     enforcement_mode='visibility_only',
+        ...     visibility_level='flows_summary'
+        ... )
+        >>> pairing_profile = pce.create_pairing_profile(pairing_profile)
+        >>> pairing_profile
+        PairingProfile(
+            href='/orgs/1/pairing_profiles/19',
+            name='PP-DATABASE-VENS',
+            enabled=True,
+            enforcement_mode='visibility_only',
+            visibility_level='flows_summary',
+            ...
+        )
+    """
     enabled: bool = None
     agent_software_release: str = None
     enforcement_mode: str = None

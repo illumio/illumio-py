@@ -97,6 +97,56 @@ class IKEAuthenticationCertificate(JsonObject):
 @dataclass
 @pce_api('workloads')
 class Workload(MutableObject):
+    """Represents a workload in the PCE.
+
+    See https://docs.illumio.com/core/21.5/Content/Guides/security-policy/workloads/_ch-workloads.htm
+
+    Usage:
+        >>> from illumio import PolicyComputeEngine, Workload, Interface, EnforcementMode
+        >>> pce = PolicyComputeEngine('my.pce.com')
+        >>> pce.set_credentials('api_key_username', 'api_key_secret')
+        >>> role_label = pce.labels.create({'key': 'role', 'value': 'Web'})
+        >>> app_label = pce.labels.create({'key': 'app', 'value': 'App'})
+        >>> env_label = pce.labels.create({'key': 'env', 'value': 'Development'})
+        >>> loc_label = pce.labels.create({'key': 'loc', 'value': 'NYC-Datacenter'})
+        >>> workload = Workload(
+        ...     name='Web 01',
+        ...     hostname='web01.lab.company.com',
+        ...     public_ip='10.8.17.229',
+        ...     labels=[role_label, app_label, env_label, loc_label],
+        ...     interfaces=[
+        ...         Interface(
+        ...             name='lo0',
+        ...             address='127.0.0.1',
+        ...             link_state='up'
+        ...         )
+        ...     ],
+        ...     enforcement_mode=EnforcementMode.SELECTIVE,
+        ...     online=True
+        ... )
+        >>> workload = pce.workloads.create(workload)
+        >>> workload
+        Workload(
+            href='/orgs/1/workloads/572eb23e-a891-42b5-b488-cd9ffe3622f5',
+            name='Web 01',
+            hostname='web01.lab.company.com',
+            public_ip='10.8.17.229',
+            labels=[
+                Label(key='role', value='Web', ...),
+                ...
+            ],
+            interfaces=[
+                Interface(
+                    name='lo0',
+                    address='127.0.0.1',
+                    link_state='up'
+                )
+            ],
+            enforcement_mode='selective',
+            online=True,
+            ...
+        )
+    """
     hostname: str = None
     os_type: str = None
     service_principal_name: str = None
@@ -115,7 +165,7 @@ class Workload(MutableObject):
     firewall_coexistence: str = None
     containers_inherit_host_policy: bool = None
     blocked_connection_action: str = None
-    labels: List[Label] = None
+    labels: List[Reference] = None
     services: WorkloadServices = None
     vulnerabilities_summary: VulnerabilitiesSummary = None
     detected_vulnerabilities: List[DetectedVulnerability] = None

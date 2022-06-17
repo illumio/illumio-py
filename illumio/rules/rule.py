@@ -61,6 +61,77 @@ class LabelResolutionBlock(JsonObject):
 @dataclass
 @pce_api('rules', endpoint='/sec_rules')
 class Rule(BaseRule, MutableObject):
+    """Represents a security rule in the PCE.
+
+    Each security rule defines one or more services on which traffic will be
+    allowed from the defined providers to the defined consumers.
+
+    Providers and consumers can be defined using static (workload HREF) or
+    dynamic (label, IP list) references. By default, providers and consumers
+    are resolved as workloads.
+
+    See https://docs.illumio.com/core/21.5/Content/Guides/security-policy/create-security-policy/rules.htm
+
+    Usage:
+        >>> from illumio import PolicyComputeEngine, Rule, RuleSet, LabelSet
+        >>> any_ip_list = pce.get_default_ip_list()
+        >>> role_label = pce.labels.create({'key': 'role', 'value': 'Web'})
+        >>> app_label = pce.labels.create({'key': 'app', 'value': 'App'})
+        >>> env_label = pce.labels.create({'key': 'env', 'value': 'Production'})
+        >>> loc_label = pce.labels.create({'key': 'loc', 'value': 'AWS'})
+        >>> ruleset = RuleSet(
+        ...     name='RS-LAB-ALLOWLIST',
+        ...     scopes=[
+        ...         LabelSet(
+        ...             labels=[app_label, env_label, loc_label]
+        ...         )
+        ...     ]
+        ... )
+        >>> ruleset = pce.rule_sets.create(ruleset)
+        >>> rule = Rule.build(
+        ...     providers=[role_label],
+        ...     consumers=[any_ip_list],
+        ...     ingress_services=[
+        ...         {'port': 80, 'proto': 'tcp'},
+        ...         {'port': 443, 'proto': 'tcp'}
+        ...     ],
+        ...     resolve_providers_as=['workloads'],
+        ...     resolve_consumers_as=['workloads'],
+        ...     unscoped_consumers=True  # creates an extra-scope rule
+        ... )
+        >>> rule = pce.rules.create(rule, parent=ruleset)
+        >>> rule
+        Rule(
+            href='/orgs/1/sec_policy/rule_sets/19/rules/sec_rules/34',
+            enabled=True,
+            providers=[
+                Actor(
+                    label=Reference(
+                        href='/orgs/1/labels/21'
+                    ),
+                    ...
+                )
+            ],
+            consumers=[
+                Actor(
+                    ip_list=Reference(
+                        href='/orgs/1/sec_policy/draft/ip_lists/1'
+                    ),
+                    ...
+                )
+            ],
+            ingress_services=[
+                ServicePort(port=80, proto=6, ...),
+                ServicePort(port=443, proto=6, ...)
+            ],
+            resolve_labels_as=LabelResolutionBlock(
+                providers=['workloads'],
+                consumers=['workloads']
+            ),
+            unscoped_consumers=True,
+            ...
+        )
+    """
     enabled: bool = None
     resolve_labels_as: LabelResolutionBlock = None
     sec_connect: bool = None
