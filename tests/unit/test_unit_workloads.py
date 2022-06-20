@@ -6,6 +6,7 @@ from typing import List
 import pytest
 
 from illumio.policyobjects import Service, ServicePort
+from illumio.util import EnforcementMode
 from illumio.workloads import Workload
 
 MOCK_WORKLOADS = os.path.join(pytest.DATA_DIR, 'workloads.json')
@@ -42,6 +43,11 @@ def mock_requests(requests_mock, get_callback, post_callback, put_callback, dele
 @pytest.fixture()
 def mock_workload(pce):
     yield pce.workloads.get_by_reference("/orgs/1/workloads/ef7f0f53-2295-4416-aaaf-965146934c53")
+
+
+def test_pass_enforcement_mode_as_enum():
+    workload = Workload(name='test workload', enforcement_mode=EnforcementMode.VISIBILITY_ONLY)
+    assert workload.enforcement_mode in EnforcementMode
 
 
 def test_selectively_enforced_services(mock_workload):
