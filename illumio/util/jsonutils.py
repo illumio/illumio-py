@@ -40,54 +40,7 @@ class IllumioEncoder(json.JSONEncoder):
 class JsonObject(ABC):
 
     def __post_init__(self):
-        for field in fields(self):
-            value = getattr(self, field.name)
-            self._flatten_ref(field, value)
-            self._resolve_enum(field, value)
         self._validate()
-
-    def _resolve_enum(self, field, value):
-        """Replaces IllumioEnumMeta subtypes with their internal value.
-
-        This allows clients to pass enums directly as attribute values.
-
-        For example:
-
-        >>> Workload(..., enforcement_mode=EnforcementMode.SELECTIVE)
-
-        will be converted to
-
-        >>> Workload(..., enforcement_mode='selective')
-        """
-        if value is None:
-            return
-        if isinstance(type(value), IllumioEnumMeta):
-            setattr(self, field.name, value.value)
-
-    def _flatten_ref(self, field, value):
-        """Replaces Reference subclasses with a simplified Reference object.
-
-        This allows clients to pass a Reference subclass instance without
-        breaking the encoded object schema for API calls.
-        """
-        if value is None:
-            return
-        if field.type is Reference:
-            if isinstance(value, Reference):
-                setattr(self, field.name, Reference(value.href))
-        elif islist(field.type):
-            if field.type.__args__[0] is Reference:
-                ref_list = []
-                for ref in value:
-                    if isinstance(ref, Reference):
-                        ref_list.append(Reference(href=ref.href))
-                    else:
-                        ref_list.append(ref)
-                setattr(self, field.name, ref_list)
-        elif isunion(field.type):
-            if Reference in field.type.__args__:
-                if isinstance(value, Reference):
-                    setattr(self, field.name, Reference(value.href))
 
     def _validate(self):
         """Validates fields by comparing their values to their registered dataclass types."""
@@ -105,6 +58,9 @@ class JsonObject(ABC):
             return True
         elif isunion(expected_type):
             return any(self._validate_field(type_, value) for type_ in expected_type.__args__)
+        elif isinstance(type(value), IllumioEnumMeta):
+            # validate enum values if they are passed as enum consts
+            return self._validate_field(expected_type, value.value)
         elif isclass(expected_type) and issubclass(expected_type, JsonObject):
             # if the object is already decoded, determine whether it's
             # a subtype of what the field expects
@@ -175,6 +131,53 @@ class JsonObject(ABC):
         return value
 
 
+def flatten_ref(type_, value):
+    """Replaces Reference subclasses with a simplified Reference object.
+
+    This allows clients to pass a Reference subclass instance without
+    breaking the encoded object schema for API calls.
+    """
+    if value is None:
+        return None
+    if type_ is Reference:
+        if isinstance(value, Reference):
+            return Reference(value.href)
+    elif islist(type_):
+        if type_.__args__[0] is Reference:
+            ref_list = []
+            for ref in value:
+                if isinstance(ref, Reference):
+                    ref_list.append(Reference(href=ref.href))
+                else:
+                    ref_list.append(ref)
+            return ref_list
+    elif isunion(type_):
+        if Reference in type_.__args__:
+            if isinstance(value, Reference):
+                return Reference(value.href)
+    return value
+
+
+def resolve_enum(value):
+    """Replaces IllumioEnumMeta subtypes with their internal value.
+
+    This allows clients to pass enums directly as attribute values.
+
+    For example:
+
+    >>> Workload(..., enforcement_mode=EnforcementMode.SELECTIVE)
+
+    will be converted to
+
+    >>> Workload(..., enforcement_mode='selective')
+    """
+    if value is None:
+        return None
+    if isinstance(type(value), IllumioEnumMeta):
+        return value.value
+    return value
+
+
 def deep_encode(o: Any) -> Any:
     """
     Recursively encode members of the given object and return a JSON-compatible
@@ -191,7 +194,9 @@ def deep_encode(o: Any) -> Any:
         if hasattr(type(o), '_encode'):
             return o._encode()
         for f in fields(o):
-            value = deep_encode(getattr(o, f.name))
+            value = flatten_ref(f.type, getattr(o, f.name))
+            value = resolve_enum(value)
+            value = deep_encode(value)
             result.append((f.name, value))
         return ignore_empty_keys(result)
     elif isinstance(o, (list, tuple)):
