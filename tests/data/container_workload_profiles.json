@@ -1,0 +1,166 @@
+[
+    {
+        "href": "/orgs/1/container_clusters/f5bef182-8c55-4219-b35b-0a50b707e434/container_workload_profiles/0574d150-f75f-4bea-b7d7-675b554ba190",
+        "namespace": "calico-apiserver",
+        "enforcement_mode": "idle",
+        "visibility_level": "flow_summary",
+        "managed": false,
+        "assign_labels": [],
+        "labels": [],
+        "linked": true,
+        "created_at": "2022-06-23T20:53:57.028Z",
+        "created_by": {
+            "href": "/orgs/1/container_clusters/f5bef182-8c55-4219-b35b-0a50b707e434"
+        },
+        "updated_at": "2022-06-23T20:53:57.028Z",
+        "updated_by": {
+            "href": "/orgs/1/container_clusters/f5bef182-8c55-4219-b35b-0a50b707e434"
+        }
+    },
+    {
+        "href": "/orgs/1/container_clusters/f5bef182-8c55-4219-b35b-0a50b707e434/container_workload_profiles/1c1e4f9e-13ac-4e47-966a-3ec11b9c76e3",
+        "namespace": "calico-system",
+        "enforcement_mode": "idle",
+        "visibility_level": "flow_summary",
+        "managed": false,
+        "assign_labels": [],
+        "labels": [],
+        "linked": true,
+        "created_at": "2022-06-23T20:53:57.037Z",
+        "created_by": {
+            "href": "/orgs/1/container_clusters/f5bef182-8c55-4219-b35b-0a50b707e434"
+        },
+        "updated_at": "2022-06-23T20:53:57.037Z",
+        "updated_by": {
+            "href": "/orgs/1/container_clusters/f5bef182-8c55-4219-b35b-0a50b707e434"
+        }
+    },
+    {
+        "href": "/orgs/1/container_clusters/f5bef182-8c55-4219-b35b-0a50b707e434/container_workload_profiles/92b828b5-ca2e-44e1-a9e3-5b705fccf929",
+        "namespace": "default",
+        "enforcement_mode": "idle",
+        "visibility_level": "flow_summary",
+        "managed": false,
+        "assign_labels": [],
+        "labels": [],
+        "linked": true,
+        "created_at": "2022-06-23T20:53:57.047Z",
+        "created_by": {
+            "href": "/orgs/1/container_clusters/f5bef182-8c55-4219-b35b-0a50b707e434"
+        },
+        "updated_at": "2022-06-23T20:53:57.047Z",
+        "updated_by": {
+            "href": "/orgs/1/container_clusters/f5bef182-8c55-4219-b35b-0a50b707e434"
+        }
+    },
+    {
+        "href": "/orgs/1/container_clusters/f5bef182-8c55-4219-b35b-0a50b707e434/container_workload_profiles/b463c39d-8920-4cf4-a134-67ec9e9193fe",
+        "namespace": "kube-node-lease",
+        "enforcement_mode": "idle",
+        "visibility_level": "flow_summary",
+        "managed": false,
+        "assign_labels": [],
+        "labels": [],
+        "linked": true,
+        "created_at": "2022-06-23T20:53:57.066Z",
+        "created_by": {
+            "href": "/orgs/1/container_clusters/f5bef182-8c55-4219-b35b-0a50b707e434"
+        },
+        "updated_at": "2022-06-23T20:53:57.066Z",
+        "updated_by": {
+            "href": "/orgs/1/container_clusters/f5bef182-8c55-4219-b35b-0a50b707e434"
+        }
+    },
+    {
+        "href": "/orgs/1/container_clusters/f5bef182-8c55-4219-b35b-0a50b707e434/container_workload_profiles/183aec04-9600-476c-a586-86bc5623181b",
+        "namespace": "kube-public",
+        "enforcement_mode": "idle",
+        "visibility_level": "flow_summary",
+        "managed": false,
+        "assign_labels": [],
+        "labels": [],
+        "linked": true,
+        "created_at": "2022-06-23T20:53:57.075Z",
+        "created_by": {
+            "href": "/orgs/1/container_clusters/f5bef182-8c55-4219-b35b-0a50b707e434"
+        },
+        "updated_at": "2022-06-23T20:53:57.075Z",
+        "updated_by": {
+            "href": "/orgs/1/container_clusters/f5bef182-8c55-4219-b35b-0a50b707e434"
+        }
+    },
+    {
+        "href": "/orgs/1/container_clusters/f5bef182-8c55-4219-b35b-0a50b707e434/container_workload_profiles/0f910734-3a5d-44ad-8dbb-aaad5bda1387",
+        "namespace": "kube-system",
+        "enforcement_mode": "idle",
+        "visibility_level": "flow_summary",
+        "managed": false,
+        "assign_labels": [],
+        "labels": [],
+        "linked": true,
+        "created_at": "2022-06-23T20:53:57.085Z",
+        "created_by": {
+            "href": "/orgs/1/container_clusters/f5bef182-8c55-4219-b35b-0a50b707e434"
+        },
+        "updated_at": "2022-06-23T20:53:57.085Z",
+        "updated_by": {
+            "href": "/orgs/1/container_clusters/f5bef182-8c55-4219-b35b-0a50b707e434"
+        }
+    },
+    {
+        "href": "/orgs/1/container_clusters/f5bef182-8c55-4219-b35b-0a50b707e434/container_workload_profiles/db8ea7d9-b598-4c1e-8de5-99fd9d248be5",
+        "namespace": "tigera-operator",
+        "enforcement_mode": "idle",
+        "visibility_level": "flow_summary",
+        "managed": false,
+        "assign_labels": [],
+        "labels": [],
+        "linked": true,
+        "created_at": "2022-06-23T20:53:57.094Z",
+        "created_by": {
+            "href": "/orgs/1/container_clusters/f5bef182-8c55-4219-b35b-0a50b707e434"
+        },
+        "updated_at": "2022-06-23T20:53:57.094Z",
+        "updated_by": {
+            "href": "/orgs/1/container_clusters/f5bef182-8c55-4219-b35b-0a50b707e434"
+        }
+    },
+    {
+        "href": "/orgs/1/container_clusters/f5bef182-8c55-4219-b35b-0a50b707e434/container_workload_profiles/d2d466b5-106d-48e9-ada9-68f6321d1da8",
+        "namespace": "illumio-system",
+        "description": "",
+        "enforcement_mode": "idle",
+        "visibility_level": "flow_summary",
+        "managed": true,
+        "assign_labels": [],
+        "labels": [],
+        "linked": true,
+        "created_at": "2022-06-23T20:53:57.056Z",
+        "created_by": {
+            "href": "/orgs/1/container_clusters/f5bef182-8c55-4219-b35b-0a50b707e434"
+        },
+        "updated_at": "2022-06-23T21:10:58.331Z",
+        "updated_by": {
+            "href": "/users/1"
+        }
+    },
+    {
+        "href": "/orgs/1/container_clusters/f5bef182-8c55-4219-b35b-0a50b707e434/container_workload_profiles/1c617b3d-a5ff-44b2-97d6-5e815185063e",
+        "name": "Default Profile",
+        "namespace": null,
+        "enforcement_mode": "idle",
+        "visibility_level": "flow_summary",
+        "managed": true,
+        "assign_labels": [],
+        "labels": [],
+        "linked": false,
+        "created_at": "2022-06-23T20:53:52.445Z",
+        "created_by": {
+            "href": "/users/1"
+        },
+        "updated_at": "2022-06-23T21:11:04.435Z",
+        "updated_by": {
+            "href": "/users/1"
+        }
+    }
+]
