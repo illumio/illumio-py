@@ -33,6 +33,7 @@ def _gen_int_id():
 
 OBJECT_TYPE_REF_MAP = {
     'container_clusters': _gen_uuid,
+    'container_workload_profiles': _gen_uuid,
     'enforcement_boundaries': _gen_int_id,
     'ip_lists': _gen_int_id,
     'label_groups': _gen_uuid,
@@ -107,8 +108,15 @@ class PCEObjectMock(object):
                             break
                     if not label_match:
                         match = False
-                elif value not in o[key]:
+                elif o[key] is None:
                     match = False
+                else:
+                    try:
+                        match = value in o[key]  # partial match
+                    except TypeError:
+                        # need exact match for some types
+                        # boolean values need to be cast to str to compare
+                        match = (value == o[key]) or (str(value) == str(o[key]))
             if match:
                 matching_objects.append(o)
         return matching_objects
