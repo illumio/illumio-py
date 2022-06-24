@@ -9,11 +9,128 @@ License:
     Apache2, see LICENSE for more details.
 """
 from dataclasses import dataclass
+from typing import List
 
-from illumio.util import MutableObject, pce_api
+from illumio.exceptions import IllumioException
+from illumio.util import (
+    JsonObject,
+    Reference,
+    IllumioObject,
+    MutableObject,
+    EnforcementMode,
+    VisibilityLevel,
+    pce_api
+)
+
+
+class ContainerClusterNode(JsonObject):
+    name: str = None
+    pod_subnet: str = None
+
+
+class ContainerClusterError(JsonObject):
+    audit_event: Reference = None
+    duplicate_ids: List[str] = None
+    error_type: str = None
+
+
+class LabelAssignment(JsonObject):
+    key: str = None
+    assignment: Reference = None
+
+
+@dataclass
+@pce_api('container_workload_profiles')
+class ContainerWorkloadProfile(MutableObject):
+    """Represents a workload profile within a container cluster object in the PCE.
+
+    Workload profiles define management and scope for container workloads under
+    a cluster namespace defined by the profile.
+
+    NOTE: though the `enforcement_mode` value for a workload profile can be set
+    to `selective`, it is currently not supported and may result in unexpected
+    behaviour. The only supported enforcement modes for workload profiles are
+    `idle`, `visibility_only`, and `full`.
+
+    Usage:
+        >>> from illumio import PolicyComputeEngine, ContainerCluster, ContainerWorkloadProfile
+        >>> pce = PolicyComputeEngine('my.pce.com')
+        >>> pce.set_credentials('api_key_username', 'api_key_secret')
+        >>> container_cluster = ContainerCluster(
+        ...     name='CC-EKS-PROD',
+        ...     description='Production Kubernetes cluster on AWS'
+        ... )
+        >>> container_cluster = pce.container_clusters.create(container_cluster)
+        >>> container_workload_profile = ContainerWorkloadProfile(
+        ...     name='illumio-system'
+        ... )
+        >>> container_workload_profile = pce.container_workload_profiles.create(
+        ...     container_workload_profile, parent=container_cluster
+        ... )
+        >>> container_workload_profile
+        ContainerWorkloadProfile(
+            href='/orgs/1/container_clusters/f5bef182-8c55-4219-b35b-0a50b707e434/container_workload_profiles/d2d466b5-106d-48e9-ada9-68f6321d1da8',
+            name='illumio-system',
+            ...
+        )
+    """
+    namespace: str = None
+    assign_labels: List[Reference] = None
+    labels: List[LabelAssignment] = None
+    enforcement_mode: str = None
+    visibility_level: str = None
+    linked: bool = None
+    managed: bool = None
+
+    def _validate(self):
+        if self.enforcement_mode and self.enforcement_mode not in EnforcementMode:
+            raise IllumioException("Invalid enforcement_mode: {}".format(self.enforcement_mode))
+        if self.visibility_level and self.visibility_level not in VisibilityLevel:
+            raise IllumioException("Invalid visibility_level: {}".format(self.visibility_level))
+        return super()._validate()
 
 
 @dataclass
 @pce_api('container_clusters')
-class ContainerCluster(MutableObject):
-    pass
+class ContainerCluster(IllumioObject):
+    """Represents a container cluster object in the PCE.
+
+    Container clusters are abstract representations of container orchestration
+    systems linked to the PCE.
+
+    See https://docs.illumio.com/core/21.5/Content/LandingPages/Guides/kubernetes-and-openshift.htm
+
+    NOTE: when a container cluster is created through the API, the
+    `container_cluster_token` used by Kubelink and C-VEN containers
+    to pair with the PCE is returned in the response. This token is
+    only available after the initial POST request and cannot be
+    retrieved via the API: make sure to store it in a persistent
+    form after creating the cluster.
+
+    Usage:
+        >>> from illumio import PolicyComputeEngine, ContainerCluster
+        >>> pce = PolicyComputeEngine('my.pce.com')
+        >>> pce.set_credentials('api_key_username', 'api_key_secret')
+        >>> container_cluster = ContainerCluster(
+        ...     name='CC-EKS-PROD',
+        ...     description='Production Kubernetes cluster on AWS'
+        ... )
+        >>> container_cluster = pce.container_clusters.create(container_cluster)
+        >>> container_cluster
+        ContainerCluster(
+            href='/orgs/1/container_clusters/f5bef182-8c55-4219-b35b-0a50b707e434',
+            name='CC-EKS-PROD',
+            description='Production Kubernetes cluster on AWS',
+            container_cluster_token='1_016dace1ab35fafe8e71c6dda6695e0881393f1f4c494e6cd70178f1e743b372',
+            ...
+        )
+    """
+    pce_fqdn: str = None
+    manager_type: str = None
+    last_connected: str = None
+    kubelink_version: str = None
+    online: bool = None
+    nodes: List[ContainerClusterNode] = None
+    container_runtime: str = None
+    errors: List[ContainerClusterError] = None
+    container_cluster_token: str = None
