@@ -230,6 +230,7 @@ class IllumioObject(Reference):
     description: str = None
     external_data_set: str = None
     external_data_reference: str = None
+    caps: List[str] = None
 
 
 @dataclass
@@ -242,7 +243,6 @@ class MutableObject(IllumioObject):
     created_by: Reference = None
     updated_by: Reference = None
     deleted_by: Reference = None
-    caps: List[str] = None
 
 
 @dataclass
