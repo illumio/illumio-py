@@ -62,13 +62,14 @@ class PolicyComputeEngine:
             http[s]://<DOMAIN_NAME>:<PORT>/api/<API_VERSION>
         org_id: the PCE organization ID.
         container_clusters: Container Clusters API.
+        container_workload_profiles: Container Cluster Workload Profiles API.
         enforcement_boundaries: Enforcement Boundaries API.
         ip_lists: IP Lists API.
         label_groups: Label Groups API.
         labels: Labels API.
         pairing_profiles: Pairing Profiles API.
         rule_sets: Rule Sets API.
-        sec_rules: Rules API.
+        rules: Security Rules API.
         security_principals: Security Principals API.
         service_bindings: Service Bindings API.
         services: Services API.

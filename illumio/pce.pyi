@@ -16,7 +16,6 @@ from illumio import (
 
 
 class PolicyComputeEngine:
-
     base_url: str
     org_id: str
 
@@ -55,6 +54,7 @@ class PolicyComputeEngine:
 
     class _PCEObjectAPI:
         def __init__(self, pce: 'PolicyComputeEngine', api_data: object) -> None: ...
+
         def _build_endpoint(self, policy_version: str, parent: Any) -> str: ...
 
         @overload
@@ -107,6 +107,7 @@ class PolicyComputeEngine:
         def delete(self, reference: dict, **kwargs) -> None: ...
 
         def bulk_create(self, objects_to_create: List[IllumioObject], **kwargs) -> List[dict]: ...
+
         def bulk_update(self, objects_to_update: List[IllumioObject], **kwargs) -> List[dict]: ...
 
         @overload
@@ -120,6 +121,7 @@ class PolicyComputeEngine:
 
     # Dynamic APIs stubbed here for auto-completion
     container_clusters: _PCEObjectAPI
+    container_workload_profiles: _PCEObjectAPI
     enforcement_boundaries: _PCEObjectAPI
     ip_lists: _PCEObjectAPI
     label_groups: _PCEObjectAPI
