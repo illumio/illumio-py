@@ -23,20 +23,24 @@ from illumio.util import (
 )
 
 
+@dataclass
 class ContainerClusterNode(JsonObject):
     name: str = None
     pod_subnet: str = None
 
 
+@dataclass
 class ContainerClusterError(JsonObject):
     audit_event: Reference = None
     duplicate_ids: List[str] = None
     error_type: str = None
 
 
-class LabelAssignment(JsonObject):
+@dataclass
+class LabelRestriction(JsonObject):
     key: str = None
     assignment: Reference = None
+    restriction: List[Reference] = None
 
 
 @dataclass
@@ -47,13 +51,18 @@ class ContainerWorkloadProfile(MutableObject):
     Workload profiles define management and scope for container workloads under
     a cluster namespace defined by the profile.
 
+    The `assign_labels` field is DEPRECATED in favour of the more flexible `labels`
+    for defining label assignments and restrictions on the profile. `assign_labels`
+    is left in for compatibility with older PCE versions. In either case, label
+    assignments can only be specified for managed workload profiles.
+
     NOTE: though the `enforcement_mode` value for a workload profile can be set
     to `selective`, it is currently not supported and may result in unexpected
     behaviour. The only supported enforcement modes for workload profiles are
     `idle`, `visibility_only`, and `full`.
 
     Usage:
-        >>> from illumio import PolicyComputeEngine, ContainerCluster, ContainerWorkloadProfile
+        >>> from illumio import PolicyComputeEngine, ContainerCluster, ContainerWorkloadProfile, LabelRestriction
         >>> pce = PolicyComputeEngine('my.pce.com')
         >>> pce.set_credentials('api_key_username', 'api_key_secret')
         >>> container_cluster = ContainerCluster(
@@ -61,8 +70,16 @@ class ContainerWorkloadProfile(MutableObject):
         ...     description='Production Kubernetes cluster on AWS'
         ... )
         >>> container_cluster = pce.container_clusters.create(container_cluster)
+        >>> env_label = pce.labels.create({'key': 'env', 'value': 'Production'})
+        >>> loc_label = pce.labels.create({'key': 'loc', 'value': 'AWS'})
         >>> container_workload_profile = ContainerWorkloadProfile(
-        ...     name='illumio-system'
+        ...     name='illumio-system',
+        ...     managed=True,
+        ...     labels=[
+        ...         LabelRestriction(key='env', assignment=env_label),
+        ...         LabelRestriction(key='loc', assignment=loc_label)
+        ...     ],
+        ...     enforcement_mode='visibility_only'
         ... )
         >>> container_workload_profile = pce.container_workload_profiles.create(
         ...     container_workload_profile, parent=container_cluster
@@ -71,12 +88,23 @@ class ContainerWorkloadProfile(MutableObject):
         ContainerWorkloadProfile(
             href='/orgs/1/container_clusters/f5bef182-8c55-4219-b35b-0a50b707e434/container_workload_profiles/d2d466b5-106d-48e9-ada9-68f6321d1da8',
             name='illumio-system',
+            namespace=None,
+            managed=True,
+            labels=[
+                LabelRestriction(
+                    key='env',
+                    assignment=Reference(href='/orgs/1/labels/23'),
+                    ...
+                ),
+                ...
+            ],
+            enforcement_mode='visibility_only'
             ...
         )
     """
     namespace: str = None
     assign_labels: List[Reference] = None
-    labels: List[LabelAssignment] = None
+    labels: List[LabelRestriction] = None
     enforcement_mode: str = None
     visibility_level: str = None
     linked: bool = None
