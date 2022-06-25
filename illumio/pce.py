@@ -75,6 +75,7 @@ class PolicyComputeEngine:
         security_principals: Security Principals API.
         service_bindings: Service Bindings API.
         services: Services API.
+        users: Users API.
         vens: VENs API.
         virtual_services: Virtual Services API.
         workloads: Workloads API.

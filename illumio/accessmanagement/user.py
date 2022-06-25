@@ -10,10 +10,11 @@ License:
 """
 from dataclasses import dataclass
 
-from illumio.util import IllumioObject
+from illumio.util import IllumioObject, pce_api
 
 
 @dataclass
+@pce_api('users', is_global=True)
 class User(IllumioObject):
     username: str = None
     last_login_on: str = None

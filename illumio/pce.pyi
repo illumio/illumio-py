@@ -132,6 +132,7 @@ class PolicyComputeEngine:
     security_principals: _PCEObjectAPI
     service_bindings: _PCEObjectAPI
     services: _PCEObjectAPI
+    users: _PCEObjectAPI
     vens: _PCEObjectAPI
     virtual_services: _PCEObjectAPI
     workloads: _PCEObjectAPI
