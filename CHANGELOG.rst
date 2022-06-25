@@ -1,6 +1,23 @@
 Changelog
 =========
 
+Version 1.0.1 (2022-06-25)
+-------------
+
+NEW FEATURES:
+
+* `illumio.infrastructure.containercluster.ContainerWorkloadProfiles` - add container clusters workload profiles API
+* add stub for `/users` api
+* make the `include_org` default configurable as a `PolicyComputeEngine` class attribute
+
+IMPROVEMENTS:
+
+* flesh out and document `/container_clusters` API
+* move flatten_ref and resolve_enum functions to JSON encoding to avoid side-effects when creating JsonObject instances
+* add sweeper module for integration test teardown
+* add unit and integration tests for container clusters and workload profiles
+* add unit tests to validate different request paths and include_org values
+
 Version 1.0.0 (2022-06-16)
 -------------
 
