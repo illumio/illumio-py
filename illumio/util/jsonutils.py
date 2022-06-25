@@ -66,9 +66,12 @@ class JsonObject(ABC):
             # a subtype of what the field expects
             if isinstance(value, JsonObject):
                 return isinstance(value, expected_type)
-            # XXX: otherwise, expand objects to run their own validation.
-            #   this is *slow*, but needed to validate deeply nested types
-            expected_type.from_json(value)
+            try:
+                # XXX: otherwise, expand objects to run their own validation.
+                #   this is *slow*, but needed to validate deeply nested types
+                expected_type.from_json(value)
+            except:
+                return False
             return True
         elif islist(expected_type) and isinstance(value, list):
             if not value:
@@ -249,3 +252,13 @@ class MutableObject(IllumioObject):
 class ImmutableObject(IllumioObject):
     created_at: str = None
     created_by: Reference = None
+
+__all__ = [
+    'IllumioEncoder',
+    'JsonObject',
+    'Reference',
+    'IllumioObject',
+    'MutableObject',
+    'ImmutableObject',
+    'href_from'
+]
