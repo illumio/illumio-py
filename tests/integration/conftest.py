@@ -3,9 +3,9 @@ import os
 import pytest
 
 from illumio import PolicyComputeEngine, IllumioException
-from illumio.util import PCE_APIS
 
 from helpers import random_string
+from sweepers import Sweeper
 
 # environment variables for integration tests
 pce_host = os.getenv('ILLUMIO_PCE_HOST')
@@ -33,18 +33,10 @@ def session_identifier():
 @pytest.fixture(scope='session', autouse=True)
 def cleanup(pce, session_identifier, request):
     def _teardown():
-        for name in PCE_APIS.keys():
-            api = getattr(pce, name)
-            try:
-                leftover_integration_objects = api.get(
-                    params={'external_data_set': session_identifier}
-                )
-                for o in leftover_integration_objects:
-                    api.delete(o.href)
-            except IllumioException:
-                pass
+        sweeper = Sweeper(pce, session_identifier)
+        sweeper.sweep()
     request.addfinalizer(_teardown)
 
 
 # prepare common fixtures
-from common import *
+from fixtures import *

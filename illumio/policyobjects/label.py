@@ -101,7 +101,7 @@ class LabelSet(JsonObject):
         json_array = []
         for label in self.labels:
             key = 'label_group' if '/label_groups/' in label.href else 'label'
-            json_array.append({key: label.to_json()})
+            json_array.append({key: Reference(href=label.href).to_json()})
         return json_array
 
     @classmethod

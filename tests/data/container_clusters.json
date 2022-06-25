@@ -1,0 +1,39 @@
+[
+    {
+        "href": "/orgs/1/container_clusters/d0cebfed-6804-4519-9d24-4f21532d75e6",
+        "pce_fqdn": null,
+        "name": "CC-UNPAIRED",
+        "description": "Not yet paired to cluster",
+        "manager_type": null,
+        "last_connected": null,
+        "kubelink_version": null,
+        "online": false,
+        "nodes": [],
+        "container_runtime": null,
+        "errors": [],
+        "caps": [
+            "write"
+        ]
+    },
+    {
+        "href": "/orgs/1/container_clusters/f5bef182-8c55-4219-b35b-0a50b707e434",
+        "pce_fqdn": null,
+        "name": "CC-EKS-PROD",
+        "description": "Production Kubernetes cluster in AWS",
+        "manager_type": "Kubernetes v1.24.1",
+        "last_connected": "2022-06-23T20:53:57.885Z",
+        "kubelink_version": "2.0.2.d53d7f",
+        "online": true,
+        "nodes": [
+            {
+                "name": "kube-leader",
+                "pod_subnet": "192.168.0.0/24"
+            }
+        ],
+        "container_runtime": "containerd",
+        "errors": [],
+        "caps": [
+            "write"
+        ]
+    }
+]

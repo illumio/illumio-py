@@ -10,11 +10,10 @@ from helpers import random_string
 @pytest.fixture
 def enforcement_boundary(pce, session_identifier, rdp_service):
     identifier = random_string()
-    hostname = '{}.{}'.format(session_identifier, identifier)
     any_enforcement_boundary = pce.get_default_ip_list()
     enforcement_boundary = pce.enforcement_boundaries.create(
         EnforcementBoundary.build(
-            name=hostname,
+            name='{}-EB-{}'.format(session_identifier, identifier),
             ingress_services=[rdp_service, {'port': 20009, 'proto': convert_protocol('tcp')}],
             providers=[AMS],
             consumers=[any_enforcement_boundary]

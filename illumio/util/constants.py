@@ -36,20 +36,20 @@ class IllumioEnumMeta(EnumMeta):
         return value in cls._value2member_map_
 
 
-class LinkState(Enum, metaclass=IllumioEnumMeta):
+class LinkState(str, Enum, metaclass=IllumioEnumMeta):
     UP = 'up'
     DOWN = 'down'
     UNKNOWN = 'unknown'
 
 
-class EnforcementMode(Enum, metaclass=IllumioEnumMeta):
+class EnforcementMode(str, Enum, metaclass=IllumioEnumMeta):
     IDLE = 'idle'
     VISIBILITY_ONLY = 'visibility_only'
     FULL = 'full'
     SELECTIVE = 'selective'
 
 
-class VisibilityLevel(Enum, metaclass=IllumioEnumMeta):
+class VisibilityLevel(str, Enum, metaclass=IllumioEnumMeta):
     FLOW_FULL_DETAIL = 'flow_full_detail'
     FLOW_SUMMARY = 'flow_summary'
     FLOW_DROPS = 'flow_drops'
@@ -57,25 +57,25 @@ class VisibilityLevel(Enum, metaclass=IllumioEnumMeta):
     ENHANCED_DATA_COLLECTION = 'enhanced_data_collection'
 
 
-class PolicyDecision(Enum, metaclass=IllumioEnumMeta):
+class PolicyDecision(str, Enum, metaclass=IllumioEnumMeta):
     ALLOWED = 'allowed'
     BLOCKED = 'blocked'
     POTENTIALLY_BLOCKED = 'potentially_blocked'
     UNKNOWN = 'unknown'
 
 
-class Transmission(Enum, metaclass=IllumioEnumMeta):
+class Transmission(str, Enum, metaclass=IllumioEnumMeta):
     BROADCAST = 'broadcast'
     MULTICAST = 'multicast'
     UNICAST = 'unicast'
 
 
-class FlowDirection(Enum, metaclass=IllumioEnumMeta):
+class FlowDirection(str, Enum, metaclass=IllumioEnumMeta):
     INBOUND = 'inbound'
     OUTBOUND = 'outbound'
 
 
-class TrafficState(Enum, metaclass=IllumioEnumMeta):
+class TrafficState(str, Enum, metaclass=IllumioEnumMeta):
     ACTIVE = 'active'
     CLOSED = 'closed'
     TIMED_OUT = 'timed out'
