@@ -1,13 +1,16 @@
-import json
-import os
 import re
 from collections import namedtuple
 
 import pytest
 
 from illumio import PolicyComputeEngine
+from illumio.accessmanagement import User
+from illumio.infrastructure import ContainerWorkloadProfile
+from illumio.policyobjects import Label
 from illumio.rules import Rule
 from illumio.util import PCE_APIS, DRAFT, ACTIVE
+
+from mocks import MockResponse
 
 
 def test_custom_protocol():
@@ -44,19 +47,36 @@ _API = namedtuple('API', [
 ])
 
 
+@pytest.fixture(autouse=True)
+def mock_requests(requests_mock):
+    pattern = re.compile('/')
+    requests_mock.register_uri('GET', pattern)
+    requests_mock.register_uri('POST', pattern, status_code=201)
+    requests_mock.register_uri('PUT', pattern, status_code=204)
+    requests_mock.register_uri('DELETE', pattern, status_code=204)
+
+
 @pytest.mark.parametrize(
     "api,policy_version,parent,expected", [
         (
-            _API(name='rules', endpoint='/sec_rules', object_class=Rule, is_sec_policy=True, is_global=False),
-            DRAFT,
-            '/orgs/1/sec_policy/active/rule_sets/1',
-            '/orgs/1/sec_policy/draft/rule_sets/1/sec_rules'
+            _API(name='users', endpoint='/users', object_class=User, is_sec_policy=False, is_global=True),
+            None, None, '/users'
+        ),
+        (
+            _API(name='labels', endpoint='/labels', object_class=Label, is_sec_policy=False, is_global=False),
+            None, None, '/orgs/1/labels'
         ),
         (
             _API(name='rules', endpoint='/sec_rules', object_class=Rule, is_sec_policy=True, is_global=False),
-            ACTIVE,
-            '/orgs/1/sec_policy/active/rule_sets/1',
-            '/orgs/1/sec_policy/draft/rule_sets/1/sec_rules'
+            DRAFT, '/orgs/1/sec_policy/active/rule_sets/1', '/orgs/1/sec_policy/draft/rule_sets/1/sec_rules'
+        ),
+        (
+            _API(name='rules', endpoint='/sec_rules', object_class=Rule, is_sec_policy=True, is_global=False),
+            ACTIVE, '/orgs/1/sec_policy/active/rule_sets/1', '/orgs/1/sec_policy/draft/rule_sets/1/sec_rules'
+        ),
+        (
+            _API(name='container_workload_profiles', endpoint='/container_workload_profiles', object_class=ContainerWorkloadProfile, is_sec_policy=False, is_global=False),
+            ACTIVE, '/orgs/1/container_clusters/f5bef182-8c55-4219-b35b-0a50b707e434', '/orgs/1/container_clusters/f5bef182-8c55-4219-b35b-0a50b707e434/container_workload_profiles'
         )
     ]
 )
@@ -65,13 +85,60 @@ def test_endpoint_building(api, policy_version, parent, expected, pce):
     assert endpoint == expected
 
 
+@pytest.fixture
+def called_with():
+    class Tester(object):
+        def __call__(self, *args, **kwargs):
+            self.args = list(args)
+            return MockResponse()
+    return Tester()
+
+
+@pytest.mark.parametrize(
+    "api_name,expected", [
+        ('users', 'https://test.pce.com:443/api/v2/users'),
+        ('labels', 'https://test.pce.com:443/api/v2/orgs/1/labels'),
+        ('ip_lists', 'https://test.pce.com:443/api/v2/orgs/1/sec_policy/draft/ip_lists')
+    ]
+)
+def test_internal_api_org_inclusion(api_name, expected, monkeypatch, called_with):
+    monkeypatch.setattr("requests.sessions.Session.request", called_with)
+    pce = PolicyComputeEngine('test.pce.com')
+    api = getattr(pce, api_name)
+    api.get(include_org=True)
+    assert called_with.args == ['GET', expected]
+    api.get_all(include_org=True)
+    assert called_with.args == ['GET', expected]
+    api.create({}, include_org=True)
+    assert called_with.args == ['POST', expected]
+
+
+
+@pytest.mark.parametrize(
+    "api_name,href,expected", [
+        ('users', '/users/1', 'https://test.pce.com:443/api/v2/users/1'),
+        ('labels', '/orgs/1/labels/1', 'https://test.pce.com:443/api/v2/orgs/1/labels/1'),
+        ('ip_lists', '/orgs/1/sec_policy/draft/ip_lists/1', 'https://test.pce.com:443/api/v2/orgs/1/sec_policy/draft/ip_lists/1')
+    ]
+)
+def test_internal_api_org_inclusion_with_href(api_name, href, expected, monkeypatch, called_with):
+    monkeypatch.setattr("requests.sessions.Session.request", called_with)
+    pce = PolicyComputeEngine('test.pce.com')
+    api = getattr(pce, api_name)
+    api.get_by_reference(href, include_org=True)
+    assert called_with.args == ['GET', expected]
+    api.update(href, {}, include_org=True)
+    assert called_with.args == ['PUT', expected]
+    api.delete(href, include_org=True)
+    assert called_with.args == ['DELETE', expected]
+
+
 @pytest.mark.parametrize(
     "endpoint,include_org,expected", [
         ('/health', False, 'https://test.pce.com:443/api/v2/health'),
         ('labels', True, 'https://test.pce.com:443/api/v2/orgs/1/labels'),
         ('/labels', True, 'https://test.pce.com:443/api/v2/orgs/1/labels'),
         ('//labels', True, 'https://test.pce.com:443/api/v2/orgs/1/labels'),
-        ('/sec_policy/active//ip_lists', True, 'https://test.pce.com:443/api/v2/orgs/1/sec_policy/active/ip_lists'),
         ('/sec_policy/active//ip_lists', True, 'https://test.pce.com:443/api/v2/orgs/1/sec_policy/active/ip_lists'),
         ('/orgs/1/workloads/ef7f0f53-2295-4416-aaaf-965146934c53', True, 'https://test.pce.com:443/api/v2/orgs/1/workloads/ef7f0f53-2295-4416-aaaf-965146934c53'),
         ('/orgs/1/workloads/ef7f0f53-2295-4416-aaaf-965146934c53', False, 'https://test.pce.com:443/api/v2/orgs/1/workloads/ef7f0f53-2295-4416-aaaf-965146934c53'),
@@ -82,10 +149,24 @@ def test_url_building(endpoint, include_org, expected, pce):
     assert pce._build_url(endpoint, include_org) == expected
 
 
-def load_data_file(type_):
-    filename = os.path.join(pytest.DATA_DIR, '{}.json'.format(type_))
-    with open(filename, 'r') as f:
-        return json.loads(f.read())
+@pytest.mark.parametrize(
+    "endpoint,expected", [
+        ('/health', 'https://test.pce.com:443/api/v2/health'),
+        ('/labels', 'https://test.pce.com:443/api/v2/labels'),
+        ('/sec_policy/active//ip_lists', 'https://test.pce.com:443/api/v2/sec_policy/active/ip_lists'),
+        ('/orgs/1/workloads/ef7f0f53-2295-4416-aaaf-965146934c53', 'https://test.pce.com:443/api/v2/orgs/1/workloads/ef7f0f53-2295-4416-aaaf-965146934c53'),
+        ('/orgs/1/sec_policy/rule_sets/1/sec_rules/1', 'https://test.pce.com:443/api/v2/orgs/1/sec_policy/rule_sets/1/sec_rules/1')
+    ]
+)
+def test_set_include_org_default(endpoint, expected):
+    pce = PolicyComputeEngine('test.pce.com')
+    pce.include_org = False
+    response = pce.get(endpoint)
+    assert response.url == expected
+
+
+def test_ignore_include_org(pce):
+    assert pce.check_connection(include_org=True)
 
 
 @pytest.mark.parametrize(

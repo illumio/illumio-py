@@ -44,6 +44,7 @@ OBJECT_TYPE_REF_MAP = {
     'security_principals': _gen_sid,
     'service_bindings': _gen_int_id,
     'services': _gen_int_id,
+    'users': _gen_int_id,
     'vens': _gen_uuid,
     'virtual_services': _gen_uuid,
     'workloads': _gen_uuid
@@ -54,8 +55,8 @@ class PCEObjectMock(object):
     """
     Base class for PCE object mocks
     """
-    base_pattern = '^/api/v2/orgs/\d+(?:/sec_policy/(?:draft|active))?/([a-zA-Z_\-]+)'
-    href_pattern = '^/api/v2(/orgs/\d+(?:/sec_policy/(?:draft|active))?(?:/[a-zA-Z_\-]+/[a-zA-Z0-9\-]+)+)$'
+    base_pattern = '^/api/v2(?:/orgs/\d+)?(?:/sec_policy/(?:draft|active))?/([a-zA-Z_\-]+)'
+    href_pattern = '^/api/v2((?:/orgs/\d+)?(?:/sec_policy/(?:draft|active))?(?:/[a-zA-Z_\-]+/[a-zA-Z0-9\-]+)+)$'
 
     def __init__(self) -> None:
         self.mock_objects = []
@@ -134,7 +135,7 @@ class PCEObjectMock(object):
         if not match:
             raise Exception("Invalid path: {}".format(path))
         object_type = match.group(1)
-        href = '/orgs/{}/{}'.format(path.split('/orgs/')[-1], OBJECT_TYPE_REF_MAP[object_type]())
+        href = '/{}/{}'.format(path.split('/api/v2/')[-1], OBJECT_TYPE_REF_MAP[object_type]())
         body['href'] = href
         self.mock_objects.append(body)
         return body
@@ -163,3 +164,11 @@ class PCEObjectMock(object):
                     return
             raise Exception("Attempting to delete invalid or missing object")
         raise Exception("Invalid HREF passed to delete_mock_object")
+
+
+class MockResponse():
+    content = ''
+    headers = {'X-Total-Count': 0}
+
+    def raise_for_status(self): pass
+    def json(self): return {}
