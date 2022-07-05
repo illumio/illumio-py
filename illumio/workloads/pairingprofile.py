@@ -8,7 +8,7 @@ Copyright:
 License:
     Apache2, see LICENSE for more details.
 """
-from dataclasses import dataclass
+from dataclasses import dataclass, fields
 from typing import List, Union
 
 from illumio import IllumioException
@@ -17,7 +17,9 @@ from illumio.util import (
     MutableObject,
     EnforcementMode,
     VisibilityLevel,
-    pce_api
+    pce_api,
+    ignore_empty_keys,
+    flatten_ref
 )
 
 
@@ -73,3 +75,24 @@ class PairingProfile(MutableObject):
         if self.visibility_level and not self.visibility_level in VisibilityLevel:
             raise IllumioException("Invalid visibility_level: {}".format(self.visibility_level))
         super()._validate()
+
+    def _encode(self):
+        """Defines custom encoding rules for pairing profiles.
+
+        The allowed_uses_per_key and key_lifespan parameters have strict schema
+        contraints in the PCE - values must either be 'unlimited' or an integer
+        which we enforce here. Other fields use the default encoding method and
+        labels is flattened to just include HREFs.
+        """
+        result = []
+        for f in fields(self):
+            value = getattr(self, f.name)
+            if f.name in ['allowed_uses_per_key', 'key_lifespan']:
+                if isinstance(value, str) and value != 'unlimited':
+                    if not value.isnumeric():
+                        raise IllumioException("Invalid '{}' value: must be 'unlimited' or int".format(f.name))
+                    value = int(value)
+            if f.name == 'labels':
+                value = flatten_ref(f.type, value)
+            result.append((f.name, value))
+        return ignore_empty_keys(result)

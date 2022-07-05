@@ -40,6 +40,36 @@ def mock_requests(requests_mock, get_callback, post_callback, put_callback, dele
     requests_mock.register_uri('POST', key_pattern, json=mock_pairing_key)
 
 
+@pytest.mark.parametrize(
+    "key_lifespan,expected", [
+        ('unlimited', 'unlimited'),
+        (60, 60),
+        ('60', 60)
+    ]
+)
+def test_encoded_key_lifespan_value(key_lifespan, expected):
+    profile = PairingProfile(
+        name='PP-TEST',
+        key_lifespan=key_lifespan
+    )
+    assert profile._encode()['key_lifespan'] == expected
+
+
+@pytest.mark.parametrize(
+    "allowed_uses_per_key,expected", [
+        ('unlimited', 'unlimited'),
+        (60, 60),
+        ('60', 60)
+    ]
+)
+def test_encoded_allowed_uses_per_key_value(allowed_uses_per_key, expected):
+    profile = PairingProfile(
+        name='PP-TEST',
+        allowed_uses_per_key=allowed_uses_per_key
+    )
+    assert profile._encode()['allowed_uses_per_key'] == expected
+
+
 def test_get_profiles_by_name(pce):
     pairing_profiles = pce.pairing_profiles.get(params={'name': 'PP-'})
     assert len(pairing_profiles) == 2
