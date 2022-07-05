@@ -260,5 +260,6 @@ __all__ = [
     'IllumioObject',
     'MutableObject',
     'ImmutableObject',
-    'href_from'
+    'href_from',
+    'flatten_ref'
 ]
