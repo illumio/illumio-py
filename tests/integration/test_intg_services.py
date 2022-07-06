@@ -4,7 +4,7 @@ from illumio.util import convert_protocol, DRAFT
 
 def test_get_by_reference(pce, web_service):
     service = pce.services.get_by_reference(web_service.href)
-    assert service == web_service
+    assert service.href == web_service.href
 
 
 def test_get_by_partial_name(pce, session_identifier, web_service, well_known_service):

@@ -97,6 +97,13 @@ class LabelGroup(Label):
 class LabelSet(JsonObject):
     labels: List[Reference] = None
 
+    def __eq__(self, o) -> bool:
+        """Compares LabelSet instances based on label HREFs, ignoring list order"""
+        if not isinstance(o, LabelSet):
+            raise False
+        return len(self.labels) == len(o.labels) and \
+            set([label.href for label in self.labels]) == set([label.href for label in o.labels])
+
     def _encode(self):
         json_array = []
         for label in self.labels:

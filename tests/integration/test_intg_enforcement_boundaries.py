@@ -25,7 +25,7 @@ def enforcement_boundary(pce, session_identifier, rdp_service):
 
 def test_get_by_reference(pce, enforcement_boundary):
     eb = pce.enforcement_boundaries.get_by_reference(enforcement_boundary.href)
-    assert eb == enforcement_boundary
+    assert eb.href == enforcement_boundary.href
 
 
 def test_get_by_partial_name(pce, session_identifier, enforcement_boundary):

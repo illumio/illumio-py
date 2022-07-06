@@ -32,7 +32,7 @@ def rule(pce, session_identifier, rule_set, role_label):
 
 def test_get_by_href(pce, rule):
     r = pce.rules.get_by_reference(rule)
-    assert r == rule
+    assert r.href == rule.href
 
 
 def test_get_from_rule_set(pce, rule_set, rule):

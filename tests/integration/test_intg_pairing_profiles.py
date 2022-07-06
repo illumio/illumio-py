@@ -36,7 +36,7 @@ def pairing_profile(pce, session_identifier, env_label):
 
 def test_get_by_reference(pce, pairing_profile):
     profile = pce.pairing_profiles.get_by_reference(pairing_profile.href)
-    assert profile == pairing_profile
+    assert profile.href == pairing_profile.href
 
 
 def test_get_by_partial_name(pce, session_identifier, pairing_profile):

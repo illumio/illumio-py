@@ -17,7 +17,7 @@ import json
 from abc import ABC
 from dataclasses import Field, dataclass, fields
 from inspect import signature, isclass
-from typing import List, Tuple, Any
+from typing import List, Any
 
 from illumio.exceptions import IllumioException
 
@@ -89,7 +89,7 @@ class JsonObject(ABC):
             result.append((f.name, self._encode_field(f)))
         return ignore_empty_keys(result)
 
-    def _encode_field(self, field: Field) -> Tuple[str, Any]:
+    def _encode_field(self, field: Field) -> Any:
         value = flatten_ref(field.type, getattr(self, field.name))
         value = resolve_enum(value)
         return deep_encode(value)

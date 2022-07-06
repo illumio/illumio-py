@@ -3,7 +3,7 @@ from illumio.util import DRAFT
 
 def test_get_by_reference(pce, rule_set):
     rs = pce.rule_sets.get_by_reference(rule_set.href)
-    assert rs == rule_set
+    assert rs.href == rule_set.href
 
 
 def test_get_by_partial_name(pce, session_identifier, rule_set):

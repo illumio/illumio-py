@@ -1,7 +1,7 @@
 def test_get_by_reference(pce, container_cluster):
     cluster = pce.container_clusters.get_by_reference(container_cluster.href)
     del container_cluster.container_cluster_token  # pop the token for the comparison
-    assert cluster == container_cluster
+    assert cluster.href == container_cluster.href
 
 
 def test_get_by_partial_name(pce, session_identifier, container_cluster):
