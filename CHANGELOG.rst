@@ -1,6 +1,16 @@
 Changelog
 =========
 
+Version 1.0.2 (2022-07-06)
+-------------
+
+IMPROVEMENTS:
+
+* `illumio.workloads.pairingprofile.PairingProfile` - add custom encoder to enforce strict type checking for `key_lifespan` and `allowed_uses_per_key` fields
+* improve unit and integration tests
+    * `illumio.policyobjects.service.Service` - add unit test suite for `/services` API
+* `illumio.policyobjects.label.LabelSet` - add custom equality function that ignores labels list ordering
+
 Version 1.0.1 (2022-06-25)
 -------------
 
