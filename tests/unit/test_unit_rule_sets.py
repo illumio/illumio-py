@@ -5,8 +5,9 @@ from typing import List
 
 import pytest
 
+from illumio.policyobjects import LabelSet
 from illumio.rules import RuleSet
-from illumio.util import DRAFT, ACTIVE
+from illumio.util import Reference, DRAFT, ACTIVE
 
 RULESETS = os.path.join(pytest.DATA_DIR, 'rule_sets.json')
 
@@ -43,9 +44,23 @@ def mock_rule_set(pce) -> RuleSet:
     yield pce.rule_sets.get_by_reference("/orgs/1/sec_policy/active/rule_sets/1")
 
 
-def test_encoded_scopes(mock_rule_set):
-    json_rule_set = mock_rule_set.to_json()
+def test_encoded_scopes(pce):
+    rule_set = pce.rule_sets.get_by_reference("/orgs/1/sec_policy/draft/rule_sets/2")
+    json_rule_set = rule_set.to_json()
     assert json_rule_set['scopes'] == [[]]
+
+
+def test_compare_unordered_scopes(mock_rule_set):
+    scopes = [
+        LabelSet(
+            labels=[
+                Reference(href="/orgs/1/labels/24"),
+                Reference(href="/orgs/1/labels/22"),
+                Reference(href="/orgs/1/labels/23")
+            ]
+        )
+    ]
+    assert mock_rule_set.scopes == scopes
 
 
 def test_get_by_name(pce):

@@ -16,7 +16,23 @@
         "description": "",
         "enabled": true,
         "scopes": [
-            []
+            [
+                {
+                    "label": {
+                        "href": "/orgs/1/labels/22"
+                    }
+                },
+                {
+                    "label": {
+                        "href": "/orgs/1/labels/23"
+                    }
+                },
+                {
+                    "label": {
+                        "href": "/orgs/1/labels/24"
+                    }
+                }
+            ]
         ],
         "rules": [],
         "ip_tables_rules": [],
@@ -42,7 +58,23 @@
         "description": "",
         "enabled": true,
         "scopes": [
-            []
+            [
+                {
+                    "label": {
+                        "href": "/orgs/1/labels/22"
+                    }
+                },
+                {
+                    "label": {
+                        "href": "/orgs/1/labels/23"
+                    }
+                },
+                {
+                    "label": {
+                        "href": "/orgs/1/labels/24"
+                    }
+                }
+            ]
         ],
         "rules": [],
         "ip_tables_rules": [],
