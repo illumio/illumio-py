@@ -15,9 +15,9 @@ License:
 import copy
 import json
 from abc import ABC
-from dataclasses import dataclass, fields
+from dataclasses import Field, dataclass, fields
 from inspect import signature, isclass
-from typing import List, Any
+from typing import List, Tuple, Any
 
 from illumio.exceptions import IllumioException
 
@@ -82,6 +82,17 @@ class JsonObject(ABC):
 
     def to_json(self) -> Any:
         return deep_encode(self)
+
+    def _encode(self) -> Any:
+        result = []
+        for f in fields(self):
+            result.append((f.name, self._encode_field(f)))
+        return ignore_empty_keys(result)
+
+    def _encode_field(self, field: Field) -> Tuple[str, Any]:
+        value = flatten_ref(field.type, getattr(self, field.name))
+        value = resolve_enum(value)
+        return deep_encode(value)
 
     @classmethod
     def from_json(cls, data: Any) -> 'JsonObject':
@@ -184,24 +195,16 @@ def resolve_enum(value):
 def deep_encode(o: Any) -> Any:
     """
     Recursively encode members of the given object and return a JSON-compatible
-    copy. Children of the JsonObject superclass can optionally implement an
-    _encode method to provide a customized encoding response, otherwise the
-    default ignore_empty_keys function is called to remove null value pairs.
+    copy. Children of the JsonObject superclass can optionally implement _encode
+    or _encode_field to provide a customized encoding response, otherwise the
+    JsonObject defaults are called to remove null-value pairs.
 
     Functionally similar to the dataclasses asdict method, but with the necessary
     adjustment of calling an optional custom encoding function for types that
     don't strictly mirror their dataclass field pairs when encoded.
     """
     if isinstance(o, JsonObject):
-        result = []
-        if hasattr(type(o), '_encode'):
-            return o._encode()
-        for f in fields(o):
-            value = flatten_ref(f.type, getattr(o, f.name))
-            value = resolve_enum(value)
-            value = deep_encode(value)
-            result.append((f.name, value))
-        return ignore_empty_keys(result)
+        return o._encode()
     elif isinstance(o, (list, tuple)):
         return type(o)(deep_encode(o) for o in o)
     elif isinstance(o, dict):
@@ -253,6 +256,7 @@ class ImmutableObject(IllumioObject):
     created_at: str = None
     created_by: Reference = None
 
+
 __all__ = [
     'IllumioEncoder',
     'JsonObject',
@@ -260,6 +264,5 @@ __all__ = [
     'IllumioObject',
     'MutableObject',
     'ImmutableObject',
-    'href_from',
-    'flatten_ref'
+    'href_from'
 ]

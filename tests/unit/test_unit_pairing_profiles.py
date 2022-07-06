@@ -6,6 +6,7 @@ from typing import List
 import pytest
 
 from illumio.workloads import PairingProfile
+from illumio.util import EnforcementMode, VisibilityLevel
 
 MOCK_PAIRING_PROFILES = os.path.join(pytest.DATA_DIR, 'pairing_profiles.json')
 MOCK_PAIRING_KEY = os.path.join(pytest.DATA_DIR, 'pairing_key.json')
@@ -68,6 +69,17 @@ def test_encoded_allowed_uses_per_key_value(allowed_uses_per_key, expected):
         allowed_uses_per_key=allowed_uses_per_key
     )
     assert profile._encode()['allowed_uses_per_key'] == expected
+
+
+def test_encoded_enum_values():
+    profile = PairingProfile(
+        name='PP-TEST',
+        enforcement_mode=EnforcementMode.SELECTIVE,
+        visibility_level=VisibilityLevel.FLOW_FULL_DETAIL
+    )
+    encoded_profile = profile._encode()
+    assert type(encoded_profile['enforcement_mode']) is str
+    assert type(encoded_profile['visibility_level']) is str
 
 
 def test_get_profiles_by_name(pce):
