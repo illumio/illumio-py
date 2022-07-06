@@ -48,13 +48,13 @@ def test_get_by_partial_name(pce, session_identifier, ip_list):
     assert len(ip_lists) == 1
 
 
-def test_get_by_ip(pce, ip_list):
-    ip_lists = pce.ip_lists.get(params={'ip_list': '192.168.123.255'}, policy_version=DRAFT)
-    assert len(ip_lists) == 2  # should include the default Any IP list
+def test_get_by_ip(pce, session_identifier, ip_list):
+    ip_lists = pce.ip_lists.get(params={'name': session_identifier, 'ip_list': '192.168.123.255'}, policy_version=DRAFT)
+    assert len(ip_lists) == 1
 
 
-def test_get_by_fqdn(pce, ip_list):
-    ip_lists = pce.ip_lists.get(params={'fqdn': 'internal.labs.io'}, policy_version=DRAFT)
+def test_get_by_fqdn(pce, session_identifier, ip_list):
+    ip_lists = pce.ip_lists.get(params={'name': session_identifier, 'fqdn': 'internal.labs.io'}, policy_version=DRAFT)
     assert len(ip_lists) == 1
 
 
