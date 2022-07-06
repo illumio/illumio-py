@@ -83,7 +83,7 @@ def service_binding(pce, active_virtual_service, workload):
 
 def test_get_by_reference(pce, virtual_service):
     vs = pce.virtual_services.get_by_reference(virtual_service.href)
-    assert vs == virtual_service
+    assert vs.href == virtual_service.href
 
 
 def test_get_by_partial_name(pce, session_identifier, virtual_service):

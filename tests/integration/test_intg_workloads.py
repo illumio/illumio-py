@@ -5,7 +5,7 @@ from helpers import random_string
 
 def test_get_by_reference(pce, workload):
     wl = pce.workloads.get_by_reference(workload.href)
-    assert wl == workload
+    assert wl.href == workload.href
 
 
 def test_get_by_partial_name(pce, session_identifier, workload):

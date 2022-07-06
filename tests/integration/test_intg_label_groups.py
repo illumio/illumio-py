@@ -24,7 +24,7 @@ def label_group(pce, session_identifier, role_label):
 
 def test_get_by_reference(pce, label_group):
     lg = pce.label_groups.get_by_reference(label_group.href)
-    assert lg == label_group
+    assert lg.href == label_group.href
 
 
 def test_get_by_key(pce, session_identifier, label_group):

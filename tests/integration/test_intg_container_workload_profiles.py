@@ -26,7 +26,7 @@ def container_workload_profile(pce, session_identifier, container_cluster, env_l
 
 def test_get_by_reference(pce, container_workload_profile):
     workload_profile = pce.container_workload_profiles.get_by_reference(container_workload_profile)
-    assert workload_profile == container_workload_profile
+    assert workload_profile.href == container_workload_profile.href
 
 
 def test_get_from_container_cluster(pce, container_cluster, container_workload_profile):

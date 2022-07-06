@@ -3,7 +3,7 @@ from helpers import random_string
 
 def test_get_by_reference(pce, role_label):
     label = pce.labels.get_by_reference(role_label.href)
-    assert label == role_label
+    assert label.href == role_label.href
 
 
 def test_get_by_partial_name(pce, session_identifier, role_label, app_label, env_label, loc_label):

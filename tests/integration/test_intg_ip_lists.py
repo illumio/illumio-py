@@ -40,7 +40,7 @@ def ip_list(pce, session_identifier):
 
 def test_get_by_reference(pce, ip_list):
     ipl = pce.ip_lists.get_by_reference(ip_list.href)
-    assert ipl == ip_list
+    assert ipl.href == ip_list.href
 
 
 def test_get_by_partial_name(pce, session_identifier, ip_list):
