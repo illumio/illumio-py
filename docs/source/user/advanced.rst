@@ -31,3 +31,15 @@ the ``get_async`` call abstracts the job poll-wait loop from the caller
 in order to provide a simpler synchronous interface. If your implementation
 requires control over the poll requests (if you have a strict job timeout,
 for example), you will need to use ``post`` and ``get``
+
+Class Structure
+---------------
+
+Container Clusters and Workloads
+--------------------------------
+
+Virtual Services
+----------------
+
+Service Bindings
+################
