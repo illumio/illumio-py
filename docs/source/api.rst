@@ -1,15 +1,14 @@
 .. _api:
 
-.. module:: illumio
+.. currentmodule:: illumio
 
-Developer Interface
-===================
+Developer Interface v\ |version|
+================================
 
 PCE Interface
 -------------
 
-Every PCE API endpoint is accessed through the
-:class:`PolicyComputeEngine <PolicyComputeEngine>` object.
+PCE API endpoints are accessed through the ``PolicyComputeEngine`` object.
 
 .. _pce:
 
@@ -19,6 +18,18 @@ Every PCE API endpoint is accessed through the
 .. autoclass:: illumio.pce::PolicyComputeEngine._PCEObjectAPI
     :inherited-members:
     :member-order: bysource
+
+----------
+
+PolicyComputeEngine API Attributes
+##################################
+
+The :class:`PolicyComputeEngine <PolicyComputeEngine>` class provides the following attributes:
+
+|APIList|
+
+Each represents a corresponding PCE API endpoint, implemented as a
+:class:`_PCEObjectAPI <illumio.pce.PolicyComputeEngine._PCEObjectAPI>` instance.
 
 Exceptions
 ----------
@@ -36,15 +47,18 @@ Workloads and VENs
 
 .. _workloads:
 
-.. rubric:: Workloads
+Workloads
+#########
 
 .. autoclass:: illumio.workloads.Workload
 
-.. rubric:: VENs
+VENs
+####
 
 .. autoclass:: illumio.workloads.VEN
 
-.. rubric:: Pairing Profiles
+Pairing Profiles
+################
 
 .. autoclass:: illumio.workloads.PairingProfile
 
@@ -53,16 +67,19 @@ Security Policy
 
 .. _rules:
 
-.. rubric:: Rule Sets
+Rule Sets
+#########
 
 .. autoclass:: illumio.rules.RuleSet
 
-.. rubric:: Rules
+Rules
+#####
 
 .. autoclass:: illumio.rules.Rule
 .. autofunction:: illumio.rules.Rule.build
 
-.. rubric:: Enforcement Boundaries
+Enforcement Boundaries
+######################
 
 .. autoclass:: illumio.rules.EnforcementBoundary
 .. autofunction:: illumio.rules.EnforcementBoundary.build
@@ -72,40 +89,50 @@ Policy Objects
 
 .. _policyobjects:
 
-.. rubric:: IP Lists
+IP Lists
+########
 
 .. autoclass:: illumio.policyobjects.IPList
 
-.. rubric:: Labels
+Labels
+######
 
 .. autoclass:: illumio.policyobjects.Label
 .. autoclass:: illumio.policyobjects.LabelUsage
 .. autoclass:: illumio.policyobjects.LabelGroup
 .. autoclass:: illumio.policyobjects.LabelSet
 
-.. rubric:: Services
+Services
+########
 
 .. autoclass:: illumio.policyobjects.Service
 
-.. rubric:: Virtual Services
+Virtual Services
+################
 
 .. autoclass:: illumio.policyobjects.VirtualService
+
+.. autoclass:: illumio.policyobjects.ServiceBinding
 
 Infrastructure
 --------------
 
 .. _infrastructure:
 
-.. rubric:: Container Clusters
+Container Clusters
+##################
 
 .. autoclass:: illumio.infrastructure.ContainerCluster
+
+.. autoclass:: illumio.infrastructure.ContainerWorkloadProfile
 
 Explorer
 --------
 
 .. _explorer:
 
-.. rubric:: Traffic Analysis
+Traffic Analysis
+################
 
 .. autoclass:: illumio.explorer.TrafficQuery
 .. autofunction:: illumio.explorer.TrafficQuery.build
@@ -117,17 +144,56 @@ Access Management
 
 .. _accessmanagement:
 
-.. rubric:: Users
+Users
+#####
 
 .. autoclass:: illumio.accessmanagement.User
 
-Internal Utilities
-------------------
+Utilities
+---------
+
+Contains global constants, helper functions, and internal structures.
 
 .. _util:
 
-.. autosummary::
-    :toctree: generated
-    :recursive:
+Constants
+#########
 
-    illumio.util
+.. autodata:: illumio.util.constants.ACTIVE
+
+.. autodata:: illumio.util.constants.DRAFT
+
+.. autodata:: illumio.util.constants.AMS
+
+.. autodata:: illumio.util.constants.ANY_IP_LIST_NAME
+
+.. autodata:: illumio.util.constants.BULK_CHANGE_LIMIT
+
+.. autoenum:: illumio.util.constants.EnforcementMode
+    :members:
+
+.. autoenum:: illumio.util.constants.LinkState
+    :members:
+
+.. autoenum:: illumio.util.constants.VisibilityLevel
+    :members:
+
+.. autoenum:: illumio.util.constants.Transmission
+    :members:
+
+.. autoenum:: illumio.util.constants.FlowDirection
+    :members:
+
+.. autoenum:: illumio.util.constants.TrafficState
+    :members:
+
+Helper Functions
+################
+
+.. autofunction:: illumio.util.functions.convert_active_href_to_draft
+.. autofunction:: illumio.util.functions.convert_draft_href_to_active
+.. autofunction:: illumio.util.functions.convert_protocol
+.. autofunction:: illumio.util.functions.deprecated
+.. autofunction:: illumio.util.functions.ignore_empty_keys
+.. autofunction:: illumio.util.functions.parse_url
+.. autofunction:: illumio.util.functions.pce_api
