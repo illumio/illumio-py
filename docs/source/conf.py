@@ -17,6 +17,8 @@ if sys.version_info < (3, 7):
 else:
     from importlib.metadata import version
 
+from illumio import PCE_APIS
+
 # -- Project information -----------------------------------------------------
 
 project = 'illumio'
@@ -37,7 +39,7 @@ version = '.'.join(release.split('.')[:3])
 extensions = [
     'sphinx.ext.napoleon',
     'sphinx.ext.autodoc',
-    'sphinx.ext.autosummary',
+    'enum_tools.autoenum',
     'sphinx.ext.viewcode'
 ]
 
@@ -69,18 +71,38 @@ html_theme_options = {
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ['_static']
 
+# Include custom CSS styles.
+html_css_files = ['custom.css']
+
+# Use the Illumio logo in place of the library name.
 html_logo = "illumio_logo.svg"
 
+# Hide the Made with Sphinx footer.
 html_show_sphinx = False
 
 # -- Autodoc Options ---------------------------------------------------------
 
+# Override the default alphabetical ordering for member variables and methods,
+# instead display them in source definition order.
 autodoc_member_order = 'bysource'
 
-# -- Autosummary Options -----------------------------------------------------
+# -- Custom definitions ------------------------------------------------------
 
-autosummary_generate = True
+# Construct the dynamic API list to embed into the API documentation page.
+apis_docstring = ""
+for name, api in sorted(PCE_APIS.items()):
+    classpath = '{}.{}'.format(
+        api.object_class.__module__,
+        api.object_class.__qualname__
+    )
+    apis_docstring += """
+    :class:`{} <{}>` |br|""".format(name, classpath)
 
-autosummary_imported_members = False
+# Adds the rst string to the bottom of every page. We use this to define
+# common and dynamic substitutions.
+rst_epilog = """
+.. |br| raw:: html
 
-autosummary_ignore_module_all = False
+    <br/>
+.. |APIList| replace:: {}
+""".format(apis_docstring)
