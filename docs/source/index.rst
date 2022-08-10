@@ -3,10 +3,14 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Illumio PCE Python API Client
-=============================
+.. module:: illumio
 
-Release v\ |version| (:ref:`Install Guide <install>`)
+Illumio Core Python API Client
+==============================
+
+.. image:: https://img.shields.io/github/v/release/illumio/illumio-py?label=Latest%20Release
+   :target: https://github.com/illumio/illumio-py/releases/latest
+   :alt: Latest Release Badge
 
 .. image:: https://img.shields.io/pypi/pyversions/illumio.svg
     :target: https://pypi.org/project/illumio/
@@ -17,13 +21,20 @@ through an easy-to-use interface.
 
 **illumio** is compatible with Illumio Core PCE versions 21.2 and up.
 
+Already have **illumio** installed and ready to get started?
+Check out the :ref:`Quickstart Guide <quickstart>`.
+
+If not, see the :ref:`Install Guide <install>`, or just run::
+
+   $ python -m pip install illumio
+
 ----------------------------------
 
-Getting started is simple::
+Take advantage of the Illumio PCE's powerful APIs in just a few lines of code::
 
    >>> from illumio import PolicyComputeEngine
-   >>> pce = PolicyComputeEngine('my.pce.com', port='8443', org_id='12')
-   >>> pce.set_credentials('<API_KEY>', '<API_SECRET>')
+   >>> pce = PolicyComputeEngine('my.pce.com', port='443', org_id='1')
+   >>> pce.set_credentials('api_key', 'api_secret')
    >>> workloads = pce.workloads.get(
    ...     params={
    ...         'managed': True,
@@ -39,9 +50,6 @@ Getting started is simple::
       ...
    ]
 
-Already have **illumio** installed and ready to get started?
-Check out the :ref:`Quickstart Guide <quickstart>`.
-
 User Guide
 ----------
 
@@ -50,6 +58,7 @@ common use-cases, and show how to manage the various policy objects and
 functions in the PCE.
 
 .. toctree::
+   :caption: User Guide
    :maxdepth: 2
 
    user/install
@@ -64,14 +73,16 @@ Full API documentation on classes, functions, and methods that make up the
 `illumio` library can be found here.
 
 .. toctree::
+   :caption: illumio API
    :maxdepth: 2
 
    api
 
-Contributing
-------------
+Development
+-----------
 
 .. toctree::
+   :caption: Development
    :maxdepth: 1
 
    dev/changelog
