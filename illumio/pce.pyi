@@ -128,7 +128,7 @@ class PolicyComputeEngine:
     labels: _PCEObjectAPI
     pairing_profiles: _PCEObjectAPI
     rule_sets: _PCEObjectAPI
-    sec_rules: _PCEObjectAPI
+    rules: _PCEObjectAPI
     security_principals: _PCEObjectAPI
     service_bindings: _PCEObjectAPI
     services: _PCEObjectAPI
