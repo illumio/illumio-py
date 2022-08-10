@@ -1,8 +1,8 @@
 import pytest
 
 from illumio.policyobjects import ServicePort
-from illumio.rules import EnforcementBoundary, AMS
-from illumio.util import convert_protocol, DRAFT
+from illumio.rules import EnforcementBoundary
+from illumio.util import convert_protocol, DRAFT, AMS
 
 from helpers import random_string
 

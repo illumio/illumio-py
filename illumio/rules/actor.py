@@ -3,7 +3,7 @@
 """This module provides a helper for actor objects in rules and enforcement boundaries.
 
 Copyright:
-    (c) 2022 Illumio
+    © 2022 Illumio
 
 License:
     Apache2, see LICENSE for more details.
@@ -12,9 +12,7 @@ import re
 from dataclasses import dataclass
 
 from illumio.exceptions import IllumioException
-from illumio.util import href_from, JsonObject, Reference, HREF_REGEX
-
-AMS = 'ams'
+from illumio.util import href_from, JsonObject, Reference, HREF_REGEX, AMS
 
 
 @dataclass
@@ -41,3 +39,9 @@ class Actor(JsonObject):
         else:
             raise IllumioException('Invalid HREF in policy provision changeset: {}'.format(href))
         return actor
+
+
+__all__ = [
+    'Actor',
+    'AMS'  # v1.0.2 - backwards compatibility
+]
