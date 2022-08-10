@@ -19,7 +19,7 @@ Usage:
     ]
 
 Copyright:
-    (c) 2022 Illumio
+    © 2022 Illumio
 
 License:
     Apache2, see LICENSE for more details.
@@ -63,22 +63,6 @@ class PolicyComputeEngine:
         include_org: flag denoting whether to prepend the orgs subpath
             to request endpoints by default. Defaults to True.
         org_id: the PCE organization ID.
-        container_clusters: Container Clusters API.
-        container_workload_profiles: Container Cluster Workload Profiles API.
-        enforcement_boundaries: Enforcement Boundaries API.
-        ip_lists: IP Lists API.
-        label_groups: Label Groups API.
-        labels: Labels API.
-        pairing_profiles: Pairing Profiles API.
-        rule_sets: Rule Sets API.
-        rules: Security Rules API.
-        security_principals: Security Principals API.
-        service_bindings: Service Bindings API.
-        services: Services API.
-        users: Users API.
-        vens: VENs API.
-        virtual_services: Virtual Services API.
-        workloads: Workloads API.
     """
     def __init__(self, url: str, port: str = '443', version: str = 'v2', org_id: str = '1') -> None:
         """Initializes the PCE REST client.
@@ -582,17 +566,17 @@ class PolicyComputeEngine:
                     as well as any errors returned from the PCE.
                     Has the following form:
 
-                    [
-                        {
-                            'href': {object_href},
-                            'errors': [
-                                {
-                                    'token': {error_type},
-                                    'message': {error_message}
-                                }
-                            ]
-                        }
-                    ]
+                    >>> [
+                    ...     {
+                    ...         'href': {object_href},
+                    ...         'errors': [
+                    ...              {
+                    ...                 'token': {error_type},
+                    ...                 'message': {error_message}
+                    ...             }
+                    ...         ]
+                    ...     }
+                    ... ]
             """
             return self._bulk_change(objects_to_create, method='bulk_create', success_status='created', **kwargs)
 
@@ -609,17 +593,17 @@ class PolicyComputeEngine:
                     as well as any errors returned from the PCE.
                     Has the following form:
 
-                    [
-                        {
-                            'href': {object_href},
-                            'errors': [
-                                {
-                                    'token': {error_type},
-                                    'message': {error_message}
-                                }
-                            ]
-                        }
-                    ]
+                    >>> [
+                    ...     {
+                    ...         'href': {object_href},
+                    ...         'errors': [
+                    ...             {
+                    ...                 'token': {error_type},
+                    ...                 'message': {error_message}
+                    ...             }
+                    ...         ]
+                    ...     }
+                    ... ]
             """
             return self._bulk_change(objects_to_update, method='bulk_update', success_status='updated', **kwargs)
 
@@ -635,17 +619,17 @@ class PolicyComputeEngine:
                 List[dict]: a list containing any errors that occurred during
                     the bulk operation. Has the following form:
 
-                    [
-                        {
-                            'href': {object_href},
-                            'errors': [
-                                {
-                                    'token': {error_type},
-                                    'message': {error_message}
-                                }
-                            ]
-                        }
-                    ]
+                    >>> [
+                    ...     {
+                    ...         'href': {object_href},
+                    ...         'errors': [
+                    ...             {
+                    ...                 'token': {error_type},
+                    ...                 'message': {error_message}
+                    ...             }
+                    ...         ]
+                    ...     }
+                    ... ]
             """
             objects_to_delete = [Reference(href=href_from(reference)) for reference in refs]
             return self._bulk_change(objects_to_delete, method='bulk_delete', success_status=None, **kwargs)
@@ -803,6 +787,7 @@ class PolicyComputeEngine:
 
         Args:
             query_name (str): name for the async query job.
+
             traffic_query (TrafficQuery): `TrafficQuery` object representing
                 the query parameters.
 
