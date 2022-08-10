@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
 
-"""
+"""This module provides utility classes, functions, and constant variables.
+
 Copyright:
-    (c) 2022 Illumio
+    © 2022 Illumio
 
 License:
     Apache2, see LICENSE for more details.

@@ -3,7 +3,7 @@
 """This module provides classes related to Virtual Enfocement Node objects.
 
 Copyright:
-    (c) 2022 Illumio
+    © 2022 Illumio
 
 License:
     Apache2, see LICENSE for more details.
@@ -82,3 +82,14 @@ class VEN(MutableObject):
     hostname: str = None
     name: str = None
     status: str = None
+
+
+__all__ = [
+    'AgentConfig',
+    'SecureConnect',
+    'AgentHealthErrors',
+    'AgentHealth',
+    'AgentStatus',
+    'VENAgent',
+    'VEN',
+]

@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
 
-"""
+"""The illumio library provides a simple interface for interacting with PCE APIs.
+
 Copyright:
-    (c) 2022 Illumio
+    © 2022 Illumio
 
 License:
     Apache2, see LICENSE for more details.

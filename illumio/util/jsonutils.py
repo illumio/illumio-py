@@ -7,7 +7,7 @@ responses from the PCE REST API into python objects. The implementation
 leverages dataclasses to simplify the logic for these operations.
 
 Copyright:
-    (c) 2022 Illumio
+    © 2022 Illumio
 
 License:
     Apache2, see LICENSE for more details.
@@ -81,6 +81,13 @@ class JsonObject(ABC):
         return False
 
     def to_json(self) -> Any:
+        """Converts the object to a JSON-compatible copy of itself.
+
+        Objects are converted to dictionaries recursively.
+
+        Returns:
+            Any: the converted JSON-compatible object
+        """
         return deep_encode(self)
 
     def _encode(self) -> Any:

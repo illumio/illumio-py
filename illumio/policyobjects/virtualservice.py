@@ -3,7 +3,7 @@
 """This module provides classes related to virtual services.
 
 Copyright:
-    (c) 2022 Illumio
+    © 2022 Illumio
 
 License:
     Apache2, see LICENSE for more details.
@@ -68,3 +68,11 @@ class ServiceBinding(IllumioObject):
     virtual_service: Reference = None
     workload: Reference = None
     port_overrides: List[PortOverride] = None
+
+
+__all__ = [
+    'ServiceAddress',
+    'VirtualService',
+    'PortOverride',
+    'ServiceBinding',
+]

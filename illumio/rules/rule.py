@@ -3,7 +3,7 @@
 """This module provides classes related to policy rules.
 
 Copyright:
-    (c) 2022 Illumio
+    © 2022 Illumio
 
 License:
     Apache2, see LICENSE for more details.
@@ -147,3 +147,10 @@ class Rule(BaseRule, MutableObject):
             resolve_providers_as: List[str], resolve_consumers_as: List[str], enabled=True, **kwargs) -> 'Rule':
         resolve_labels_as = LabelResolutionBlock(providers=resolve_providers_as, consumers=resolve_consumers_as)
         return super().build(providers, consumers, ingress_services, resolve_labels_as=resolve_labels_as, enabled=enabled, **kwargs)
+
+
+__all__ = [
+    'BaseRule',
+    'Rule',
+    'LabelResolutionBlock',
+]

@@ -3,7 +3,7 @@
 """This module provides classes related to IP list policy objects.
 
 Copyright:
-    (c) 2022 Illumio
+    © 2022 Illumio
 
 License:
     Apache2, see LICENSE for more details.
@@ -62,3 +62,10 @@ class IPList(MutableObject):
     """
     ip_ranges: List[IPRange] = None
     fqdns: List[FQDN] = None
+
+
+__all__ = [
+    'IPRange',
+    'FQDN',
+    'IPList',
+]

@@ -3,7 +3,7 @@
 """This module provides classes for traffic analysis using Explorer.
 
 Copyright:
-    (c) 2022 Illumio
+    © 2022 Illumio
 
 License:
     Apache2, see LICENSE for more details.
@@ -230,3 +230,14 @@ class TrafficFlow(JsonObject):
         if self.transmission and not self.transmission in Transmission:
             raise IllumioException("Invalid transmission: {}".format(self.transmission))
         super()._validate()
+
+
+__all__ = [
+    'TrafficQueryFilter',
+    'TrafficQueryFilterBlock',
+    'TrafficQueryServiceBlock',
+    'TrafficQuery',
+    'TrafficNode',
+    'TimestampRange',
+    'TrafficFlow',
+]

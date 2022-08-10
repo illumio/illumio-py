@@ -3,7 +3,7 @@
 """This module provides classes related to policy rule sets.
 
 Copyright:
-    (c) 2022 Illumio
+    © 2022 Illumio
 
 License:
     Apache2, see LICENSE for more details.
@@ -49,3 +49,8 @@ class RuleSet(MutableObject):
     scopes: List[LabelSet] = None
     rules: List[Rule] = None
     ip_tables_rules: List[IPTablesRule] = None
+
+
+__all__ = [
+    'RuleSet',
+]

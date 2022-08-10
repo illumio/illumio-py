@@ -3,7 +3,7 @@
 """This module provides classes related to workload objects.
 
 Copyright:
-    (c) 2022 Illumio
+    © 2022 Illumio
 
 License:
     Apache2, see LICENSE for more details.
@@ -192,3 +192,15 @@ class Workload(MutableObject):
             enforced_services.append(service_type.from_json(service))
         self.selectively_enforced_services = enforced_services if enforced_services else None
         super()._decode_complex_types()
+
+
+__all__ = [
+    'Interface',
+    'WorkloadServicePort',
+    'WorkloadServices',
+    'PortWideExposure',
+    'VulnerabilitiesSummary',
+    'DetectedVulnerability',
+    'IKEAuthenticationCertificate',
+    'Workload',
+]

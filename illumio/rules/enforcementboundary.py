@@ -3,7 +3,7 @@
 """This module is a stub for enforcement boundary objects.
 
 Copyright:
-    (c) 2022 Illumio
+    © 2022 Illumio
 
 License:
     Apache2, see LICENSE for more details.
@@ -71,3 +71,8 @@ class EnforcementBoundary(BaseRule):
         )
     """
     name: str = None
+
+
+__all__ = [
+    'EnforcementBoundary',
+]

@@ -3,7 +3,7 @@
 """This module provides classes related to services and service ports.
 
 Copyright:
-    (c) 2022 Illumio
+    © 2022 Illumio
 
 License:
     Apache2, see LICENSE for more details.
@@ -84,3 +84,10 @@ class Service(MutableObject):
         )
     """
     service_ports: List[ServicePort] = None
+
+
+__all__ = [
+    'BaseService',
+    'ServicePort',
+    'Service',
+]

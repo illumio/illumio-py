@@ -3,7 +3,7 @@
 """This module provides classes related to iptables rules.
 
 Copyright:
-    (c) 2022 Illumio
+    © 2022 Illumio
 
 License:
     Apache2, see LICENSE for more details.
@@ -29,3 +29,9 @@ class IPTablesRule(MutableObject):
     enabled: bool = None
     statements: List[IPTablesStatement] = None
     actors: List[Actor] = None
+
+
+__all__ = [
+    'IPTablesStatement',
+    'IPTablesRule',
+]

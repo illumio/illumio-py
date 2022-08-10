@@ -3,7 +3,7 @@
 """This module is a stub for container cluster objects.
 
 Copyright:
-    (c) 2022 Illumio
+    © 2022 Illumio
 
 License:
     Apache2, see LICENSE for more details.
@@ -162,3 +162,12 @@ class ContainerCluster(IllumioObject):
     container_runtime: str = None
     errors: List[ContainerClusterError] = None
     container_cluster_token: str = None
+
+
+__all__ = [
+    'ContainerClusterNode',
+    'ContainerClusterError',
+    'LabelRestriction',
+    'ContainerWorkloadProfile',
+    'ContainerCluster',
+]

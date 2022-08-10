@@ -3,7 +3,7 @@
 """This module provides classes related to RBAC users in the PCE.
 
 Copyright:
-    (c) 2022 Illumio
+    © 2022 Illumio
 
 License:
     Apache2, see LICENSE for more details.
@@ -27,3 +27,8 @@ class User(IllumioObject):
     local_profile: dict = None
     type: str = None
     presence_status: str = None
+
+
+__all__ = [
+    'User',
+]

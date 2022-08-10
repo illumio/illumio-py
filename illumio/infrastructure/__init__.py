@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
 
-"""
+"""This module provides classes related to infra, containers, and networking.
+
 Copyright:
-    (c) 2022 Illumio
+    © 2022 Illumio
 
 License:
     Apache2, see LICENSE for more details.

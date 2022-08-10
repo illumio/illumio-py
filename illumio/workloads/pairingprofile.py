@@ -3,7 +3,7 @@
 """This module provides classes related to pairing profile objects.
 
 Copyright:
-    (c) 2022 Illumio
+    © 2022 Illumio
 
 License:
     Apache2, see LICENSE for more details.
@@ -89,3 +89,8 @@ class PairingProfile(MutableObject):
                 value = int(value)
             return value
         return super()._encode_field(field)
+
+
+__all__ = [
+    'PairingProfile',
+]

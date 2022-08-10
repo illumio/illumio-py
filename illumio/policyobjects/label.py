@@ -3,7 +3,7 @@
 """This module provides classes related to labels and label groups.
 
 Copyright:
-    (c) 2022 Illumio
+    © 2022 Illumio
 
 License:
     Apache2, see LICENSE for more details.
@@ -119,3 +119,11 @@ class LabelSet(JsonObject):
             key = 'label' if 'label' in label_entry else 'label_group'
             labels.append(Label.from_json(label_entry[key]))
         return LabelSet(labels=labels)
+
+
+__all__ = [
+    'LabelUsage',
+    'Label',
+    'LabelGroup',
+    'LabelSet',
+]
