@@ -11,16 +11,24 @@ License:
 import re
 from enum import Enum, EnumMeta
 
+#: Active policy version path literal.
 ACTIVE = 'active'
+
+#: Draft policy version path literal.
 DRAFT = 'draft'
 
+#: Constant used in rules and enforcement boundaries to denote that all
+#: workloads should be affected.
 AMS = 'ams'
 
+#: Name of the default global IP list.
 ANY_IP_LIST_NAME = 'Any (0.0.0.0/0 and ::/0)'
 
 FQDN_REGEX = re.compile('(?=^.{4,253}$)(^((?!-)[a-zA-Z0-9-]{1,63}(?<!-)\.)+[a-zA-Z]{2,63}$)')
 HREF_REGEX = re.compile('^\/orgs\/\d+\/(?:sec_policy\/(?:active|draft)\/)?(?P<type>[a-zA-Z_]+)\/(?P<uid>[a-zA-Z0-9-]+)$')
 
+#: Upper limit on the number of objects that can be sent to PCE bulk change
+#: endpoints in a single request.
 BULK_CHANGE_LIMIT = 1000
 
 PCE_APIS = {}
