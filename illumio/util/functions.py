@@ -11,13 +11,15 @@ License:
 import functools
 import re
 import socket
+import sys
 import typing
 import warnings
 from dataclasses import dataclass
+from typing import Any
 from urllib.parse import urlparse
 
 from illumio._version import version
-from illumio.exceptions import IllumioException
+from illumio.exceptions import IllumioException, IllumioIntegerValidationException
 from .constants import ACTIVE, DRAFT, PCE_APIS
 
 
@@ -149,6 +151,24 @@ def convert_protocol(protocol: str) -> int:
     except:
         raise IllumioException('Invalid protocol name: {}'.format(protocol))
 
+
+def validate_int(val: Any, minimum: int=0, maximum: int=sys.maxsize) -> None:
+    """Validates a given value is an integer and is within min <= val <= max.
+
+    Args:
+        val (Any): value to validate.
+        min (int, optional): validation lower bound. Defaults to 0.
+        max (int, optional): validation upper bound. Defaults to sys.maxsize.
+
+    Raises:
+        IllumioIntegerValidationException: if an invalid value is provided.
+    """
+    try:
+        valid = minimum <= int(val) <= maximum
+    except:  # catch the ValueError for invalid values
+        valid = False
+    if not valid:
+        raise IllumioIntegerValidationException(val, minimum, maximum)
 
 if hasattr(typing, 'get_origin'):
     # python 3.8+ - introduces the get_origin function
