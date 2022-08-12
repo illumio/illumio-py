@@ -101,17 +101,18 @@ def test_get_async(pce, session_identifier, virtual_service):
     assert len(virtual_services) == 1
 
 
-def test_update_virtual_service(pce, virtual_service):
+def test_update_virtual_service(pce, session_identifier, virtual_service):
+    fqdn = '{}.localhost.localdomain'.format(session_identifier)
     pce.virtual_services.update(
         virtual_service.href,
         {
             'description': 'Integration test update. Add service address.',
-            'service_addresses': [{'fqdn': 'localhost.localdomain'}]
+            'service_addresses': [{'fqdn': fqdn}]
         }
     )
-    virtual_services = pce.virtual_services.get(params={'service_addresses.fqdn': 'localhost'}, policy_version=DRAFT)
+    virtual_services = pce.virtual_services.get(params={'service_address.fqdn': fqdn}, policy_version=DRAFT)
     vs = virtual_services[0]
-    assert vs.href == virtual_service.href and vs.service_addresses[0].fqdn == 'localhost.localdomain'
+    assert vs.href == virtual_service.href and vs.service_addresses[0].fqdn == fqdn
 
 
 def test_get_service_binding_by_href(pce, service_binding):
