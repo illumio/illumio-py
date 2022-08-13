@@ -4,19 +4,18 @@ Changelog
 Version 1.0.3 (2022-08-13)
 --------------------------
 
-NEW FEATURES:
+.. rubric:: NEW FEATURES
 
 * add `PORT_MAX` constant to util.constants
 * add `IllumioIntegerValidationException` class
 * add int validation helper function
 
-IMPROVEMENTS:
+.. rubric:: IMPROVEMENTS
 
 * validate `PolicyComputeEngine` org_id and port values on init
 * build URL for each request `PolicyComputeEngine`
 * add private member vars for scheme/hostname/port/version
 * update `PolicyComputeEngine.check_connection` to make a second call to validate org_id
-
 
 Version 1.0.2 (2022-07-06)
 --------------------------

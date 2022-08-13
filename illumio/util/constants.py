@@ -24,6 +24,7 @@ AMS = 'ams'
 #: Name of the default global IP list.
 ANY_IP_LIST_NAME = 'Any (0.0.0.0/0 and ::/0)'
 
+#: Max port number
 PORT_MAX = 65535
 
 FQDN_REGEX = re.compile('(?=^.{4,253}$)(^((?!-)[a-zA-Z0-9-]{1,63}(?<!-)\.)+[a-zA-Z]{2,63}$)')
@@ -102,6 +103,7 @@ __all__ = [
     'DRAFT',
     'AMS',
     'ANY_IP_LIST_NAME',
+    'PORT_MAX',
     'FQDN_REGEX',
     'HREF_REGEX',
     'BULK_CHANGE_LIMIT',

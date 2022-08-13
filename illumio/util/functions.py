@@ -218,6 +218,7 @@ __all__ = [
     'pce_api',
     'parse_url',
     'convert_protocol',
+    'validate_int',
     'isunion',
     'islist',
 ]
