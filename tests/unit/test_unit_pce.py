@@ -5,6 +5,7 @@ import pytest
 
 from illumio import PolicyComputeEngine
 from illumio.accessmanagement import User
+from illumio.exceptions import IllumioIntegerValidationException
 from illumio.infrastructure import ContainerWorkloadProfile
 from illumio.policyobjects import Label
 from illumio.rules import Rule
@@ -36,6 +37,31 @@ def test_path_parsing():
 def test_int_org_id():
     pce = PolicyComputeEngine('my.pce.com', org_id=1)
     assert pce.base_url == 'https://my.pce.com:443/api/v2'
+
+
+def test_invalid_org_id():
+    with pytest.raises(IllumioIntegerValidationException):
+        PolicyComputeEngine('my.pce.com', org_id='invalid')
+
+
+def test_org_id_lower_bound():
+    with pytest.raises(IllumioIntegerValidationException):
+        PolicyComputeEngine('my.pce.com', org_id=0)
+
+
+def test_invalid_port():
+    with pytest.raises(IllumioIntegerValidationException):
+        PolicyComputeEngine('my.pce.com', port='invalid')
+
+
+def test_port_lower_bound():
+    with pytest.raises(IllumioIntegerValidationException):
+        PolicyComputeEngine('my.pce.com', port=-1)
+
+
+def test_port_upper_bound():
+    with pytest.raises(IllumioIntegerValidationException):
+        PolicyComputeEngine('my.pce.com', port=65536)
 
 
 _API = namedtuple('API', [

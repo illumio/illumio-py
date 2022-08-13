@@ -41,11 +41,13 @@ from .util import (
     convert_active_href_to_draft,
     parse_url,
     href_from,
+    validate_int,
     Reference,
     IllumioObject,
     IllumioEncoder,
     ACTIVE,
     DRAFT,
+    PORT_MAX,
     ANY_IP_LIST_NAME,
     BULK_CHANGE_LIMIT,
     PCE_APIS
@@ -58,8 +60,8 @@ class PolicyComputeEngine:
     Contains request logic for API calls and handles the HTTP(S) connection to the PCE.
 
     Attributes:
-        base_url: the base URL for API calls to the PCE. Has the form
-            http[s]://<DOMAIN_NAME>:<PORT>/api/<API_VERSION>
+        base_url: DEPRECATED in v1.0.3. The base URL for API calls to the PCE.
+            Has the form ``http[s]://<DOMAIN_NAME>:<PORT>/api/<API_VERSION>``
         include_org: flag denoting whether to prepend the orgs subpath
             to request endpoints by default. Defaults to True.
         org_id: the PCE organization ID.
@@ -68,7 +70,7 @@ class PolicyComputeEngine:
         """Initializes the PCE REST client.
 
         Args:
-            url (str): PCE URL. May include http:// or https:// as the protocol.
+            url (str): PCE URL. May include http:// or https:// as the scheme.
             port (str, optional): PCE http(s) port. Defaults to '443'.
             version (str, optional): The PCE API version to use. Defaults to 'v2'.
             org_id (str, optional): The PCE organization ID. Defaults to '1'.
@@ -77,11 +79,22 @@ class PolicyComputeEngine:
         self._encoder = IllumioEncoder()
         self._session = Session()
         self._session.headers.update({'Accept': 'application/json'})
-        protocol, url = parse_url(url)
-        self.base_url = "{}://{}:{}/api/{}".format(protocol, url, port, version)
+        self._scheme, self._hostname = parse_url(url)
+        self._port = port
+        self._version = version
+        # leaving this in for backwards compatibility
+        self.base_url = "{}://{}:{}/api/{}".format(
+            self._scheme, self._hostname, port, version
+        )
         self.include_org = True
         self.org_id = org_id
+        self._validate()
         self._setup_retry()
+
+    def _validate(self):
+        """Validates configuration values, raising an error on failure"""
+        validate_int(self._port, minimum=1, maximum=PORT_MAX)
+        validate_int(self.org_id, minimum=1)
 
     def _setup_retry(self):
         """Configures `requests.Session` retry defaults"""
@@ -150,7 +163,9 @@ class PolicyComputeEngine:
         endpoint = endpoint.lstrip('/').replace('//', '/')
         if include_org and not endpoint.startswith('orgs/'):
             endpoint = 'orgs/{}/{}'.format(self.org_id, endpoint)
-        return '{}/{}'.format(self.base_url, endpoint)
+        return '{}://{}:{}/api/{}/{}'.format(
+            self._scheme, self._hostname, self._port, self._version, endpoint
+        )
 
     def _encode_body(self, kwargs):
         """Encodes request body data to JSON."""
@@ -305,8 +320,8 @@ class PolicyComputeEngine:
             bool: True if the call is successful, otherwise False.
         """
         try:
-            kwargs['include_org'] = False
-            self.get('/health', **kwargs)
+            self.get('/health', **{**kwargs, **{'include_org': False}})
+            self.get('/settings/events', **{**kwargs, **{'include_org': True}})
             return True
         except IllumioApiException:
             return False
@@ -397,9 +412,8 @@ class PolicyComputeEngine:
             Returns:
                 List[IllumioObject]: the returned list of decoded objects.
             """
-            kwargs['include_org'] = False
             endpoint = self._build_endpoint(policy_version, parent)
-            response = self.pce.get(endpoint, **kwargs)
+            response = self.pce.get(endpoint, **{**kwargs, **{'include_org': False}})
             return [self.object_cls.from_json(o) for o in response.json()]
 
         def get_all(self, policy_version: str = DRAFT, parent: Union[str, Reference, dict] = None, **kwargs) -> List[IllumioObject]:
@@ -481,8 +495,7 @@ class PolicyComputeEngine:
             Returns:
                 IllumioObject: the created object.
             """
-            kwargs['json'] = body
-            kwargs['include_org'] = False
+            kwargs = {**kwargs, **{'json': body, 'include_org': False}}
             endpoint = self._build_endpoint(DRAFT, parent)
             response = self.pce.post(endpoint, **kwargs)
             return self._parse_response_body(response.json())
@@ -534,8 +547,7 @@ class PolicyComputeEngine:
             Args:
                 reference (Union[str, Reference, dict]): the HREF of the object to delete.
             """
-            kwargs['include_org'] = False
-            self.pce.delete(href_from(reference), **kwargs)
+            self.pce.delete(href_from(reference), **{**kwargs, **{'include_org': False}})
 
         def _bulk_change(self, objects: List[IllumioObject], method: str, success_status: str, **kwargs) -> List[dict]:
             results = []
@@ -669,8 +681,7 @@ class PolicyComputeEngine:
         Returns:
             str: the pairing key value.
         """
-        kwargs['json'] = {}
-        response = self.post('{}/pairing_key'.format(pairing_profile_href), **kwargs)
+        response = self.post('{}/pairing_key'.format(pairing_profile_href), **{**kwargs, **{'json': {}}})
         return response.json().get('activation_code')
 
     @deprecated(deprecated_in='1.0.0')
@@ -695,8 +706,7 @@ class PolicyComputeEngine:
             List[TrafficFlow]: list of `TrafficFlow` objects found using the
                 provided query.
         """
-        kwargs['json'] = traffic_query
-        kwargs['include_org'] = True
+        kwargs = {**kwargs, **{'json': traffic_query, 'include_org': True}}
         response = self.post('/traffic_flows/traffic_analysis_queries', **kwargs)
         return [TrafficFlow.from_json(flow) for flow in response.json()]
 
@@ -855,8 +865,7 @@ class PolicyComputeEngine:
         """
         policy_changeset = PolicyChangeset.build(hrefs)
         kwargs['json'] = {'update_description': change_description, 'change_subset': policy_changeset}
-        kwargs['include_org'] = True
-        response = self.post('/sec_policy', **kwargs)
+        response = self.post('/sec_policy', **{**kwargs, **{'include_org': True}})
         return PolicyVersion.from_json(response.json())
 
 
