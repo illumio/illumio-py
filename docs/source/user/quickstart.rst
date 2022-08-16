@@ -5,7 +5,14 @@
 Quickstart Guide
 ================
 
-<<< TODO >>>
+This document provides a basic introduction to the core features of the
+**illumio** library, from connecting to the Illumio Policy Compute Engine
+to creating and provisioning policy.
+
+Make sure you have the library :ref:`installed <install>`, then read on for
+some simple examples.
+
+.. _pceconnect:
 
 Connect to the PCE
 ------------------
@@ -32,15 +39,16 @@ Now that we've set up our connection details, we can confirm that our connection
 Great! With only a few lines of code, we now have a working, persistent connection
 to our PCE that we can use to interact with the PCE APIs.
 
+.. _apiendpoints:
+
 API Endpoints
 -------------
-
-<<<< TODO: list PCE_APIS names here, with some documentation >>>>
 
 PCE API CRUD endpoints are registered as attributes in :class:`PolicyComputeEngine <PolicyComputeEngine>`,
 represented by instances of the internal :class:`_PCEObjectAPI <illumio.pce.PolicyComputeEngine._PCEObjectAPI>` class.
 
 Each one implements a standard interface to manage objects in the PCE.
+The full list can be found in the :ref:`API documentation <apiattributes>`.
 
 .. code:: python
 
@@ -69,8 +77,9 @@ Each one implements a standard interface to manage objects in the PCE.
     IPList(href='/orgs/1/sec_policy/draft/ip_lists/12', fqdns=[FQDN(fqdn='localhost')], ...)
     >>> pce.ip_lists.delete(new_ip_list)
 
-In addition to the CRUD operations shown above, the ``_PCEObjectAPI`` class also provides functions
-for asynchronous and batch operations - see the :ref:`Advanced Usage guide <advanced>` for details.
+In addition to the CRUD operations shown above, the ``_PCEObjectAPI`` class also
+provides functions for asynchronous and batch operations - see the
+:ref:`Advanced Usage guide <advanced>` for details.
 
 .. note:: HTTP requests
     The **illumio** library uses **requests** under the hood to communicate with the PCE.
@@ -92,7 +101,7 @@ This HREF is used to **GET** individual objects and in request/response bodies t
 reference dependent or nested objects.
 
 Where references are required, the **illumio** library generally accepts HREF string
-literals, dictionaries containing an ``href`` key, or a :class:`Reference <Reference>`
+literals, dictionaries containing an ``href`` key, or a :class:`Reference <illumio.util.jsonutils.Reference>`
 object. The ``Reference`` class is a base type extended by most PCE objects.
 
 
@@ -139,8 +148,9 @@ functions are exposed for unimplemented or custom PCE requests::
     {'key_id': '11ce8a65cde969f8f', 'auth_username': 'api_11ce8a65cde969f8f', 'secret': '...'}
     >>> pce.set_credentials(api_key_response['auth_username'], api_key_response['secret'])
 
-These functions return the ``requests.Response`` object directly. For supported objects, the JSON
-response can be converted to its Python equivalent using :meth:`from_json <illumio.util.jsonutils.JsonObject.from_json>`::
+These functions return the ``requests.Response`` object directly. For supported
+objects, the JSON response can be converted to its Python equivalent using
+:meth:`from_json <illumio.util.jsonutils.JsonObject.from_json>`::
 
     >>> from illumio import Service
     >>> resp = pce.get('/sec_policy/active/services/1')
@@ -151,27 +161,71 @@ response can be converted to its Python equivalent using :meth:`from_json <illum
 Working with Policy Objects
 ---------------------------
 
-<<<< TODO >>>>
+Segmenting your network using the PCE is achieved through `security policy <https://docs.illumio.com/core/21.5/Content/Guides/security-policy/overview/illumio-policy-model.htm>`_
+defined using `policy objects <https://docs.illumio.com/core/21.5/Content/Guides/security-policy/security-policy-objects/_ch-security-policy-objects.htm>`_.
+
+Security Rules, scoped within Rule Sets, provide a flexible way to define
+allow-list policies for your workloads. IP Lists and Services provide abstraction
+and grouping for ingress and egress. Labels and Label Groups categorize workloads,
+defining policy scope in an extensible and human-readable way.
 
 .. rubric:: Representing Application Boundaries with Labels
 
-<<<< TODO >>>>
+The Illumio Policy Compute Engine provides four label dimensions: Role,
+Application, Environment, and Location. Using these, we can create logical
+boundaries for workloads within which to define policy rules.
+
+Let's take a look at an example.
+
+.. code:: python
+
+    >>> from illumio import Label
+    >>> role_label = pce.labels.create(Label(key='role', value='R-NTP'))
+    >>> app_label = pce.labels.create(Label(key='app', value='A-CoreServices'))
+    >>> env_label = pce.labels.create(Label(key='env', value='E-Prod'))
+    >>> loc_label = pce.labels.create(Label(key='loc', value='L-AWS'))
+    >>> ntp_server = pce.workloads.create(
+    ...     Workload(
+    ...         name='Internal NTP',
+    ...         hostname='ntp0.lab.company.com',
+    ...         public_ip='10.8.0.17',
+    ...         labels= [role_label, app_label, env_label, loc_label]
+    ...     )
+    ... )
+    >>> ntp_server
+    Workload(
+        href='/orgs/1/workloads/644418c6-fdf7-4008-87d7-d023019a6f0d',
+        name='Internal NTP',
+        ...
+    )
+
+Based on these labels, it's clear that this `unmanaged workload <https://docs.illumio.com/core/21.5/Content/Guides/security-policy/workloads/workload-setup-using-pce-web-console.htm#UnmanagedWorkloads>`_
+represents an NTP server in our Production Core Services application running in AWS.
+
+Check out the :ref:`nano-segmentation use-case <nanosegmentation>` for a
+more detailed example of how labels can be used to simplify policy definition
+for complex applications, or further explore how labels can be applied to
+workloads in the :ref:`workload labelling use-case <workloadlabelling>`.
+
+.. _provisioning:
 
 .. rubric:: Policy Provisioning
 
-Objects in the PCE that directly affect your network's security policy -- such as Rules, IP Lists,
-Enforcement Boundaries, and Virtual Services -- are initially created in a **draft** state.
-Changes to these objects will show up in `Illumination's Draft view <https://docs.illumio.com/core/21.5/Content/Guides/introduction/visualization-overview.htm#DraftvsReportedintheMaps>`_
+Objects in the PCE that directly affect your network's security policy -- such
+as Rules, IP Lists, Enforcement Boundaries, and Virtual Services -- are initially
+created in a **draft** state. Changes to these objects will show up in
+`Illumination's Draft view <https://docs.illumio.com/core/21.5/Content/Guides/introduction/visualization-overview.htm#DraftvsReportedintheMaps>`_
 so that their impact can be reviewed before being applied.
 
 The GET functions in :class:`_PCEObjectAPI <illumio.pce.PolicyComputeEngine._PCEObjectAPI>`
-provide a ``policy_version`` parameter to specify whether **draft** or **active** state objects
-should be returned from the PCE.
+provide a ``policy_version`` parameter to specify whether **draft** or **active**
+state objects should be returned from the PCE.
 
 .. note::
-    By default, these functions return **draft** objects as all PCE objects have a draft
-    representation that may or may not be the same as its active version. Any operations
-    that modify the object must be performed on the draft version, then provisioned.
+    By default, these functions return **draft** objects as all PCE objects have
+    a draft representation that may or may not be the same as its active version.
+    Any operations that modify the object must be performed on the draft version,
+    then provisioned.
 
 To apply policy in **draft** state, we have to `provision <https://docs.illumio.com/core/21.5/Content/Guides/security-policy/create-security-policy/provisioning.htm>`_
 the change to create or update the **active** version of impacted policy objects.
@@ -208,5 +262,5 @@ the change to create or update the **active** version of impacted policy objects
 
 .. note::
     Objects in **draft** state that haven't been provisioned do not have **active**
-    representations, and DELETE requests on them will remove the object without needing
-    a provision request.
+    representations, and DELETE requests on them will remove the object without
+    needing a provision request.
