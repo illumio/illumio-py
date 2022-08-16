@@ -47,6 +47,11 @@ class Interface(JsonObject):
 
 
 @dataclass
+class FirewallCoexistence(JsonObject):
+    illumio_primary: bool = None
+
+
+@dataclass
 class WorkloadServicePort(JsonObject):
     port: int = None
     protocol: int = None
@@ -162,7 +167,7 @@ class Workload(MutableObject):
     online: bool = None
     deleted: bool = None
     ignored_interface_names: List[str] = None
-    firewall_coexistence: str = None
+    firewall_coexistence: FirewallCoexistence = None
     containers_inherit_host_policy: bool = None
     blocked_connection_action: str = None
     labels: List[Reference] = None
