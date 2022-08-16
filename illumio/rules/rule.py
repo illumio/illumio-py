@@ -11,7 +11,13 @@ License:
 from dataclasses import dataclass
 from typing import List, Union
 
-from illumio.util import JsonObject, Reference, MutableObject, pce_api
+from illumio.util import (
+    JsonObject,
+    Reference,
+    MutableObject,
+    pce_api,
+    RESOLVE_AS_WORKLOADS
+)
 from illumio.policyobjects import Service, ServicePort
 
 from .actor import Actor
@@ -144,8 +150,11 @@ class Rule(BaseRule, MutableObject):
     @classmethod
     def build(cls, providers: List[Union[str, Reference, dict]], consumers: List[Union[str, Reference, dict]],
             ingress_services: List[Union[JsonObject, dict, str]],
-            resolve_providers_as: List[str], resolve_consumers_as: List[str], enabled=True, **kwargs) -> 'Rule':
-        resolve_labels_as = LabelResolutionBlock(providers=resolve_providers_as, consumers=resolve_consumers_as)
+            resolve_providers_as: List[str]=None, resolve_consumers_as: List[str]=None, enabled=True, **kwargs) -> 'Rule':
+        resolve_labels_as = LabelResolutionBlock(
+            providers=resolve_providers_as or [RESOLVE_AS_WORKLOADS],
+            consumers=resolve_consumers_as or [RESOLVE_AS_WORKLOADS]
+        )
         return super().build(providers, consumers, ingress_services, resolve_labels_as=resolve_labels_as, enabled=enabled, **kwargs)
 
 
