@@ -10,14 +10,14 @@
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 
-import os
 import sys
+
 if sys.version_info < (3, 7):
     from importlib_metadata import version
 else:
     from importlib.metadata import version
 
-from illumio import PCE_APIS
+from illumio import PCE_APIS, BULK_CHANGE_LIMIT
 
 # -- Project information -----------------------------------------------------
 
@@ -62,8 +62,8 @@ add_module_names = True
 #
 html_theme = 'furo'
 html_theme_options = {
-    "navigation_with_keys": True,
-    "sidebar_hide_name": True,
+    'navigation_with_keys': True,
+    'sidebar_hide_name': True,
 }
 
 # Add any paths that contain custom static files (such as style sheets) here,
@@ -75,21 +75,35 @@ html_static_path = ['_static']
 html_css_files = ['custom.css']
 
 # Use the Illumio logo in place of the library name.
-html_logo = "illumio_logo.svg"
+html_logo = 'illumio_logo.svg'
 
 # Hide the Made with Sphinx footer.
 html_show_sphinx = False
 
 # -- Autodoc Options ---------------------------------------------------------
 
+# Exclude documentation for __new__ by default.
+autodoc_default_options = {
+    'exclude-members': '__init__, __new__'
+}
+
 # Override the default alphabetical ordering for member variables and methods,
 # instead display them in source definition order.
 autodoc_member_order = 'bysource'
 
+# Show type hints in the description rather than the signature.
+autodoc_typehints = 'description'
+
+# Don't show class signature with the class name.
+autodoc_class_signature = 'separated'
+
+# Don't inherit docstrings from parent classes.
+autodoc_inherit_docstrings = False
+
 # -- Custom definitions ------------------------------------------------------
 
 # Construct the dynamic API list to embed into the API documentation page.
-apis_docstring = ""
+apis_docstring = ''
 for name, api in sorted(PCE_APIS.items()):
     classpath = '{}.{}'.format(
         api.object_class.__module__,
@@ -105,4 +119,5 @@ rst_epilog = """
 
     <br/>
 .. |APIList| replace:: {}
-""".format(apis_docstring)
+.. |BulkChangeLimit| replace:: {}
+""".format(apis_docstring, BULK_CHANGE_LIMIT)
