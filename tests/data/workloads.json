@@ -42,6 +42,9 @@
             }
         ],
         "ignored_interface_names": [],
+        "firewall_coexistence": {
+            "illumio_primary": true
+        },
         "service_provider": null,
         "data_center": null,
         "data_center_zone": null,

@@ -1,7 +1,7 @@
 Changelog
 =========
 
-Version 1.0.4 (TBD)
+Version 1.1.0 (TBD)
 -------------------
 
 .. rubric:: NEW FEATURES
@@ -22,6 +22,13 @@ Version 1.0.4 (TBD)
 * update `illumio.rules.Rule.build` function to use `['workloads']` as consumer/provider label resolution default
 * broad improvements to pydoc
 * add `__all__` to all modules
+
+Version 1.0.4 (2022-08-16)
+--------------------------
+
+.. rubric:: BUG FIXES
+
+* add `FirewallCoexistence` object to fix decoded `Workload.firewall_coexistence` data type
 
 Version 1.0.3 (2022-08-13)
 --------------------------
