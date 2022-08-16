@@ -228,7 +228,8 @@ class Reference(JsonObject):
 def href_from(reference: Any):
     """Attempts to parse HREF value from a provided source."""
     if isinstance(reference, Reference):
-        return reference.href
+        if reference.href:
+            return reference.href
     elif type(reference) is dict:
         if 'href' in reference:
             return reference['href']
