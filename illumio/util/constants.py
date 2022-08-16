@@ -17,14 +17,25 @@ ACTIVE = 'active'
 #: Draft policy version path literal.
 DRAFT = 'draft'
 
-#: Constant used in rules and enforcement boundaries to denote that all
+#: Used in rules and enforcement boundaries to denote that all
 #: workloads should be affected.
 AMS = 'ams'
+
+#: Used in resolve_labels_as block in rule creation to denote that
+#: workloads matching the rule scope should be affected.
+RESOLVE_AS_WORKLOADS = 'workloads'
+
+#: Used in resolve_labels_as block in rule creation to denote that
+#: virtual services matching the rule scope should be affected.
+RESOLVE_AS_VIRTUAL_SERVICES = 'virtual_services'
 
 #: Name of the default global IP list.
 ANY_IP_LIST_NAME = 'Any (0.0.0.0/0 and ::/0)'
 
-#: Max port number
+#: Name of the default global Service.
+ALL_SERVICES_NAME = 'All Services'
+
+#: Max port number.
 PORT_MAX = 65535
 
 FQDN_REGEX = re.compile('(?=^.{4,253}$)(^((?!-)[a-zA-Z0-9-]{1,63}(?<!-)\.)+[a-zA-Z]{2,63}$)')
@@ -102,7 +113,10 @@ __all__ = [
     'ACTIVE',
     'DRAFT',
     'AMS',
+    'RESOLVE_AS_WORKLOADS',
+    'RESOLVE_AS_VIRTUAL_SERVICES',
     'ANY_IP_LIST_NAME',
+    'ALL_SERVICES_NAME',
     'PORT_MAX',
     'FQDN_REGEX',
     'HREF_REGEX',
