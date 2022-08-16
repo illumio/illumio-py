@@ -1,6 +1,13 @@
 Changelog
 =========
 
+Version 1.0.4 (2022-08-16)
+--------------------------
+
+BUG FIXES:
+
+* add `FirewallCoexistence` object to fix decoded `Workload.firewall_coexistence` data type
+
 Version 1.0.3 (2022-08-13)
 --------------------------
 
