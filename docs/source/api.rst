@@ -5,21 +5,24 @@
 Developer Interface v\ |version|
 ================================
 
+.. _pce:
+
 PCE Interface
 -------------
 
 PCE API endpoints are accessed through the ``PolicyComputeEngine`` object.
 
-.. _pce:
-
 .. autoclass:: PolicyComputeEngine
     :inherited-members:
+
+PCE Object API
+##############
 
 .. autoclass:: illumio.pce::PolicyComputeEngine._PCEObjectAPI
     :inherited-members:
     :member-order: bysource
 
-----------
+.. _apiattributes:
 
 PolicyComputeEngine API Attributes
 ##################################
@@ -31,10 +34,10 @@ The :class:`PolicyComputeEngine <PolicyComputeEngine>` class provides the follow
 Each represents a corresponding PCE API endpoint, implemented as a
 :class:`_PCEObjectAPI <illumio.pce.PolicyComputeEngine._PCEObjectAPI>` instance.
 
+.. _exceptions:
+
 Exceptions
 ----------
-
-.. _exceptions:
 
 The library uses two exception types to capture errors returned from the API or
 encountered in other library functions.
@@ -42,10 +45,10 @@ encountered in other library functions.
 .. autoexception:: IllumioException
 .. autoexception:: IllumioApiException
 
+.. _workloads:
+
 Workloads and VENs
 ------------------
-
-.. _workloads:
 
 Workloads
 #########
@@ -62,10 +65,10 @@ Pairing Profiles
 
 .. autoclass:: illumio.workloads.PairingProfile
 
+.. _securitypolicy:
+
 Security Policy
 ---------------
-
-.. _rules:
 
 Rule Sets
 #########
@@ -76,18 +79,18 @@ Rules
 #####
 
 .. autoclass:: illumio.rules.Rule
-.. autofunction:: illumio.rules.Rule.build
+    :members: build
 
 Enforcement Boundaries
 ######################
 
 .. autoclass:: illumio.rules.EnforcementBoundary
-.. autofunction:: illumio.rules.EnforcementBoundary.build
+    :members: build
+
+.. _policyobjects:
 
 Policy Objects
 --------------
-
-.. _policyobjects:
 
 IP Lists
 ########
@@ -114,10 +117,10 @@ Virtual Services
 
 .. autoclass:: illumio.policyobjects.ServiceBinding
 
+.. _infrastructure:
+
 Infrastructure
 --------------
-
-.. _infrastructure:
 
 Container Clusters
 ##################
@@ -126,35 +129,35 @@ Container Clusters
 
 .. autoclass:: illumio.infrastructure.ContainerWorkloadProfile
 
+.. _explorer:
+
 Explorer
 --------
-
-.. _explorer:
 
 Traffic Analysis
 ################
 
 .. autoclass:: illumio.explorer.TrafficQuery
-.. autofunction:: illumio.explorer.TrafficQuery.build
+    :members: build
 
 .. autoclass:: illumio.explorer.TrafficFlow
 
+.. _accessmanagement:
+
 Access Management
 -----------------
-
-.. _accessmanagement:
 
 Users
 #####
 
 .. autoclass:: illumio.accessmanagement.User
 
+.. _util:
+
 Utilities
 ---------
 
 Contains global constants, helper functions, and internal structures.
-
-.. _util:
 
 Constants
 #########
@@ -197,3 +200,12 @@ Helper Functions
 .. autofunction:: illumio.util.functions.ignore_empty_keys
 .. autofunction:: illumio.util.functions.parse_url
 .. autofunction:: illumio.util.functions.pce_api
+
+.. autofunction:: illumio.util.jsonutils.href_from
+
+Base Classes
+############
+
+.. autoclass:: illumio.util.jsonutils.JsonObject
+.. autoclass:: illumio.util.jsonutils.IllumioObject
+.. autoclass:: illumio.util.jsonutils.Reference
