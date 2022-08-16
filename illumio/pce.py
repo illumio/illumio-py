@@ -34,7 +34,7 @@ from urllib3.util.retry import Retry
 
 from .secpolicy import PolicyChangeset, PolicyVersion
 from .exceptions import IllumioApiException
-from .policyobjects import IPList
+from .policyobjects import IPList, Service
 from .explorer import TrafficQuery, TrafficFlow
 from .util import (
     deprecated,
@@ -49,6 +49,7 @@ from .util import (
     DRAFT,
     PORT_MAX,
     ANY_IP_LIST_NAME,
+    ALL_SERVICES_NAME,
     BULK_CHANGE_LIMIT,
     PCE_APIS
 )
@@ -671,6 +672,19 @@ class PolicyComputeEngine:
         kwargs['include_org'] = True
         response = self.get('/sec_policy/active/ip_lists', **kwargs)
         return IPList.from_json(response.json()[0])
+
+    def get_default_service(self, **kwargs) -> Service:
+        """Retrieves the "All Services" default global Service.
+
+        Returns:
+            Service: decoded object representing the default global Service.
+        """
+        params = kwargs.get('params', {})
+        # retrieve by name as each org will use a different ID
+        kwargs['params'] = {**params, **{'name': ALL_SERVICES_NAME}}
+        kwargs['include_org'] = True
+        response = self.get('/sec_policy/active/services', **kwargs)
+        return Service.from_json(response.json()[0])
 
     def generate_pairing_key(self, pairing_profile_href: str, **kwargs) -> str:
         """Generates a pairing key using a pairing profile.
