@@ -1,12 +1,38 @@
 Changelog
 =========
 
-Version 1.0.3 (2022-08-13)
---------------------------
+Version 1.0.4 (TBD)
+-------------------
 
 .. rubric:: NEW FEATURES
 
-* add `PORT_MAX` constant to util.constants
+* add `PolicyComputeEngine.get_default_service` function
+* add `ALL_SERVICES_NAME` constant to `illumio.util.constants`
+* add `RESOLVE_AS_WORKLOADS` constant to `illumio.util.constants`
+* add `RESOLVE_AS_VIRTUAL_SERVICES` constant to `illumio.util.constants`
+* readthedocs documentation generated with Sphinx
+    * API documentation
+    * install guide
+    * user guide
+    * common use-cases
+    * advanced usage
+
+.. rubric:: IMPROVEMENTS
+
+* update `illumio.rules.Rule.build` function to use `['workloads']` as consumer/provider label resolution default
+* broad improvements to pydoc
+* add `__all__` to all modules
+
+Version 1.0.3 (2022-08-13)
+--------------------------
+
+.. rubric:: DEPRECATIONS
+
+* `PolicyComputeEngine.base_url` is DEPRECATED and will be removed in version 2.0.0. The URL is built on each request instead for more flexibility
+
+.. rubric:: NEW FEATURES
+
+* add `PORT_MAX` constant to `illumio.util.constants`
 * add `IllumioIntegerValidationException` class
 * add int validation helper function
 
