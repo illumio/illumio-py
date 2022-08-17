@@ -86,7 +86,7 @@ Container Clusters and Workloads
 
 The PCE can provide visibility and enforcement for Kubernetes and OpenShift
 container orchestration clusters, representing them as :class:`ContainerCluster <illumio.infrastructure.ContainerCluster>`
-objects. Container clusters in turn are made up of ``ContainerWorkload``s,
+objects. Container clusters in turn are made up of ``ContainerWorkload`` objects,
 which are governed by :class:`ContainerWorkloadProfile <illumio.infrastructure.ContainerWorkloadProfile>`
 objects.
 
