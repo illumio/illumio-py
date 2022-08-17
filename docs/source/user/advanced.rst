@@ -24,6 +24,14 @@ If not set in the session, the ``requests`` library will pull proxy settings
 from environment variables, see the ``requests`` `proxy documentation <https://requests.readthedocs.io/en/latest/user/advanced/#proxies>`_
 for details.
 
+.. note::
+    Proxy values set with ``set_proxies`` will apply to the session, and will
+    be overwritten by proxy values set in the executing shell environment. If
+    you need to override environment proxy settings, you can specify the
+    ``proxies`` parameter directly as a keyword argument::
+
+        >>> pce.ip_lists.get(proxies={'http': 'http://proxy.server:8080', 'https': 'http://proxy.server:8080'})
+
 TLS Certificates
 ----------------
 
