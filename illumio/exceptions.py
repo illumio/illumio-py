@@ -17,7 +17,7 @@ class IllumioApiException(IllumioException):
 
 
 class IllumioIntegerValidationException(IllumioException):
-    """Raised when invalid values are provided to """
+    """Raised when invalid integer values are provided"""
     def __init__(self, val, minimum: int, maximum: int, message="") -> None:
         if not message:
             message = "Invalid value {} - must be integer between {} and {}".format(
