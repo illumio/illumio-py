@@ -12,6 +12,13 @@ to creating and provisioning policy.
 Make sure you have the library :ref:`installed <install>`, then read on for
 some simple examples.
 
+.. note::
+
+    This guide assumes a base level of familiarity with the PCE APIs. Refer to the
+    `Illumio PCE REST API Developer Guide <https://docs.illumio.com/core/21.5/Content/LandingPages/Guides/rest-api.htm>`_
+    or the `PCE API reference <https://docs.illumio.com/core/21.5/API-Reference/index.html>`_
+    for your PCE version for a more complete introduction to API usage and schema.
+
 .. _pceconnect:
 
 Connect to the PCE
@@ -22,6 +29,12 @@ The **illumio** library makes this simple with the :class:`PolicyComputeEngine <
 
     >>> from illumio import PolicyComputeEngine
     >>> pce = PolicyComputeEngine('my.pce.com', port=443, org_id=1)
+
+.. note::
+    The first ``PolicyComputeEngine`` parameter can be passed as a URL - useful
+    if your PCE instance does not have TLS certificates configured - or as an
+    FQDN as shown above. When passing just the domain name, the scheme will
+    default to ``https://``.
 
 In order to access the PCE API endpoints, we now need to provide credentials to
 authorize our ``pce`` instance::
