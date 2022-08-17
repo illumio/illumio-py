@@ -190,6 +190,9 @@ Constants
 .. autoenum:: illumio.util.constants.TrafficState
     :members:
 
+.. autoenum:: illumio.util.constants.ApplyTo
+    :members:
+
 Helper Functions
 ################
 
