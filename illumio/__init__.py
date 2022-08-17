@@ -8,6 +8,7 @@ Copyright:
 License:
     Apache2, see LICENSE for more details.
 """
+from .events import *
 from .exceptions import *
 from .secpolicy import *
 from .util import *

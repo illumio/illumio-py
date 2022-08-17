@@ -123,6 +123,7 @@ class PolicyComputeEngine:
     container_clusters: _PCEObjectAPI
     container_workload_profiles: _PCEObjectAPI
     enforcement_boundaries: _PCEObjectAPI
+    events: _PCEObjectAPI
     ip_lists: _PCEObjectAPI
     label_groups: _PCEObjectAPI
     labels: _PCEObjectAPI
