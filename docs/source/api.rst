@@ -18,9 +18,11 @@ PCE API endpoints are accessed through the ``PolicyComputeEngine`` object.
 PCE Object API
 ##############
 
+This internal class is used to represent API objects within the PCE, and provides
+a common CRUD interface for them.
+
 .. autoclass:: illumio.pce::PolicyComputeEngine._PCEObjectAPI
     :inherited-members:
-    :member-order: bysource
 
 .. _apiattributes:
 
