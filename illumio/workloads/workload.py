@@ -13,37 +13,18 @@ from typing import List, Union
 
 from illumio import IllumioException
 from illumio.infrastructure import ContainerCluster
-from illumio.policyobjects import Label, BaseService, Service, ServicePort
+from illumio.policyobjects import BaseService, Service, ServicePort
 from illumio.vulnerabilities import Vulnerability
 from illumio.util import (
     JsonObject,
     Reference,
     MutableObject,
-    LinkState,
     EnforcementMode,
     VisibilityLevel,
     pce_api
 )
 
-from .ven import VEN, VENAgent
-
-
-@dataclass
-class Interface(JsonObject):
-    name: str = None
-    link_state: str = None
-    address: str = None
-    cidr_block: int = None
-    default_gateway_address: str = None
-    network: Reference = None
-    network_detection_mode: str = None
-    friendly_name: str = None
-    loopback: bool = None
-
-    def _validate(self):
-        if self.link_state and not self.link_state in LinkState:
-            raise IllumioException("Invalid link_state: {}".format(self.link_state))
-        super()._validate()
+from .ven import VEN, VENAgent, Interface
 
 
 @dataclass
@@ -137,7 +118,7 @@ class Workload(MutableObject):
             hostname='web01.lab.company.com',
             public_ip='10.8.17.229',
             labels=[
-                Label(key='role', value='Web', ...),
+                Reference(href='/orgs/1/labels/11'),
                 ...
             ],
             interfaces=[
