@@ -43,7 +43,9 @@ and production for redundancy, or for parallel deployment models (blue/green).
 Additionally, servers may be added or removed to scale the application up or
 down and may renew their DHCP leases on a regular basis.
 
-All this adds up to a lot of complexity for network security teams to handle.
+All this adds up to a lot of complexity for networking and security teams to
+handle.
+
 With Illumio, we can simplify policy administration using human-readable
 abstractions for common elements. The example below shows the step-by-step
 process by which we can create all policy objects needed to segment an
