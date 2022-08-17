@@ -114,6 +114,34 @@ class ApplyTo(str, Enum, metaclass=IllumioEnumMeta):
     INTERNAL_BRIDGE_NETWORK = 'internal_bridge_network'
 
 
+class VENType(str, Enum, metaclass=IllumioEnumMeta):
+    SERVER = 'server'
+    ENDPOINT = 'endpoint'
+    CONTAINERIZED = 'containerized'
+
+
+class ChangeType(str, Enum, metaclass=IllumioEnumMeta):
+    CREATE = 'create'
+    UPDATE = 'update'
+    DELETE = 'delete'
+
+
+class EventSeverity(str, Enum, metaclass=IllumioEnumMeta):
+    EMERGENCY = 'emerg'
+    ALERT = 'alert'
+    CRITICAL = 'crit'
+    ERROR = 'err'
+    WARNING = 'warning'
+    NOTICE = 'notice'
+    INFO = 'info'
+    DEBUG = 'debug'
+
+
+class EventStatus(str, Enum, metaclass=IllumioEnumMeta):
+    SUCCESS = 'success'
+    FAILURE = 'failure'
+
+
 __all__ = [
     'ACTIVE',
     'DRAFT',
@@ -136,4 +164,8 @@ __all__ = [
     'FlowDirection',
     'TrafficState',
     'ApplyTo',
+    'VENType',
+    'ChangeType',
+    'EventSeverity',
+    'EventStatus',
 ]
