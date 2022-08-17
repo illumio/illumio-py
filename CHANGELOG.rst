@@ -6,17 +6,27 @@ Version 1.1.0 (TBD)
 
 .. rubric:: NEW FEATURES
 
-* add `PolicyComputeEngine.get_default_service` function
-* add `ALL_SERVICES_NAME` constant to `illumio.util.constants`
-* add `RESOLVE_AS_WORKLOADS` constant to `illumio.util.constants`
-* add `RESOLVE_AS_VIRTUAL_SERVICES` constant to `illumio.util.constants`
-* add `ApplyTo` enumeration in place of Virtual Service module constants
 * readthedocs documentation generated with Sphinx
     * API documentation
     * install guide
     * user guide
     * common use-cases
     * advanced usage
+* add `illumio.events` module
+    * adds `/events` PCE API endpoint
+* add `PolicyComputeEngine.get_default_service` function
+* added constant values to `illumio.util.constants`
+* `ALL_SERVICES_NAME` - default `All Services` Service object name
+* `RESOLVE_AS_WORKLOADS` - rule label resolution as workloads
+* `RESOLVE_AS_VIRTUAL_SERVICES` - rule label resolution as workloads
+* add enumerations to `illumio.util.constants`
+    * `ApplyTo` - enum in place of Virtual Service module constants
+    * `VENType` - enum for `VEN.ven_type` field
+    * `ChangeType` - enum for `ResourceEvent.change_type` field
+    * `EventSeverity` - enum for `BaseEvent.severity` field
+    * `EventStatus` - enum for `BaseEvent.status` field
+
+* add `illumio.util.jsonutils.Error` dataclass to capture API error responses
 
 .. rubric:: IMPROVEMENTS
 
