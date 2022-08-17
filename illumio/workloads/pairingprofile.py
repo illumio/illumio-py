@@ -29,15 +29,16 @@ class PairingProfile(MutableObject):
     Pairing profiles are used to configure VEN defaults and generate keys
     for VEN pairing  on workloads that will be managed by the PCE.
 
+    See https://docs.illumio.com/asp/20.1/Content/Guides/rest-api/workloads/pairing-profiles-and-pairing-keys.htm
+
     Usage:
-        >>> from illumio.workloads import PairingProfile
         >>> pairing_profile = PairingProfile(
         ...     name='PP-DATABASE-VENS',
         ...     enabled=True,
         ...     enforcement_mode='visibility_only',
         ...     visibility_level='flows_summary'
         ... )
-        >>> pairing_profile = pce.create_pairing_profile(pairing_profile)
+        >>> pairing_profile = pce.pairing_profiles.create(pairing_profile)
         >>> pairing_profile
         PairingProfile(
             href='/orgs/1/pairing_profiles/19',
