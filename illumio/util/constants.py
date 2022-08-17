@@ -109,6 +109,11 @@ class TrafficState(str, Enum, metaclass=IllumioEnumMeta):
     INCOMPLETE = 'incomplete'
 
 
+class ApplyTo(str, Enum, metaclass=IllumioEnumMeta):
+    HOST_ONLY = 'host_only'
+    INTERNAL_BRIDGE_NETWORK = 'internal_bridge_network'
+
+
 __all__ = [
     'ACTIVE',
     'DRAFT',
@@ -130,4 +135,5 @@ __all__ = [
     'Transmission',
     'FlowDirection',
     'TrafficState',
+    'ApplyTo',
 ]

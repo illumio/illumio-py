@@ -10,6 +10,7 @@ Version 1.1.0 (TBD)
 * add `ALL_SERVICES_NAME` constant to `illumio.util.constants`
 * add `RESOLVE_AS_WORKLOADS` constant to `illumio.util.constants`
 * add `RESOLVE_AS_VIRTUAL_SERVICES` constant to `illumio.util.constants`
+* add `ApplyTo` enumeration in place of Virtual Service module constants
 * readthedocs documentation generated with Sphinx
     * API documentation
     * install guide

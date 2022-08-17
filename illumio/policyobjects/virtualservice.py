@@ -12,12 +12,15 @@ from dataclasses import dataclass
 from typing import List
 
 from illumio import IllumioException
-from illumio.util import IllumioObject, Reference, MutableObject, pce_api
+from illumio.util import (
+    IllumioObject,
+    Reference,
+    MutableObject,
+    ApplyTo,
+    pce_api
+)
 
 from .service import BaseService, ServicePort
-
-HOST_ONLY = 'host_only'
-INTERNAL_BRIDGE_NETWORK = 'internal_bridge_network'
 
 
 @dataclass
@@ -50,7 +53,7 @@ class VirtualService(MutableObject):
     labels: List[Reference] = None
 
     def _validate(self):
-        if self.apply_to and self.apply_to not in {HOST_ONLY, INTERNAL_BRIDGE_NETWORK}:
+        if self.apply_to and self.apply_to not in ApplyTo:
             raise IllumioException("Invalid 'apply_to' value: {}".format(self.apply_to))
         super()._validate()
 
