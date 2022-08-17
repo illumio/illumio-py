@@ -46,6 +46,14 @@ encountered in other library functions.
 
 .. autoexception:: IllumioException
 .. autoexception:: IllumioApiException
+.. autoexception:: IllumioIntegerValidationException
+
+.. _events:
+
+Events
+------
+
+.. autoclass:: Event
 
 .. _workloads:
 
