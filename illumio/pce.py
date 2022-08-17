@@ -60,6 +60,12 @@ class PolicyComputeEngine:
 
     Contains request logic for API calls and handles the HTTP(S) connection to the PCE.
 
+    Args:
+        url (str): PCE URL. May include http:// or https:// as the scheme.
+        port (str, optional): PCE http(s) port. Defaults to '443'.
+        version (str, optional): The PCE API version to use. Defaults to 'v2'.
+        org_id (str, optional): The PCE organization ID. Defaults to '1'.
+
     Attributes:
         base_url: DEPRECATED in v1.0.3. The base URL for API calls to the PCE.
             Has the form ``http[s]://<DOMAIN_NAME>:<PORT>/api/<API_VERSION>``
@@ -68,14 +74,6 @@ class PolicyComputeEngine:
         org_id: the PCE organization ID.
     """
     def __init__(self, url: str, port: str = '443', version: str = 'v2', org_id: str = '1') -> None:
-        """Initializes the PCE REST client.
-
-        Args:
-            url (str): PCE URL. May include http:// or https:// as the scheme.
-            port (str, optional): PCE http(s) port. Defaults to '443'.
-            version (str, optional): The PCE API version to use. Defaults to 'v2'.
-            org_id (str, optional): The PCE organization ID. Defaults to '1'.
-        """
         self._apis = {}
         self._encoder = IllumioEncoder()
         self._session = Session()
