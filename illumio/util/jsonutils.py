@@ -265,6 +265,12 @@ class ImmutableObject(IllumioObject):
     created_by: Reference = None
 
 
+@dataclass
+class Error(JsonObject):
+    token: str = None
+    message: str = None
+
+
 __all__ = [
     'IllumioEncoder',
     'JsonObject',
@@ -272,5 +278,6 @@ __all__ = [
     'IllumioObject',
     'MutableObject',
     'ImmutableObject',
-    'href_from'
+    'Error',
+    'href_from',
 ]
