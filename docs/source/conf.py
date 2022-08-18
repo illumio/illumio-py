@@ -10,12 +10,15 @@
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 
+import os
 import sys
 
 if sys.version_info < (3, 8):
     from importlib_metadata import version
 else:
     from importlib.metadata import version
+
+sys.path.insert(0, os.path.abspath("../.."))
 
 from illumio import PCE_APIS, BULK_CHANGE_LIMIT
 
