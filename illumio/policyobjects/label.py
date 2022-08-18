@@ -17,6 +17,7 @@ from illumio.util import JsonObject, Reference, MutableObject, pce_api
 
 @dataclass
 class LabelUsage(JsonObject):
+    """Represents how a label object is being used in the PCE."""
     label_group: bool = None
     ruleset: bool = None
     rule: bool = None
@@ -40,9 +41,10 @@ class Label(MutableObject):
     See https://docs.illumio.com/core/21.5/Content/Guides/security-policy/security-policy-objects/labels-and-label-groups.htm
 
     Usage:
-        >>> from illumio import PolicyComputeEngine, Label
-        >>> pce = PolicyComputeEngine('my.pce.com')
-        >>> label = Label(key='role', value='R-DB')
+        >>> import illumio
+        >>> pce = illumio.PolicyComputeEngine('pce.company.com', port=443, org_id=1)
+        >>> pce.set_credentials('api_key', 'api_secret')
+        >>> label = illumio.Label(key='role', value='R-DB')
         >>> label = pce.labels.create(label)
         >>> label
         Label(
@@ -70,14 +72,14 @@ class LabelGroup(Label):
     See https://docs.illumio.com/core/21.5/Content/Guides/security-policy/security-policy-objects/labels-and-label-groups.htm
 
     Usage:
-        >>> from illumio import PolicyComputeEngine, LabelGroup
-        >>> pce = PolicyComputeEngine('my.pce.com')
-        >>> pce.set_credentials('api_key_username', 'api_key_secret')
-        >>> dev_label = pce.labels.create({'key': 'env', 'value': 'E-DEV'})
-        >>> stage_label = pce.labels.create({'key': 'env', 'value': 'E-STAGE'})
-        >>> label_group = LabelGroup(
+        >>> import illumio
+        >>> pce = illumio.PolicyComputeEngine('pce.company.com', port=443, org_id=1)
+        >>> pce.set_credentials('api_key', 'api_secret')
+        >>> dev_label = pce.labels.create({'key': 'env', 'value': 'E-Dev'})
+        >>> stage_label = pce.labels.create({'key': 'env', 'value': 'E-Stage'})
+        >>> label_group = illumio.LabelGroup(
         ...     key='role',
-        ...     name='LG-E-PREPROD',
+        ...     name='LG-E-PreProd',
         ...     labels=[dev_label, stage_label]
         ... )
         >>> label_group = pce.label_groups.create(label_group)
@@ -95,12 +97,20 @@ class LabelGroup(Label):
 
 @dataclass
 class LabelSet(JsonObject):
+    """Represents a set of labels with distinct keys.
+
+    Used to define rule set scopes.
+
+    Args:
+        labels (List[Reference], optional): list of label and label group
+            references in the set.
+    """
     labels: List[Reference] = None
 
     def __eq__(self, o) -> bool:
         """Compares LabelSet instances based on label HREFs, ignoring list order"""
         if not isinstance(o, LabelSet):
-            raise False
+            return False
         return len(self.labels) == len(o.labels) and \
             set([label.href for label in self.labels]) == set([label.href for label in o.labels])
 
