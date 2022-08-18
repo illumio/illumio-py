@@ -28,6 +28,10 @@ The main entrypoint for the client is the `PolicyComputeEngine` class:
 
 For more information on the Illumio APIs, see the [REST API guide](https://docs.illumio.com/core/21.5/Content/LandingPages/Guides/rest-api.htm) and the [API reference](https://docs.illumio.com/core/21.5/API-Reference/index.html) for your version of Illumio Core.  
 
+## [Read the Docs](https://illumio-py.readthedocs.io/en/latest/)
+
+You can find API documentation, code examples, and usage guides on our [readthedocs page](https://illumio-py.readthedocs.io/en/latest/)!
+
 ## Installation  
 
 The `illumio` library is now [available on pypi](https://pypi.org/project/illumio/)!  
