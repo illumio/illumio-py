@@ -35,6 +35,7 @@ Version 1.1.0 (TBD)
 * update `illumio.rules.Rule.build` function to use `['workloads']` as consumer/provider label resolution default
 * broad improvements to pydoc
 * add `__all__` to all modules
+* bug fixes and type hint improvements
 
 Version 1.0.4 (2022-08-16)
 --------------------------
