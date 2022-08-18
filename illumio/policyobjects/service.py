@@ -9,7 +9,7 @@ License:
     Apache2, see LICENSE for more details.
 """
 from dataclasses import dataclass
-from typing import List
+from typing import List, Union
 
 from illumio import IllumioException
 from illumio.util import (
@@ -27,7 +27,7 @@ from illumio.util import (
 @dataclass
 class BaseService(JsonObject):
     port: int = None
-    proto: int = None
+    proto: Union[str, int] = None
 
     def __post_init__(self):
         if type(self.proto) is str:
