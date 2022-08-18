@@ -10,7 +10,11 @@ Developer Interface v\ |version|
 PCE Interface
 -------------
 
-PCE API endpoints are accessed through the ``PolicyComputeEngine`` object.
+PolicyComputeEngine
+###################
+
+The ``PolicyComputeEngine`` object provides the core interface for interacting
+with PCE API endpoints.
 
 .. autoclass:: PolicyComputeEngine
     :inherited-members:
@@ -111,7 +115,6 @@ Labels
 ######
 
 .. autoclass:: illumio.policyobjects.Label
-.. autoclass:: illumio.policyobjects.LabelUsage
 .. autoclass:: illumio.policyobjects.LabelGroup
 .. autoclass:: illumio.policyobjects.LabelSet
 
@@ -173,13 +176,15 @@ Constants
 #########
 
 .. autodata:: illumio.util.constants.ACTIVE
-
 .. autodata:: illumio.util.constants.DRAFT
-
 .. autodata:: illumio.util.constants.AMS
-
+.. autodata:: illumio.util.constants.RESOLVE_AS_WORKLOADS
+.. autodata:: illumio.util.constants.RESOLVE_AS_VIRTUAL_SERVICES
 .. autodata:: illumio.util.constants.ANY_IP_LIST_NAME
-
+.. autodata:: illumio.util.constants.ALL_SERVICES_NAME
+.. autodata:: illumio.util.constants.PORT_MAX
+.. autodata:: illumio.util.constants.ICMP_CODE_MAX
+.. autodata:: illumio.util.constants.ICMP_TYPE_MAX
 .. autodata:: illumio.util.constants.BULK_CHANGE_LIMIT
 
 .. autoenum:: illumio.util.constants.EnforcementMode
@@ -201,6 +206,18 @@ Constants
     :members:
 
 .. autoenum:: illumio.util.constants.ApplyTo
+    :members:
+
+.. autoenum:: illumio.util.constants.VENType
+    :members:
+
+.. autoenum:: illumio.util.constants.ChangeType
+    :members:
+
+.. autoenum:: illumio.util.constants.EventSeverity
+    :members:
+
+.. autoenum:: illumio.util.constants.EventStatus
     :members:
 
 Helper Functions
