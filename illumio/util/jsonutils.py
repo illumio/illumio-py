@@ -17,7 +17,7 @@ import json
 from abc import ABC
 from dataclasses import Field, dataclass, fields
 from inspect import signature, isclass
-from typing import List, Any
+from typing import List, Any, Union
 
 from illumio.exceptions import IllumioException
 
@@ -38,12 +38,16 @@ class IllumioEncoder(json.JSONEncoder):
 
 @dataclass
 class JsonObject(ABC):
+    """Base dataclass for all derived PCE objects.
+
+    Provides custom encoding, decoding, and type validation to and from JSON.
+    """
 
     def __post_init__(self):
         self._validate()
 
     def _validate(self):
-        """Validates fields by comparing their values to their registered dataclass types."""
+        """Validates all dataclass fields against their indicated types."""
         for field in fields(self):
             value = getattr(self, field.name)
             if not self._validate_field(field.type, value):
@@ -222,16 +226,34 @@ def deep_encode(o: Any) -> Any:
 
 @dataclass
 class Reference(JsonObject):
+    """Simplest PCE object type, containing only an HREF.
+
+    Used in most API schema to refer to other PCE objects.
+
+    Args:
+        href (str, optional): PCE object HREF.
+    """
     href: str = None
 
 
-def href_from(reference: Any):
-    """Attempts to parse HREF value from a provided source."""
+def href_from(reference: Union[Reference, dict, str]):
+    """Attempts to parse HREF value from a provided source.
+
+    Args:
+        reference (Union[Reference, dict, str]): source reference. If a string
+            value is passed, it is returned unchanged. The ``href`` field
+            is returned from a Reference object or subclass instance, and the
+            ``'href'`` key is returned from a provided dictionary.
+
+    Raises:
+        IllumioException: if an invalid reference type is provided, or if the
+            href value is null or falsy.
+    """
     if isinstance(reference, Reference):
         if reference.href:
             return reference.href
     elif type(reference) is dict:
-        if 'href' in reference:
+        if 'href' in reference and reference['href']:
             return reference['href']
     elif type(reference) is str:
         return reference
@@ -240,6 +262,21 @@ def href_from(reference: Any):
 
 @dataclass
 class IllumioObject(Reference):
+    """Base class for most PCE objects.
+
+    Args:
+        name (str, optional): object name.
+        description (str, optional): object description.
+        external_data_set (str, optional): unique namespace identifier for an
+            external source creating PCE objects. If set,
+            ``external_data_reference`` must also be provided.
+        external_data_reference (str, optional): unique identifier within the
+            external_data_set. If set, ``external_data_set`` must also be
+            provided. ``external_data_set`` + ``external_data_reference``
+            must be globally unique.
+        caps (List[str], optional): defines the requesting user's
+            capabilities/permissions on the object.
+    """
     name: str = None
     description: str = None
     external_data_set: str = None
@@ -249,6 +286,7 @@ class IllumioObject(Reference):
 
 @dataclass
 class MutableObject(IllumioObject):
+    """Base class for PCE objects that can be updated/deleted."""
     created_at: str = None
     updated_at: str = None
     deleted_at: str = None
@@ -261,12 +299,19 @@ class MutableObject(IllumioObject):
 
 @dataclass
 class ImmutableObject(IllumioObject):
+    """Base class for PCE objects that cannot be updated/deleted."""
     created_at: str = None
     created_by: Reference = None
 
 
 @dataclass
 class Error(JsonObject):
+    """Wrapper class for error status/message.
+
+    Args:
+        token (str, optional): error status.
+        message (str, optional): error message.
+    """
     token: str = None
     message: str = None
 

@@ -57,6 +57,7 @@ PCE_APIS = {}
 
 
 class IllumioEnumMeta(EnumMeta):
+    """Metaclass to provide a common contains check for enumerations."""
 
     def __contains__(cls, value):
         if value is None:
@@ -69,12 +70,14 @@ class IllumioEnumMeta(EnumMeta):
 
 
 class LinkState(str, Enum, metaclass=IllumioEnumMeta):
+    """Network interface link state enumeration."""
     UP = 'up'
     DOWN = 'down'
     UNKNOWN = 'unknown'
 
 
 class EnforcementMode(str, Enum, metaclass=IllumioEnumMeta):
+    """Workload enforcement mode enumeration."""
     IDLE = 'idle'
     VISIBILITY_ONLY = 'visibility_only'
     FULL = 'full'
@@ -82,6 +85,7 @@ class EnforcementMode(str, Enum, metaclass=IllumioEnumMeta):
 
 
 class VisibilityLevel(str, Enum, metaclass=IllumioEnumMeta):
+    """Workload visibility level enumeration."""
     FLOW_FULL_DETAIL = 'flow_full_detail'
     FLOW_SUMMARY = 'flow_summary'
     FLOW_DROPS = 'flow_drops'
@@ -90,6 +94,7 @@ class VisibilityLevel(str, Enum, metaclass=IllumioEnumMeta):
 
 
 class PolicyDecision(str, Enum, metaclass=IllumioEnumMeta):
+    """Traffic flow policy decision enumeration."""
     ALLOWED = 'allowed'
     BLOCKED = 'blocked'
     POTENTIALLY_BLOCKED = 'potentially_blocked'
@@ -97,17 +102,20 @@ class PolicyDecision(str, Enum, metaclass=IllumioEnumMeta):
 
 
 class Transmission(str, Enum, metaclass=IllumioEnumMeta):
+    """Traffic flow transmission enumeration."""
     BROADCAST = 'broadcast'
     MULTICAST = 'multicast'
     UNICAST = 'unicast'
 
 
 class FlowDirection(str, Enum, metaclass=IllumioEnumMeta):
+    """Traffic flow direction enumeration."""
     INBOUND = 'inbound'
     OUTBOUND = 'outbound'
 
 
 class TrafficState(str, Enum, metaclass=IllumioEnumMeta):
+    """Traffic flow state enumeration."""
     ACTIVE = 'active'
     CLOSED = 'closed'
     TIMED_OUT = 'timed out'
@@ -118,23 +126,27 @@ class TrafficState(str, Enum, metaclass=IllumioEnumMeta):
 
 
 class ApplyTo(str, Enum, metaclass=IllumioEnumMeta):
+    """Virtual service apply to value enumeration."""
     HOST_ONLY = 'host_only'
     INTERNAL_BRIDGE_NETWORK = 'internal_bridge_network'
 
 
 class VENType(str, Enum, metaclass=IllumioEnumMeta):
+    """VEN type enumeration."""
     SERVER = 'server'
     ENDPOINT = 'endpoint'
     CONTAINERIZED = 'containerized'
 
 
 class ChangeType(str, Enum, metaclass=IllumioEnumMeta):
+    """Resource event change type enumeration."""
     CREATE = 'create'
     UPDATE = 'update'
     DELETE = 'delete'
 
 
 class EventSeverity(str, Enum, metaclass=IllumioEnumMeta):
+    """Event severity enumeration."""
     EMERGENCY = 'emerg'
     ALERT = 'alert'
     CRITICAL = 'crit'
@@ -146,6 +158,7 @@ class EventSeverity(str, Enum, metaclass=IllumioEnumMeta):
 
 
 class EventStatus(str, Enum, metaclass=IllumioEnumMeta):
+    """Event status enumeration."""
     SUCCESS = 'success'
     FAILURE = 'failure'
 
