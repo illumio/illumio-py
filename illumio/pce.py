@@ -3,9 +3,9 @@
 """This module provides the core PolicyComputeEngine class for communicating with the PCE.
 
 Usage:
-    >>> from illumio import PolicyComputeEngine
-    >>> pce = PolicyComputeEngine('my.pce.com', port='8443', org_id='12')
-    >>> pce.set_credentials('<API_KEY>', '<API_SECRET>')
+    >>> import illumio
+    >>> pce = illumio.PolicyComputeEngine('pce.company.com', port=8443, org_id=12)
+    >>> pce.set_credentials('api_key', 'api_secret')
     >>> workloads = pce.workloads.get(
     ...     params={
     ...         'managed': True,
@@ -519,7 +519,6 @@ class PolicyComputeEngine:
             Successful PUT requests return a 204 No Content response.
 
             Usage:
-                >>> from illumio.workloads import PairingProfile
                 >>> pairing_profiles = pce.pairing_profile.get(
                 ...     params={'name': 'PP-DATABASE', 'max_results': 1}
                 ... )
@@ -566,7 +565,7 @@ class PolicyComputeEngine:
         def bulk_create(self, objects_to_create: List[IllumioObject], **kwargs) -> List[dict]:
             """Creates a set of objects in the PCE.
 
-            NOTE: Bulk creation can currently only be applied for Security Principals,
+            **NOTE:** Bulk creation can currently only be applied for Security Principals,
                 Virtual Services and Workloads.
 
             Args:
@@ -729,7 +728,6 @@ class PolicyComputeEngine:
         for details on async traffic query parameters.
 
         Usage:
-            >>> from illumio.explorer import TrafficQuery
             >>> traffic_query = TrafficQuery.build(
             ...     start_date="2022-02-01T00:00:00Z",
             ...     end_date="2022-03-01T00:00:00Z",
@@ -844,7 +842,6 @@ class PolicyComputeEngine:
         """Provisions policy changes for draft objects with the given HREFs.
 
         Usage:
-            >>> from illumio.rules import RuleSet
             >>> rule_set = pce.rule_sets.create(
             ...     RuleSet(name='RS-RINGFENCE')
             ... )

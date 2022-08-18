@@ -120,15 +120,18 @@ class VEN(MutableObject):
     """Represents a Virtual Enforcement Node object in the PCE.
 
     The VEN object represents the agent on a workload that has been paired with
-    the PCE. VENs are read-only via the PCE API.
+    the PCE.
+
+    **NOTE:** VENs are read-only via the PCE API.
 
     See https://docs.illumio.com/core/21.5/Content/Guides/rest-api/workloads/ven-operations.htm
 
     Usage:
-        >>> from illumio import PolicyComputeEngine, Workload, Interface, EnforcementMode
-        >>> pce = PolicyComputeEngine('my.pce.com')
-        >>> pce.set_credentials('api_key_username', 'api_key_secret')
+        >>> import illumio
+        >>> pce = illumio.PolicyComputeEngine('pce.company.com', port=443, org_id=1)
+        >>> pce.set_credentials('api_key', 'api_secret')
         >>> vens = pce.vens.get()
+        >>> vens
         [
             VEN(
                 href="/orgs/1/vens/5fe88f13-d22c-427e-be47-b9c3369e1e32",

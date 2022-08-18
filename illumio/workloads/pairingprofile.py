@@ -32,7 +32,10 @@ class PairingProfile(MutableObject):
     See https://docs.illumio.com/asp/20.1/Content/Guides/rest-api/workloads/pairing-profiles-and-pairing-keys.htm
 
     Usage:
-        >>> pairing_profile = PairingProfile(
+        >>> import illumio
+        >>> pce = illumio.PolicyComputeEngine('pce.company.com', port=443, org_id=1)
+        >>> pce.set_credentials('api_key', 'api_secret')
+        >>> pairing_profile = illumio.PairingProfile(
         ...     name='PP-DATABASE-VENS',
         ...     enabled=True,
         ...     enforcement_mode='visibility_only',

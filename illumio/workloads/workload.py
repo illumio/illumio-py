@@ -88,26 +88,26 @@ class Workload(MutableObject):
     See https://docs.illumio.com/core/21.5/Content/Guides/security-policy/workloads/_ch-workloads.htm
 
     Usage:
-        >>> from illumio import PolicyComputeEngine, Workload, Interface, EnforcementMode
-        >>> pce = PolicyComputeEngine('my.pce.com')
-        >>> pce.set_credentials('api_key_username', 'api_key_secret')
-        >>> role_label = pce.labels.create({'key': 'role', 'value': 'Web'})
-        >>> app_label = pce.labels.create({'key': 'app', 'value': 'App'})
-        >>> env_label = pce.labels.create({'key': 'env', 'value': 'Development'})
-        >>> loc_label = pce.labels.create({'key': 'loc', 'value': 'NYC-Datacenter'})
-        >>> workload = Workload(
+        >>> import illumio
+        >>> pce = illumio.PolicyComputeEngine('pce.company.com', port=443, org_id=1)
+        >>> pce.set_credentials('api_key', 'api_secret')
+        >>> role_label = pce.labels.create({'key': 'role', 'value': 'R-Web'})
+        >>> app_label = pce.labels.create({'key': 'app', 'value': 'A-App'})
+        >>> env_label = pce.labels.create({'key': 'env', 'value': 'E-Dev'})
+        >>> loc_label = pce.labels.create({'key': 'loc', 'value': 'L-NYC'})
+        >>> workload = illumio.Workload(
         ...     name='Web 01',
         ...     hostname='web01.lab.company.com',
         ...     public_ip='10.8.17.229',
         ...     labels=[role_label, app_label, env_label, loc_label],
         ...     interfaces=[
-        ...         Interface(
+        ...         illumio.Interface(
         ...             name='lo0',
         ...             address='127.0.0.1',
         ...             link_state='up'
         ...         )
         ...     ],
-        ...     enforcement_mode=EnforcementMode.SELECTIVE,
+        ...     enforcement_mode=illumio.EnforcementMode.SELECTIVE,
         ...     online=True
         ... )
         >>> workload = pce.workloads.create(workload)

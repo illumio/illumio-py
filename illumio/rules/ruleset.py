@@ -23,17 +23,19 @@ from .iptablesrule import IPTablesRule
 class RuleSet(MutableObject):
     """Provides scope boundaries for security policy rules.
 
+    See https://docs.illumio.com/core/21.5/Content/Guides/security-policy/create-security-policy/rulesets.htm
+
     Usage:
-        >>> from illumio import PolicyComputeEngine, RuleSet, LabelSet
-        >>> pce = PolicyComputeEngine('my.pce.com')
-        >>> pce.set_credentials('api_key_username', 'api_key_secret')
-        >>> app_label = pce.labels.create({'key': 'app', 'value': 'App'})
-        >>> env_label = pce.labels.create({'key': 'env', 'value': 'Production'})
-        >>> loc_label = pce.labels.create({'key': 'loc', 'value': 'AWS'})
-        >>> ruleset = RuleSet(
+        >>> import illumio
+        >>> pce = illumio.PolicyComputeEngine('pce.company.com', port=443, org_id=1)
+        >>> pce.set_credentials('api_key', 'api_secret')
+        >>> app_label = pce.labels.create({'key': 'app', 'value': 'A-App'})
+        >>> env_label = pce.labels.create({'key': 'env', 'value': 'E-Prod'})
+        >>> loc_label = pce.labels.create({'key': 'loc', 'value': 'L-AWS'})
+        >>> ruleset = illumio.RuleSet(
         ...     name='RS-RINGFENCE',
         ...     scopes=[
-        ...         LabelSet(
+        ...         illumio.LabelSet(
         ...             labels=[app_label, env_label, loc_label]
         ...         )
         ...     ]
