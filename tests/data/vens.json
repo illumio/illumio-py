@@ -1,0 +1,325 @@
+[
+    {
+        "href": "/orgs/1/vens/ec38510d-e4fd-41a1-a6ba-8b0bb4ce9ae9",
+        "name": null,
+        "description": null,
+        "hostname": "WIN-CK9JH7R07NB",
+        "uid": null,
+        "os_id": "win-x86_64-server",
+        "os_detail": "14393.1794.amd64fre.rs1_release.171008-1615 (Windows Server 2016 Standard)",
+        "os_platform": "windows",
+        "version": "21.5.30-8527",
+        "status": "active",
+        "activation_type": "pairing_key",
+        "active_pce_fqdn": null,
+        "target_pce_fqdn": null,
+        "labels": [
+            {
+                "href": "/orgs/1/labels/14"
+            },
+            {
+                "href": "/orgs/1/labels/8"
+            },
+            {
+                "href": "/orgs/1/labels/13"
+            },
+            {
+                "href": "/orgs/1/labels/1"
+            }
+        ],
+        "interfaces": [
+            {
+                "href": "/orgs/1/workloads/ec38510d-e4fd-41a1-a6ba-8b0bb4ce9ae9/interfaces/eth32768",
+                "name": "eth32768",
+                "cidr_block": 16,
+                "link_state": null,
+                "network_detection_mode": "single_private_brn",
+                "friendly_name": null,
+                "network": {
+                    "href": "/orgs/1/networks/40995e57-5e83-4fc5-9492-5b0e6df32a68"
+                },
+                "loopback": false,
+                "address": "10.2.65.171",
+                "default_gateway_address": "10.2.0.1"
+            },
+            {
+                "href": "/orgs/1/workloads/ec38510d-e4fd-41a1-a6ba-8b0bb4ce9ae9/interfaces/eth32768",
+                "name": "eth32768",
+                "cidr_block": 64,
+                "link_state": null,
+                "network_detection_mode": "link_local",
+                "friendly_name": null,
+                "network": {
+                    "href": "/orgs/1/networks/57b3b654-8d49-431b-95fc-0954610727de"
+                },
+                "loopback": false,
+                "address": "fe80::39f6:3e9e:3cab:c31e",
+                "default_gateway_address": null
+            }
+        ],
+        "workloads": [
+            {
+                "href": "/orgs/1/workloads/ec38510d-e4fd-41a1-a6ba-8b0bb4ce9ae9"
+            }
+        ],
+        "container_cluster": null,
+        "secure_connect": null,
+        "unpair_allowed": true,
+        "last_heartbeat_at": "2022-08-17T17:33:31.158Z",
+        "last_goodbye_at": null,
+        "created_at": "2022-07-20T00:11:45.926Z",
+        "created_by": {
+            "href": "/orgs/1/vens/ec38510d-e4fd-41a1-a6ba-8b0bb4ce9ae9"
+        },
+        "updated_at": "2022-08-17T17:28:29.979Z",
+        "updated_by": {
+            "href": "/orgs/1/vens/ec38510d-e4fd-41a1-a6ba-8b0bb4ce9ae9"
+        },
+        "conditions": [],
+        "caps": [
+            "write",
+            "generate_support_report",
+            "upgrade",
+            "unpair"
+        ]
+    },
+    {
+        "href": "/orgs/1/vens/f3879549-416e-4243-9688-f9e700af86fc",
+        "name": null,
+        "description": null,
+        "hostname": "kube.ansible.ilabs.io",
+        "uid": null,
+        "os_id": "centos-x86_64-7.0",
+        "os_detail": "4.18.0-394.el8.x86_64 #1 SMP Tue May 31 16:19:11 UTC 2022 (Red Hat Enterprise Linux Server release 7.9 (Maipo))",
+        "os_platform": "linux",
+        "version": "21.5.40-8601",
+        "status": "active",
+        "activation_type": "pairing_key",
+        "active_pce_fqdn": null,
+        "target_pce_fqdn": null,
+        "labels": [
+            {
+                "href": "/orgs/1/labels/5"
+            },
+            {
+                "href": "/orgs/1/labels/23"
+            },
+            {
+                "href": "/orgs/1/labels/24"
+            },
+            {
+                "href": "/orgs/1/labels/25"
+            }
+        ],
+        "interfaces": [
+            {
+                "href": "/orgs/1/workloads/f3879549-416e-4243-9688-f9e700af86fc/interfaces/ens192",
+                "name": "ens192",
+                "cidr_block": 16,
+                "link_state": null,
+                "network_detection_mode": "single_private_brn",
+                "friendly_name": null,
+                "network": {
+                    "href": "/orgs/1/networks/40995e57-5e83-4fc5-9492-5b0e6df32a68"
+                },
+                "loopback": false,
+                "address": "10.2.133.201",
+                "default_gateway_address": "10.2.0.1"
+            },
+            {
+                "href": "/orgs/1/workloads/f3879549-416e-4243-9688-f9e700af86fc/interfaces/ens192",
+                "name": "ens192",
+                "cidr_block": 64,
+                "link_state": null,
+                "network_detection_mode": "link_local",
+                "friendly_name": null,
+                "network": {
+                    "href": "/orgs/1/networks/57b3b654-8d49-431b-95fc-0954610727de"
+                },
+                "loopback": false,
+                "address": "fe80::250:56ff:fe8b:6d80",
+                "default_gateway_address": null
+            },
+            {
+                "href": "/orgs/1/workloads/f3879549-416e-4243-9688-f9e700af86fc/interfaces/docker0",
+                "name": "docker0",
+                "cidr_block": 16,
+                "link_state": null,
+                "network_detection_mode": "single_private_brn",
+                "friendly_name": null,
+                "network": {
+                    "href": "/orgs/1/networks/40995e57-5e83-4fc5-9492-5b0e6df32a68"
+                },
+                "loopback": false,
+                "address": "172.17.0.1",
+                "default_gateway_address": null
+            },
+            {
+                "href": "/orgs/1/workloads/f3879549-416e-4243-9688-f9e700af86fc/interfaces/vxlan.calico",
+                "name": "vxlan.calico",
+                "cidr_block": 32,
+                "link_state": null,
+                "network_detection_mode": "single_private_brn",
+                "friendly_name": null,
+                "network": {
+                    "href": "/orgs/1/networks/40995e57-5e83-4fc5-9492-5b0e6df32a68"
+                },
+                "loopback": false,
+                "address": "192.168.80.128",
+                "default_gateway_address": null
+            },
+            {
+                "href": "/orgs/1/workloads/f3879549-416e-4243-9688-f9e700af86fc/interfaces/vxlan.calico",
+                "name": "vxlan.calico",
+                "cidr_block": 64,
+                "link_state": null,
+                "network_detection_mode": "link_local",
+                "friendly_name": null,
+                "network": {
+                    "href": "/orgs/1/networks/57b3b654-8d49-431b-95fc-0954610727de"
+                },
+                "loopback": false,
+                "address": "fe80::64e9:d3ff:feca:1a4",
+                "default_gateway_address": null
+            }
+        ],
+        "workloads": [
+            {
+                "href": "/orgs/1/workloads/f3879549-416e-4243-9688-f9e700af86fc"
+            }
+        ],
+        "container_cluster": null,
+        "secure_connect": null,
+        "unpair_allowed": false,
+        "last_heartbeat_at": "2022-08-17T17:34:41.670Z",
+        "last_goodbye_at": null,
+        "created_at": "2022-07-20T16:42:22.452Z",
+        "created_by": {
+            "href": "/orgs/1/vens/f3879549-416e-4243-9688-f9e700af86fc"
+        },
+        "updated_at": "2022-08-17T17:34:41.682Z",
+        "updated_by": {
+            "href": "/orgs/1/vens/f3879549-416e-4243-9688-f9e700af86fc"
+        },
+        "conditions": [],
+        "caps": [
+            "write",
+            "generate_support_report"
+        ]
+    },
+    {
+        "href": "/orgs/1/vens/e7366e18-97e1-4eeb-945c-a565139ba077",
+        "name": null,
+        "description": null,
+        "hostname": "apache01.ansible.ilabs.io",
+        "uid": null,
+        "os_id": "centos-x86_64-7.0",
+        "os_detail": "3.10.0-1160.71.1.el7.x86_64 #1 SMP Tue Jun 28 15:37:28 UTC 2022 (CentOS Linux release 7.9.2009 (Core))",
+        "os_platform": "linux",
+        "version": "21.2.5-8017",
+        "status": "active",
+        "activation_type": "pairing_key",
+        "active_pce_fqdn": null,
+        "target_pce_fqdn": null,
+        "labels": [
+            {
+                "href": "/orgs/1/labels/14"
+            },
+            {
+                "href": "/orgs/1/labels/8"
+            },
+            {
+                "href": "/orgs/1/labels/13"
+            },
+            {
+                "href": "/orgs/1/labels/1"
+            }
+        ],
+        "interfaces": [
+            {
+                "href": "/orgs/1/workloads/e7366e18-97e1-4eeb-945c-a565139ba077/interfaces/eth0",
+                "name": "eth0",
+                "cidr_block": 24,
+                "link_state": null,
+                "network_detection_mode": "single_private_brn",
+                "friendly_name": null,
+                "network": {
+                    "href": "/orgs/1/networks/40995e57-5e83-4fc5-9492-5b0e6df32a68"
+                },
+                "loopback": false,
+                "address": "10.0.2.15",
+                "default_gateway_address": "10.0.2.2"
+            },
+            {
+                "href": "/orgs/1/workloads/e7366e18-97e1-4eeb-945c-a565139ba077/interfaces/eth1",
+                "name": "eth1",
+                "cidr_block": 64,
+                "link_state": null,
+                "network_detection_mode": "link_local",
+                "friendly_name": null,
+                "network": {
+                    "href": "/orgs/1/networks/57b3b654-8d49-431b-95fc-0954610727de"
+                },
+                "loopback": false,
+                "address": "fe80::a00:27ff:fe11:8fb6",
+                "default_gateway_address": null
+            }
+        ],
+        "workloads": [
+            {
+                "href": "/orgs/1/workloads/e7366e18-97e1-4eeb-945c-a565139ba077"
+            }
+        ],
+        "container_cluster": null,
+        "secure_connect": null,
+        "unpair_allowed": true,
+        "last_heartbeat_at": "2022-08-01T17:13:28.922Z",
+        "last_goodbye_at": null,
+        "created_at": "2022-07-20T00:07:51.539Z",
+        "created_by": {
+            "href": "/orgs/1/vens/e7366e18-97e1-4eeb-945c-a565139ba077"
+        },
+        "updated_at": "2022-08-01T17:03:25.741Z",
+        "updated_by": {
+            "href": "/orgs/1/vens/e7366e18-97e1-4eeb-945c-a565139ba077"
+        },
+        "conditions": [
+            {
+                "first_reported_timestamp": "2022-08-01T17:31:40.669Z",
+                "latest_event": {
+                    "notification_type": "agent.missed_heartbeats",
+                    "severity": "warning",
+                    "href": "/orgs/1/events/0d2cec5f-5025-4e62-b867-b6e607397105",
+                    "info": {
+                        "agent": {
+                            "name": null,
+                            "hostname": "apache01.ansible.ilabs.io",
+                            "href": "/orgs/1/agents/16"
+                        }
+                    },
+                    "timestamp": "2022-08-01T17:31:40.669Z"
+                }
+            },
+            {
+                "first_reported_timestamp": "2022-08-13T00:38:32.196Z",
+                "latest_event": {
+                    "notification_type": "agent.upgrade_time_out",
+                    "severity": "warning",
+                    "href": "/orgs/1/events/63bdd849-58cd-4d7d-a551-6074b625671b",
+                    "info": {
+                        "current_version": "21.2.5-8017",
+                        "desired_version": "21.5.30-8527",
+                        "href": "/orgs/1/vens/e7366e18-97e1-4eeb-945c-a565139ba077"
+                    },
+                    "timestamp": "2022-08-13T00:38:32.196Z"
+                }
+            }
+        ],
+        "caps": [
+            "write",
+            "generate_support_report",
+            "upgrade",
+            "unpair"
+        ]
+    }
+]

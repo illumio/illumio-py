@@ -1,12 +1,14 @@
 # -*- coding: utf-8 -*-
 
-"""
+"""The illumio library provides a simple interface for interacting with PCE APIs.
+
 Copyright:
-    (c) 2022 Illumio
+    © 2022 Illumio
 
 License:
     Apache2, see LICENSE for more details.
 """
+from .events import *
 from .exceptions import *
 from .secpolicy import *
 from .util import *
@@ -18,3 +20,12 @@ from .workloads import *
 from .rules import *
 from .explorer import *
 from .pce import *
+
+from types import ModuleType
+
+# avoid name conflicts with package modules when using
+# `from illumio import *` by excluding them here
+__all__ = [
+    export for export, o in globals().items()
+        if not (export.startswith('_') or isinstance(o, ModuleType))
+]

@@ -1,5 +1,6 @@
 import re
 from collections import namedtuple
+from dataclasses import fields
 
 import pytest
 
@@ -212,14 +213,19 @@ def test_pce_apis(api_name, endpoint, ObjectClass, is_sec_policy, pce,
     requests_mock.register_uri('PUT', pattern, json=put_callback)
     requests_mock.register_uri('DELETE', pattern, json=delete_callback)
 
-    obj = api.create(ObjectClass(name='test object'))
+    params = {}
+    if 'name' in [field.name for field in fields(ObjectClass)]:
+        params = {'name': 'test object'}
+
+    obj = api.create(ObjectClass(**params))
     assert obj.href
 
     policy_version = DRAFT if is_sec_policy else None
     assert api.get_by_reference(obj.href) == obj
 
-    objs = api.get(params={'name': 'test object'}, policy_version=policy_version)
-    assert objs[0] == obj
+    if params:
+        objs = api.get(params=params, policy_version=policy_version)
+        assert objs[0] == obj
 
     api.update(obj.href, {'description': 'updated description'})
     obj = api.get_by_reference(obj.href)

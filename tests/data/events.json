@@ -1,0 +1,277 @@
+[
+    {
+        "href": "/orgs/1/events/71d7ba77-7a84-4e56-ae46-7226b983b550",
+        "timestamp": "2022-08-17T18:12:24.268Z",
+        "pce_fqdn": "pce.company.com",
+        "created_by": {
+            "system": {}
+        },
+        "event_type": "system_task.expire_service_account_api_keys",
+        "status": "success",
+        "severity": "info",
+        "action": {
+            "uuid": "d2b31a14-4bd6-40d0-9a5b-a239b3ccd3e5",
+            "api_endpoint": null,
+            "api_method": null,
+            "http_status_code": null,
+            "src_ip": "FILTERED"
+        },
+        "resource_changes": [],
+        "notifications": []
+    },
+    {
+        "href": "/orgs/1/events/a066c6ec-4d4a-4c51-bf46-9a20add3bcac",
+        "timestamp": "2022-08-17T17:48:28.345Z",
+        "pce_fqdn": "pce.company.com",
+        "created_by": {
+            "user": {
+                "href": "/users/1",
+                "username": "first.last@company.com"
+            }
+        },
+        "event_type": "user.login",
+        "status": "success",
+        "severity": "info",
+        "action": {
+            "uuid": "e780169c-7b15-4f80-a88b-ca940b5d05b7",
+            "api_endpoint": "/api/v2/users/login",
+            "api_method": "GET",
+            "http_status_code": 200,
+            "src_ip": "10.10.10.10"
+        },
+        "resource_changes": [],
+        "notifications": [
+            {
+                "uuid": "71c5811a-0399-4340-a8dc-df0343a9c466",
+                "notification_type": "user.pce_session_created",
+                "info": {
+                    "user": {
+                        "href": "/users/1",
+                        "username": "first.last@company.com"
+                    }
+                }
+            }
+        ]
+    },
+    {
+        "href": "/orgs/1/events/ab222a32-0773-4f1b-9b06-7396cdfba9aa",
+        "timestamp": "2022-08-17T17:48:26.666Z",
+        "pce_fqdn": "pce.company.com",
+        "created_by": {
+            "user": {
+                "href": "/users/1",
+                "username": "first.last@company.com"
+            }
+        },
+        "event_type": "user.sign_in",
+        "status": "success",
+        "severity": "info",
+        "action": {
+            "uuid": "d376a18e-5a1c-4585-8965-8b8f92fcbfad",
+            "api_endpoint": "/login/users/sign_in",
+            "api_method": "POST",
+            "http_status_code": 302,
+            "src_ip": "10.10.10.10"
+        },
+        "resource_changes": [
+            {
+                "uuid": "66b7ff97-a0e5-40b3-a2b7-0e97f7cc6e9e",
+                "resource": {
+                    "user": {
+                        "href": "/users/1",
+                        "type": "local",
+                        "username": "first.last@company.com"
+                    }
+                },
+                "changes": {
+                    "last_sign_in_ip": {
+                        "before": "10.10.10.9",
+                        "after": "10.10.10.10"
+                    },
+                    "sign_in_attempts_count": {
+                        "before": 53,
+                        "after": 54
+                    }
+                },
+                "change_type": "update"
+            }
+        ],
+        "notifications": [
+            {
+                "uuid": "fc9d2c2d-df13-47a3-80a2-f77bdcb4fd34",
+                "notification_type": "user.login_session_created",
+                "info": {
+                    "user": {
+                        "href": "/users/1",
+                        "type": "local",
+                        "username": "first.last@company.com"
+                    }
+                }
+            }
+        ]
+    },
+    {
+        "href": "/orgs/1/events/fcd7d82c-c50e-45b7-ac34-8afa436b3688",
+        "timestamp": "2022-08-17T17:44:14.568Z",
+        "pce_fqdn": "pce.company.com",
+        "created_by": {
+            "user": {
+                "href": "/users/1",
+                "username": "first.last@company.com"
+            }
+        },
+        "event_type": "user.sign_out",
+        "status": "success",
+        "severity": "info",
+        "action": {
+            "uuid": "ab29cb9b-6af0-4a7e-b157-6fa1abc113ac",
+            "api_endpoint": "/login/logout",
+            "api_method": "GET",
+            "http_status_code": 302,
+            "src_ip": "10.10.10.10"
+        },
+        "resource_changes": [],
+        "notifications": []
+    },
+    {
+        "href": "/system_events/1ece8d96-a736-444f-b9fc-b1ed9356c035",
+        "timestamp": "2022-08-17T17:44:12.669Z",
+        "pce_fqdn": "pce.company.com",
+        "created_by": {
+            "system": {}
+        },
+        "event_type": "user.logout",
+        "status": "success",
+        "severity": "info",
+        "action": {
+            "uuid": "329ca821-586d-45f5-b3ac-17cdc1fe57ef",
+            "api_endpoint": "/api/v2/users/logout_from_jwt",
+            "api_method": "POST",
+            "http_status_code": 204,
+            "src_ip": "10.10.10.8"
+        },
+        "resource_changes": [],
+        "notifications": [
+            {
+                "uuid": "8579bd15-b4d5-469a-a894-855d2aa6ccb5",
+                "notification_type": "user.pce_session_terminated",
+                "info": {
+                    "reason": "user_logout",
+                    "user": {
+                        "href": "/users/1",
+                        "username": "first.last@company.com"
+                    }
+                }
+            }
+        ]
+    },
+    {
+        "href": "/orgs/1/events/37f8c845-90e0-4151-bd10-4c04279ad37a",
+        "timestamp": "2022-08-17T17:44:11.258Z",
+        "pce_fqdn": "pce.company.com",
+        "created_by": {
+            "system": {}
+        },
+        "event_type": "user.sign_out",
+        "status": "failure",
+        "severity": "info",
+        "action": {
+            "uuid": "d80fbe9d-a114-464b-8f76-19369b68d9a0",
+            "api_endpoint": "/login/logout",
+            "api_method": "GET",
+            "http_status_code": 200,
+            "src_ip": "10.10.10.10"
+        },
+        "resource_changes": [],
+        "notifications": [
+            {
+                "uuid": "f311955d-17e1-4e41-87a2-15cfd914b842",
+                "notification_type": "user.login_session_terminated",
+                "info": {
+                    "reason": "timeout",
+                    "user": {
+                        "href": "/users/1",
+                        "username": "first.last@company.com"
+                    }
+                }
+            }
+        ]
+    },
+    {
+        "href": "/orgs/1/events/2020ca46-a1be-4865-98b2-fb2ef838e384",
+        "timestamp": "2022-08-17T16:53:58.576Z",
+        "pce_fqdn": "pce.company.com",
+        "created_by": {
+            "user": {
+                "href": "/users/1",
+                "username": "first.last@company.com"
+            }
+        },
+        "event_type": "sec_rule.create",
+        "status": "success",
+        "severity": "info",
+        "action": {
+            "uuid": "2cba8336-da8a-4b2f-8337-aa2a46acd370",
+            "info": {
+                "api_key_id": "1f2ff7664e9c3a663"
+            },
+            "api_endpoint": "/api/v2/orgs/1/sec_policy/draft/rule_sets/219/sec_rules",
+            "api_method": "POST",
+            "http_status_code": 201,
+            "src_ip": "10.10.10.10"
+        },
+        "resource_changes": [
+            {
+                "uuid": "b56c1085-23f0-447e-b2b4-dd96d8a665a3",
+                "resource": {
+                    "sec_rule": {
+                        "href": "/orgs/1/sec_policy/draft/rule_sets/219/sec_rules/223"
+                    }
+                },
+                "changes": {
+                    "rule_list": {
+                        "before": null,
+                        "after": {
+                            "href": "/orgs/1/sec_policy/draft/rule_sets/219"
+                        }
+                    },
+                    "type": {
+                        "before": null,
+                        "after": "SecRule"
+                    },
+                    "resolve_labels": {
+                        "before": null,
+                        "after": {
+                            "providers": [
+                                "virtual_services"
+                            ],
+                            "consumers": [
+                                "workloads"
+                            ]
+                        }
+                    },
+                    "providers": {
+                        "created": [
+                            {
+                                "provider": true,
+                                "label": {
+                                    "href": "/orgs/1/labels/562"
+                                }
+                            }
+                        ]
+                    },
+                    "consumers": {
+                        "created": [
+                            {
+                                "provider": false,
+                                "actors": "ams"
+                            }
+                        ]
+                    }
+                },
+                "change_type": "create"
+            }
+        ],
+        "notifications": []
+    }
+]

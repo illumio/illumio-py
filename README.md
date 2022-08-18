@@ -11,8 +11,8 @@ The main entrypoint for the client is the `PolicyComputeEngine` class:
 
 ```python
 >>> from illumio import PolicyComputeEngine
->>> pce = PolicyComputeEngine('my.pce.com', port='8443', org_id='12')
->>> pce.set_credentials('<API_KEY>', '<API_SECRET>')
+>>> pce = PolicyComputeEngine('pce.company.com', port='8443', org_id='12')
+>>> pce.set_credentials('api_key', 'api_secret')
 >>> workloads = pce.workloads.get(
 ...     params={
 ...         'managed': True,

@@ -3,7 +3,7 @@
 """This module is a stub for enforcement boundary objects.
 
 Copyright:
-    (c) 2022 Illumio
+    © 2022 Illumio
 
 License:
     Apache2, see LICENSE for more details.
@@ -30,12 +30,14 @@ class EnforcementBoundary(BaseRule):
     Rules allowing traffic that would otherwise be denied by an enforcement
     boundary will override the boundary's deny rule.
 
+    See https://docs.illumio.com/core/21.5/Content/Guides/security-policy/policy-enforcement/enforcement-boundaries.htm
+
     Usage:
-        >>> from illumio import PolicyComputeEngine, EnforcementBoundary, AMS
-        >>> pce = PolicyComputeEngine('my.pce.com')
-        >>> pce.set_credentials('api_key_username', 'api_key_secret')
+        >>> import illumio
+        >>> pce = illumio.PolicyComputeEngine('pce.company.com', port=443, org_id=1)
+        >>> pce.set_credentials('api_key', 'api_secret')
         >>> any_ip_list = pce.get_default_ip_list()
-        >>> enforcement_boundary = EnforcementBoundary.build(
+        >>> enforcement_boundary = illumio.EnforcementBoundary.build(
         ...     name='EB-BLOCK-RDP',
         ...     providers=[AMS],  # the special 'ams' literal denotes all workloads
         ...     consumers=[any_ip_list.href],
@@ -71,3 +73,8 @@ class EnforcementBoundary(BaseRule):
         )
     """
     name: str = None
+
+
+__all__ = [
+    'EnforcementBoundary',
+]

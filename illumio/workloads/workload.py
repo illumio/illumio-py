@@ -3,7 +3,7 @@
 """This module provides classes related to workload objects.
 
 Copyright:
-    (c) 2022 Illumio
+    © 2022 Illumio
 
 License:
     Apache2, see LICENSE for more details.
@@ -13,37 +13,18 @@ from typing import List, Union
 
 from illumio import IllumioException
 from illumio.infrastructure import ContainerCluster
-from illumio.policyobjects import Label, BaseService, Service, ServicePort
+from illumio.policyobjects import BaseService, Service, ServicePort
 from illumio.vulnerabilities import Vulnerability
 from illumio.util import (
     JsonObject,
     Reference,
     MutableObject,
-    LinkState,
     EnforcementMode,
     VisibilityLevel,
     pce_api
 )
 
-from .ven import VEN, VENAgent
-
-
-@dataclass
-class Interface(JsonObject):
-    name: str = None
-    link_state: str = None
-    address: str = None
-    cidr_block: int = None
-    default_gateway_address: str = None
-    network: Reference = None
-    network_detection_mode: str = None
-    friendly_name: str = None
-    loopback: bool = None
-
-    def _validate(self):
-        if self.link_state and not self.link_state in LinkState:
-            raise IllumioException("Invalid link_state: {}".format(self.link_state))
-        super()._validate()
+from .ven import VEN, VENAgent, Interface
 
 
 @dataclass
@@ -107,26 +88,26 @@ class Workload(MutableObject):
     See https://docs.illumio.com/core/21.5/Content/Guides/security-policy/workloads/_ch-workloads.htm
 
     Usage:
-        >>> from illumio import PolicyComputeEngine, Workload, Interface, EnforcementMode
-        >>> pce = PolicyComputeEngine('my.pce.com')
-        >>> pce.set_credentials('api_key_username', 'api_key_secret')
-        >>> role_label = pce.labels.create({'key': 'role', 'value': 'Web'})
-        >>> app_label = pce.labels.create({'key': 'app', 'value': 'App'})
-        >>> env_label = pce.labels.create({'key': 'env', 'value': 'Development'})
-        >>> loc_label = pce.labels.create({'key': 'loc', 'value': 'NYC-Datacenter'})
-        >>> workload = Workload(
+        >>> import illumio
+        >>> pce = illumio.PolicyComputeEngine('pce.company.com', port=443, org_id=1)
+        >>> pce.set_credentials('api_key', 'api_secret')
+        >>> role_label = pce.labels.create({'key': 'role', 'value': 'R-Web'})
+        >>> app_label = pce.labels.create({'key': 'app', 'value': 'A-App'})
+        >>> env_label = pce.labels.create({'key': 'env', 'value': 'E-Dev'})
+        >>> loc_label = pce.labels.create({'key': 'loc', 'value': 'L-NYC'})
+        >>> workload = illumio.Workload(
         ...     name='Web 01',
         ...     hostname='web01.lab.company.com',
         ...     public_ip='10.8.17.229',
         ...     labels=[role_label, app_label, env_label, loc_label],
         ...     interfaces=[
-        ...         Interface(
+        ...         illumio.Interface(
         ...             name='lo0',
         ...             address='127.0.0.1',
         ...             link_state='up'
         ...         )
         ...     ],
-        ...     enforcement_mode=EnforcementMode.SELECTIVE,
+        ...     enforcement_mode=illumio.EnforcementMode.SELECTIVE,
         ...     online=True
         ... )
         >>> workload = pce.workloads.create(workload)
@@ -137,7 +118,7 @@ class Workload(MutableObject):
             hostname='web01.lab.company.com',
             public_ip='10.8.17.229',
             labels=[
-                Label(key='role', value='Web', ...),
+                Reference(href='/orgs/1/labels/11'),
                 ...
             ],
             interfaces=[
@@ -197,3 +178,15 @@ class Workload(MutableObject):
             enforced_services.append(service_type.from_json(service))
         self.selectively_enforced_services = enforced_services if enforced_services else None
         super()._decode_complex_types()
+
+
+__all__ = [
+    'Interface',
+    'WorkloadServicePort',
+    'WorkloadServices',
+    'PortWideExposure',
+    'VulnerabilitiesSummary',
+    'DetectedVulnerability',
+    'IKEAuthenticationCertificate',
+    'Workload',
+]

@@ -5,6 +5,7 @@ from typing import List
 
 import pytest
 
+from illumio import IllumioException
 from illumio.policyobjects import IPList, IPRange
 from illumio.util import ANY_IP_LIST_NAME, DRAFT, ACTIVE
 
@@ -80,3 +81,25 @@ def test_update_ip_list(pce):
     updated_ip_list = pce.ip_lists.get_by_reference(ip_list.href)
     assert len(updated_ip_list.fqdns) > 0
     assert updated_ip_list.fqdns[0].fqdn == 'test.example.com'
+
+
+def test_valid_ip_ranges():
+    IPRange(from_ip='10.0.0.0', to_ip='10.0.0.1')
+    IPRange(from_ip='10.0.0.0/8')
+    IPRange(from_ip='10.0.0.0/32')
+    IPRange(from_ip='10.0.0.0/32', to_ip='10.0.0.1')
+
+
+def test_validate_ip_range_to_ip_passed_with_from_ip_cidr():
+    with pytest.raises(IllumioException):
+        IPRange(from_ip='10.0.0.0/8', to_ip='11.0.0.0')
+
+
+def test_validate_ip_range_lower_to_ip():
+    with pytest.raises(IllumioException):
+        IPRange(from_ip='10.0.0.1', to_ip='10.0.0.0')
+
+
+def test_validate_ip_range_to_ip_cidr():
+    with pytest.raises(IllumioException):
+        IPRange(from_ip='10.0.0.0', to_ip='11.0.0.0/8')

@@ -3,9 +3,9 @@
 """This module provides the core PolicyComputeEngine class for communicating with the PCE.
 
 Usage:
-    >>> from illumio import PolicyComputeEngine
-    >>> pce = PolicyComputeEngine('my.pce.com', port='8443', org_id='12')
-    >>> pce.set_credentials('<API_KEY>', '<API_SECRET>')
+    >>> import illumio
+    >>> pce = illumio.PolicyComputeEngine('pce.company.com', port=8443, org_id=12)
+    >>> pce.set_credentials('api_key', 'api_secret')
     >>> workloads = pce.workloads.get(
     ...     params={
     ...         'managed': True,
@@ -19,7 +19,7 @@ Usage:
     ]
 
 Copyright:
-    (c) 2022 Illumio
+    © 2022 Illumio
 
 License:
     Apache2, see LICENSE for more details.
@@ -34,7 +34,7 @@ from urllib3.util.retry import Retry
 
 from .secpolicy import PolicyChangeset, PolicyVersion
 from .exceptions import IllumioApiException
-from .policyobjects import IPList
+from .policyobjects import IPList, Service
 from .explorer import TrafficQuery, TrafficFlow
 from .util import (
     deprecated,
@@ -49,6 +49,7 @@ from .util import (
     DRAFT,
     PORT_MAX,
     ANY_IP_LIST_NAME,
+    ALL_SERVICES_NAME,
     BULK_CHANGE_LIMIT,
     PCE_APIS
 )
@@ -59,38 +60,36 @@ class PolicyComputeEngine:
 
     Contains request logic for API calls and handles the HTTP(S) connection to the PCE.
 
+    Usage:
+        >>> import illumio
+        >>> pce = illumio.PolicyComputeEngine('pce.company.com', port=8443, org_id=12)
+        >>> pce.set_credentials('api_key', 'api_secret')
+        >>> workloads = pce.workloads.get(
+        ...     params={
+        ...         'managed': True,
+        ...         'enforcement_mode': 'visibility_only'
+        ...     }
+        ... )
+        >>> workloads
+        [
+            Workload(href='/orgs/12/workloads/c754a713-2bde-4427-af1f-bff145be509b', ...),
+            ...
+        ]
+
+    Args:
+        url (str): PCE URL. May include http:// or https:// as the scheme.
+        port (str, optional): PCE http(s) port. Defaults to '443'.
+        version (str, optional): The PCE API version to use. Defaults to 'v2'.
+        org_id (str, optional): The PCE organization ID. Defaults to '1'.
+
     Attributes:
         base_url: DEPRECATED in v1.0.3. The base URL for API calls to the PCE.
             Has the form ``http[s]://<DOMAIN_NAME>:<PORT>/api/<API_VERSION>``
         include_org: flag denoting whether to prepend the orgs subpath
             to request endpoints by default. Defaults to True.
         org_id: the PCE organization ID.
-        container_clusters: Container Clusters API.
-        container_workload_profiles: Container Cluster Workload Profiles API.
-        enforcement_boundaries: Enforcement Boundaries API.
-        ip_lists: IP Lists API.
-        label_groups: Label Groups API.
-        labels: Labels API.
-        pairing_profiles: Pairing Profiles API.
-        rule_sets: Rule Sets API.
-        rules: Security Rules API.
-        security_principals: Security Principals API.
-        service_bindings: Service Bindings API.
-        services: Services API.
-        users: Users API.
-        vens: VENs API.
-        virtual_services: Virtual Services API.
-        workloads: Workloads API.
     """
     def __init__(self, url: str, port: str = '443', version: str = 'v2', org_id: str = '1') -> None:
-        """Initializes the PCE REST client.
-
-        Args:
-            url (str): PCE URL. May include http:// or https:// as the scheme.
-            port (str, optional): PCE http(s) port. Defaults to '443'.
-            version (str, optional): The PCE API version to use. Defaults to 'v2'.
-            org_id (str, optional): The PCE organization ID. Defaults to '1'.
-        """
         self._apis = {}
         self._encoder = IllumioEncoder()
         self._session = Session()
@@ -262,7 +261,7 @@ class PolicyComputeEngine:
     def get_collection(self, endpoint: str, **kwargs) -> Response:
         """Uses the PCE's asynchronous job logic to retrieve a collection of objects.
 
-        NOTE: for large collections (surpassing 10,000 objects), this function will be extremely
+        **NOTE:** for large collections (surpassing 10,000 objects), this function will be extremely
         slow - it is recommended that callers use query filters or the max_results parameter to limit
         the number of results in the collection.
 
@@ -536,7 +535,6 @@ class PolicyComputeEngine:
             Successful PUT requests return a 204 No Content response.
 
             Usage:
-                >>> from illumio.workloads import PairingProfile
                 >>> pairing_profiles = pce.pairing_profile.get(
                 ...     params={'name': 'PP-DATABASE', 'max_results': 1}
                 ... )
@@ -583,7 +581,7 @@ class PolicyComputeEngine:
         def bulk_create(self, objects_to_create: List[IllumioObject], **kwargs) -> List[dict]:
             """Creates a set of objects in the PCE.
 
-            NOTE: Bulk creation can currently only be applied for Security Principals,
+            **NOTE:** Bulk creation can currently only be applied for Security Principals,
                 Virtual Services and Workloads.
 
             Args:
@@ -594,24 +592,24 @@ class PolicyComputeEngine:
                     as well as any errors returned from the PCE.
                     Has the following form:
 
-                    [
-                        {
-                            'href': {object_href},
-                            'errors': [
-                                {
-                                    'token': {error_type},
-                                    'message': {error_message}
-                                }
-                            ]
-                        }
-                    ]
+                    >>> [
+                    ...     {
+                    ...         'href': {object_href},
+                    ...         'errors': [
+                    ...              {
+                    ...                 'token': {error_type},
+                    ...                 'message': {error_message}
+                    ...             }
+                    ...         ]
+                    ...     }
+                    ... ]
             """
             return self._bulk_change(objects_to_create, method='bulk_create', success_status='created', **kwargs)
 
         def bulk_update(self, objects_to_update: List[IllumioObject], **kwargs) -> List[dict]:
             """Updates a set of objects in the PCE.
 
-            NOTE: Bulk updates can currently only be applied for Virtual Services and Workloads.
+            **NOTE:** Bulk updates can currently only be applied for Virtual Services and Workloads.
 
             Args:
                 objects_to_update (List[IllumioObject]): list of objects to update.
@@ -621,24 +619,24 @@ class PolicyComputeEngine:
                     as well as any errors returned from the PCE.
                     Has the following form:
 
-                    [
-                        {
-                            'href': {object_href},
-                            'errors': [
-                                {
-                                    'token': {error_type},
-                                    'message': {error_message}
-                                }
-                            ]
-                        }
-                    ]
+                    >>> [
+                    ...     {
+                    ...         'href': {object_href},
+                    ...         'errors': [
+                    ...             {
+                    ...                 'token': {error_type},
+                    ...                 'message': {error_message}
+                    ...             }
+                    ...         ]
+                    ...     }
+                    ... ]
             """
             return self._bulk_change(objects_to_update, method='bulk_update', success_status='updated', **kwargs)
 
         def bulk_delete(self, refs: List[Union[str, Reference, dict]], **kwargs) -> List[dict]:
             """Deletes a set of objects in the PCE.
 
-            NOTE: Bulk updates can currently only be applied for Workloads.
+            **NOTE:** Bulk updates can currently only be applied for Workloads.
 
             Args:
                 hrefs (List[Union[str, Reference, dict]]): list of references to objects to delete.
@@ -647,17 +645,17 @@ class PolicyComputeEngine:
                 List[dict]: a list containing any errors that occurred during
                     the bulk operation. Has the following form:
 
-                    [
-                        {
-                            'href': {object_href},
-                            'errors': [
-                                {
-                                    'token': {error_type},
-                                    'message': {error_message}
-                                }
-                            ]
-                        }
-                    ]
+                    >>> [
+                    ...     {
+                    ...         'href': {object_href},
+                    ...         'errors': [
+                    ...             {
+                    ...                 'token': {error_type},
+                    ...                 'message': {error_message}
+                    ...             }
+                    ...         ]
+                    ...     }
+                    ... ]
             """
             objects_to_delete = [Reference(href=href_from(reference)) for reference in refs]
             return self._bulk_change(objects_to_delete, method='bulk_delete', success_status=None, **kwargs)
@@ -688,6 +686,19 @@ class PolicyComputeEngine:
         response = self.get('/sec_policy/active/ip_lists', **kwargs)
         return IPList.from_json(response.json()[0])
 
+    def get_default_service(self, **kwargs) -> Service:
+        """Retrieves the "All Services" default global Service.
+
+        Returns:
+            Service: decoded object representing the default global Service.
+        """
+        params = kwargs.get('params', {})
+        # retrieve by name as each org will use a different ID
+        kwargs['params'] = {**params, **{'name': ALL_SERVICES_NAME}}
+        kwargs['include_org'] = True
+        response = self.get('/sec_policy/active/services', **kwargs)
+        return Service.from_json(response.json()[0])
+
     def generate_pairing_key(self, pairing_profile_href: str, **kwargs) -> str:
         """Generates a pairing key using a pairing profile.
 
@@ -706,7 +717,7 @@ class PolicyComputeEngine:
 
         Retrieves Explorer traffic flows using the provided query.
 
-        NOTE: this function is deprecated in the Illumio REST API, and is
+        **NOTE:** this function is deprecated in the Illumio REST API, and is
         only provided for compatibility. The Illumio Explorer REST API
         documentation recommends using the async traffic flow query instead,
         provided here as `PolicyComputeEngine.get_traffic_flows_async`.
@@ -733,7 +744,6 @@ class PolicyComputeEngine:
         for details on async traffic query parameters.
 
         Usage:
-            >>> from illumio.explorer import TrafficQuery
             >>> traffic_query = TrafficQuery.build(
             ...     start_date="2022-02-01T00:00:00Z",
             ...     end_date="2022-03-01T00:00:00Z",
@@ -813,6 +823,7 @@ class PolicyComputeEngine:
 
         Args:
             query_name (str): name for the async query job.
+
             traffic_query (TrafficQuery): `TrafficQuery` object representing
                 the query parameters.
 
@@ -847,7 +858,6 @@ class PolicyComputeEngine:
         """Provisions policy changes for draft objects with the given HREFs.
 
         Usage:
-            >>> from illumio.rules import RuleSet
             >>> rule_set = pce.rule_sets.create(
             ...     RuleSet(name='RS-RINGFENCE')
             ... )

@@ -7,6 +7,7 @@ from illumio.policyobjects import (
     ServiceAddress
 )
 from illumio.util import (
+    ApplyTo,
     convert_draft_href_to_active,
     convert_active_href_to_draft,
     convert_protocol,
@@ -37,7 +38,7 @@ def active_virtual_service(pce, session_identifier, env_label, loc_label):
         VirtualService(
             name='{}-VS-{}'.format(session_identifier, identifier),
             description='Created by illumio python library integration tests',
-            apply_to='host_only',
+            apply_to=ApplyTo.HOST_ONLY,
             service_addresses=[
                 ServiceAddress(fqdn='localhost.localdomain')
             ],

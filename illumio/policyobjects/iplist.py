@@ -3,27 +3,62 @@
 """This module provides classes related to IP list policy objects.
 
 Copyright:
-    (c) 2022 Illumio
+    © 2022 Illumio
 
 License:
     Apache2, see LICENSE for more details.
 """
 from dataclasses import dataclass
+from ipaddress import ip_address, ip_network
 from typing import List
 
+from illumio import IllumioException
 from illumio.util import JsonObject, MutableObject, pce_api
 
 
 @dataclass
 class IPRange(JsonObject):
-    description: str = None
+    """Represents a range of one or more IP addresses in an IP list.
+
+    Args:
+        from_ip (str, optional): IP address at the start of the range. Can be a
+            single IP or CIDR range, e.g. "10.0.0.0/8".
+        to_ip (str, optional): IP address at the end of the range. If provided,
+            ``from_ip`` must be a single IP address
+        exclusion (bool, optional): if True, this range represents an exclusion
+            rather than an inclusion in the IP list object.
+        description (str, optional): optional description.
+
+    Raises:
+        IllumioException: if an invalid IP range is given.
+    """
     from_ip: str = None
     to_ip: str = None
     exclusion: bool = None
+    description: str = None
+
+    def _validate(self):
+        try:
+            from_net = ip_network(self.from_ip)
+            if self.to_ip:
+                to_ip = ip_address(self.to_ip)
+                if from_net.prefixlen < 32:
+                    raise "Can't specify CIDR block and to_ip in same range"
+                if to_ip <= from_net.network_address:
+                    raise "to_ip address must be greater than from_ip address"
+        except Exception as e:
+            raise IllumioException("Invalid IP range: {}".format(e))
+        return super()._validate()
 
 
 @dataclass
 class FQDN(JsonObject):
+    """Represents a fully-qualified domain name associated with an IP list.
+
+    Args:
+        fqdn (str, optional): fully-qualified domain name.
+        description (str, optional): optional description.
+    """
     fqdn: str = None
     description: str = None
 
@@ -62,3 +97,10 @@ class IPList(MutableObject):
     """
     ip_ranges: List[IPRange] = None
     fqdns: List[FQDN] = None
+
+
+__all__ = [
+    'IPRange',
+    'FQDN',
+    'IPList',
+]

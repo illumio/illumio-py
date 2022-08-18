@@ -3,7 +3,7 @@
 """This module is a stub for security principal objects.
 
 Copyright:
-    (c) 2022 Illumio
+    © 2022 Illumio
 
 License:
     Apache2, see LICENSE for more details.
@@ -17,3 +17,8 @@ from illumio.util import MutableObject, pce_api
 @pce_api('security_principals')
 class SecurityPrincipal(MutableObject):
     sid: str = None
+
+
+__all__ = [
+    'SecurityPrincipal',
+]

@@ -3,7 +3,7 @@
 """This module provides classes related to policy rule sets.
 
 Copyright:
-    (c) 2022 Illumio
+    © 2022 Illumio
 
 License:
     Apache2, see LICENSE for more details.
@@ -21,19 +21,25 @@ from .iptablesrule import IPTablesRule
 @dataclass
 @pce_api('rule_sets', is_sec_policy=True)
 class RuleSet(MutableObject):
-    """Provides scope boundaries for security policy rules.
+    """Represents a rule set object in the PCE.
+
+    Rule sets provide scope boundaries for security policy rules. Scopes are
+    defined using application, environment, and location labels. Rules within
+    the set will default to applying to workloads with these labels.
+
+    See https://docs.illumio.com/core/21.5/Content/Guides/security-policy/create-security-policy/rulesets.htm
 
     Usage:
-        >>> from illumio import PolicyComputeEngine, RuleSet, LabelSet
-        >>> pce = PolicyComputeEngine('my.pce.com')
-        >>> pce.set_credentials('api_key_username', 'api_key_secret')
-        >>> app_label = pce.labels.create({'key': 'app', 'value': 'App'})
-        >>> env_label = pce.labels.create({'key': 'env', 'value': 'Production'})
-        >>> loc_label = pce.labels.create({'key': 'loc', 'value': 'AWS'})
-        >>> ruleset = RuleSet(
+        >>> import illumio
+        >>> pce = illumio.PolicyComputeEngine('pce.company.com', port=443, org_id=1)
+        >>> pce.set_credentials('api_key', 'api_secret')
+        >>> app_label = pce.labels.create({'key': 'app', 'value': 'A-App'})
+        >>> env_label = pce.labels.create({'key': 'env', 'value': 'E-Prod'})
+        >>> loc_label = pce.labels.create({'key': 'loc', 'value': 'L-AWS'})
+        >>> ruleset = illumio.RuleSet(
         ...     name='RS-RINGFENCE',
         ...     scopes=[
-        ...         LabelSet(
+        ...         illumio.LabelSet(
         ...             labels=[app_label, env_label, loc_label]
         ...         )
         ...     ]
@@ -49,3 +55,8 @@ class RuleSet(MutableObject):
     scopes: List[LabelSet] = None
     rules: List[Rule] = None
     ip_tables_rules: List[IPTablesRule] = None
+
+
+__all__ = [
+    'RuleSet',
+]

@@ -3,7 +3,7 @@
 """This module is a stub for network objects.
 
 Copyright:
-    (c) 2022 Illumio
+    © 2022 Illumio
 
 License:
     Apache2, see LICENSE for more details.
@@ -16,3 +16,8 @@ from illumio.util import MutableObject
 @dataclass
 class Network(MutableObject):
     pass
+
+
+__all__ = [
+    'Network',
+]

@@ -3,7 +3,7 @@
 """This module provides helper functions and decorators for common use-cases.
 
 Copyright:
-    (c) 2022 Illumio
+    © 2022 Illumio
 
 License:
     Apache2, see LICENSE for more details.
@@ -32,10 +32,30 @@ def ignore_empty_keys(o: dict):
 
 
 def convert_draft_href_to_active(href: str) -> str:
+    """Given an HREF string, converts policy version to active.
+
+    If an active HREF is provided, this function has no effect.
+
+    Args:
+        href (str): PCE object HREF.
+
+    Returns:
+        str: active policy version HREF.
+    """
     return href.replace('/{}/'.format(DRAFT), '/{}/'.format(ACTIVE))
 
 
 def convert_active_href_to_draft(href: str) -> str:
+    """Given an HREF string, converts policy version to draft.
+
+    If a draft HREF is provided, this function has no effect.
+
+    Args:
+        href (str): PCE object HREF.
+
+    Returns:
+        str: draft policy version HREF.
+    """
     return href.replace('/{}/'.format(ACTIVE), '/{}/'.format(DRAFT))
 
 
@@ -119,15 +139,22 @@ def pce_api(name: str, endpoint: str = None, is_sec_policy=False, is_global=Fals
 
 
 def parse_url(url: str) -> tuple:
-    """Parses given URL into its scheme and hostname, stripping port and path."""
+    """Parses given URL into its scheme and hostname, stripping port and path.
+
+    Args:
+        url (str): URL to parse.
+
+    Returns:
+        tuple: parsed (scheme, hostname)
+    """
     pattern = re.compile('^\w+://')
     if not re.match(pattern, url):
         url = 'https://{}'.format(url)
     parsed = urlparse(url)
-    protocol = parsed.scheme
-    if protocol not in ('http', 'https'):
-        protocol = 'https'     # only support http(s)
-    return protocol, parsed.hostname
+    scheme = parsed.scheme
+    if scheme not in ('http', 'https'):
+        scheme = 'https'     # only support http(s)
+    return scheme, parsed.hostname
 
 
 def convert_protocol(protocol: str) -> int:
@@ -208,3 +235,17 @@ else:
         if hasattr(type_, '__extra__'):
             return type_.__extra__ is list
         return False
+
+
+__all__ = [
+    'ignore_empty_keys',
+    'convert_draft_href_to_active',
+    'convert_active_href_to_draft',
+    'deprecated',
+    'pce_api',
+    'parse_url',
+    'convert_protocol',
+    'validate_int',
+    'isunion',
+    'islist',
+]
