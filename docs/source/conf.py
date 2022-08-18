@@ -12,7 +12,7 @@
 
 import sys
 
-if sys.version_info < (3, 7):
+if sys.version_info < (3, 8):
     from importlib_metadata import version
 else:
     from importlib.metadata import version
