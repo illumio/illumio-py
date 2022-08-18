@@ -21,7 +21,11 @@ from .iptablesrule import IPTablesRule
 @dataclass
 @pce_api('rule_sets', is_sec_policy=True)
 class RuleSet(MutableObject):
-    """Provides scope boundaries for security policy rules.
+    """Represents a rule set object in the PCE.
+
+    Rule sets provide scope boundaries for security policy rules. Scopes are
+    defined using application, environment, and location labels. Rules within
+    the set will default to applying to workloads with these labels.
 
     See https://docs.illumio.com/core/21.5/Content/Guides/security-policy/create-security-policy/rulesets.htm
 

@@ -52,6 +52,8 @@ class VirtualService(MutableObject):
     one or more workloads. This can be useful when a workload is running multiple
     services, or multiple instances of the same service for different apps.
 
+    See https://docs.illumio.com/core/21.5/Content/Guides/security-policy/security-policy-objects/virtual-services.htm
+
     Usage:
         >>> import illumio
         >>> pce = illumio.PolicyComputeEngine('pce.company.com', port=443, org_id=1)
@@ -172,6 +174,24 @@ class VirtualService(MutableObject):
 
 @dataclass
 class PortOverride(BaseService):
+    """Represents a service binding port override.
+
+    The ``proto`` field can be provided as a string, e.g. 'tcp', and it will be
+    converted to its IANA integer equivalent.
+
+    Args:
+        port (int, optional): virtual service port to override. If the port is
+            part of a range in the service, this must be the starting port in
+            the range.
+        proto (Union[str, int], optional): IANA protocol name or number for the
+            service protocol.
+        new_port (int, optional): override port or starting port of an override
+            range.
+        new_to_port (int, optional): ending port in an override range.
+
+    Raises:
+        IllumioException: if an invalid port value or port range is given.
+    """
     new_port: int = None
     new_to_port: int = None
 

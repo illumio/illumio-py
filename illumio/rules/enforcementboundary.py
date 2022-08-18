@@ -30,6 +30,8 @@ class EnforcementBoundary(BaseRule):
     Rules allowing traffic that would otherwise be denied by an enforcement
     boundary will override the boundary's deny rule.
 
+    See https://docs.illumio.com/core/21.5/Content/Guides/security-policy/policy-enforcement/enforcement-boundaries.htm
+
     Usage:
         >>> import illumio
         >>> pce = illumio.PolicyComputeEngine('pce.company.com', port=443, org_id=1)

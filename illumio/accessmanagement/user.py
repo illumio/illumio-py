@@ -16,6 +16,7 @@ from illumio.util import IllumioObject, pce_api
 @dataclass
 @pce_api('users', is_global=True)
 class User(IllumioObject):
+    """Represents a user object in the PCE."""
     username: str = None
     last_login_on: str = None
     last_login_ip_address: str = None

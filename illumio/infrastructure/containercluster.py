@@ -38,6 +38,17 @@ class ContainerClusterError(JsonObject):
 
 @dataclass
 class LabelRestriction(JsonObject):
+    """Represents a label or set of labels to restrict the workload profile to.
+
+    Only one of ``assignment`` or ``restriction`` can be specified.
+
+    Args:
+        key (str, optional): label type, for example 'role', 'app'.
+        assignment (Reference, optional): reference to label object to assign
+            to container workloads using the profile.
+        restriction (List[Reference], optional): restricts container workload
+            label assignment for the given key to only the referenced labels.
+    """
     key: str = None
     assignment: Reference = None
     restriction: List[Reference] = None
@@ -56,28 +67,28 @@ class ContainerWorkloadProfile(MutableObject):
     is left in for compatibility with older PCE versions. In either case, label
     assignments can only be specified for managed workload profiles.
 
-    NOTE: though the `enforcement_mode` value for a workload profile can be set
-    to `selective`, it is currently not supported and may result in unexpected
-    behaviour. The only supported enforcement modes for workload profiles are
-    `idle`, `visibility_only`, and `full`.
+    **NOTE:** though the `enforcement_mode` value for a workload profile can be
+    set to `selective`, it is currently not supported and may result in
+    unexpected behaviour. The only supported enforcement modes for workload
+    profiles are ``idle``, ``visibility_only``, and ``full``.
 
     Usage:
-        >>> from illumio import PolicyComputeEngine, ContainerCluster, ContainerWorkloadProfile, LabelRestriction
-        >>> pce = PolicyComputeEngine('my.pce.com')
-        >>> pce.set_credentials('api_key_username', 'api_key_secret')
-        >>> container_cluster = ContainerCluster(
+        >>> import illumio
+        >>> pce = illumio.PolicyComputeEngine('pce.company.com', port=443, org_id=1)
+        >>> pce.set_credentials('api_key', 'api_secret')
+        >>> container_cluster = illumio.ContainerCluster(
         ...     name='CC-EKS-PROD',
         ...     description='Production Kubernetes cluster on AWS'
         ... )
         >>> container_cluster = pce.container_clusters.create(container_cluster)
         >>> env_label = pce.labels.create({'key': 'env', 'value': 'Production'})
         >>> loc_label = pce.labels.create({'key': 'loc', 'value': 'AWS'})
-        >>> container_workload_profile = ContainerWorkloadProfile(
+        >>> container_workload_profile = illumio.ContainerWorkloadProfile(
         ...     name='illumio-system',
         ...     managed=True,
         ...     labels=[
-        ...         LabelRestriction(key='env', assignment=env_label),
-        ...         LabelRestriction(key='loc', assignment=loc_label)
+        ...         illumio.LabelRestriction(key='env', assignment=env_label),
+        ...         illumio.LabelRestriction(key='loc', assignment=loc_label)
         ...     ],
         ...     enforcement_mode='visibility_only'
         ... )
@@ -126,20 +137,20 @@ class ContainerCluster(IllumioObject):
     Container clusters are abstract representations of container orchestration
     systems linked to the PCE.
 
-    See https://docs.illumio.com/core/21.5/Content/LandingPages/Guides/kubernetes-and-openshift.htm
-
-    NOTE: when a container cluster is created through the API, the
+    **NOTE:** when a container cluster is created through the API, the
     `container_cluster_token` used by Kubelink and C-VEN containers
     to pair with the PCE is returned in the response. This token is
     only available after the initial POST request and cannot be
     retrieved via the API: make sure to store it in a persistent
     form after creating the cluster.
 
+    See https://docs.illumio.com/core/21.5/Content/LandingPages/Guides/kubernetes-and-openshift.htm
+
     Usage:
-        >>> from illumio import PolicyComputeEngine, ContainerCluster
-        >>> pce = PolicyComputeEngine('my.pce.com')
-        >>> pce.set_credentials('api_key_username', 'api_key_secret')
-        >>> container_cluster = ContainerCluster(
+        >>> import illumio
+        >>> pce = illumio.PolicyComputeEngine('pce.company.com', port=443, org_id=1)
+        >>> pce.set_credentials('api_key', 'api_secret')
+        >>> container_cluster = illumio.ContainerCluster(
         ...     name='CC-EKS-PROD',
         ...     description='Production Kubernetes cluster on AWS'
         ... )
