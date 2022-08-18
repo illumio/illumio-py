@@ -91,7 +91,7 @@ def _parse_traffic_filters(refs: List[Any], include=False) -> List[object]:
                 socket.inet_aton(ref)  # check if the reference is an IP address
                 o = {'ip_address': ref}
             except socket.error:
-                raise IllumioException('Invalid traffic filter type: {}').format(ref)
+                raise IllumioException('Invalid traffic filter type: {}'.format(ref))
         traffic_objects.append([o] if include else o)
     return traffic_objects
 
@@ -121,6 +121,14 @@ def _parse_service_ports(service_ports: List[Union[ServicePort, dict]]):
 
 @dataclass
 class TrafficQuery(JsonObject):
+    """Represents a query against the PCE traffic flow database.
+
+    See https://docs.illumio.com/core/22.1/Content/Guides/rest-api/visualization/explorer.htm#TrafficAnalysisQueries
+
+    Raises:
+        IllumioException: if any of the dates provided, the date range, or the
+            policy_decision field value are invalid.
+    """
     start_date: Union[str, int, float]
     end_date: Union[str, int, float]
     sources: TrafficQueryFilterBlock = field(default_factory=TrafficQueryFilterBlock)
@@ -133,13 +141,61 @@ class TrafficQuery(JsonObject):
     query_name: str = None  # required for async traffic queries
 
     @staticmethod
-    def build(start_date: Optional[Union[str, int, float]] = None,
-            end_date: Optional[Union[str, int, float]] = None,
-            include_sources=[], exclude_sources=[],
-            include_destinations=[], exclude_destinations=[],
+    def build(start_date: Optional[Union[str, int, float]],
+            end_date: Optional[Union[str, int, float]],
+            include_sources=[[]], exclude_sources=[],
+            include_destinations=[[]], exclude_destinations=[],
             include_services=[], exclude_services=[], policy_decisions=[],
             exclude_workloads_from_ip_list_query=True, max_results=100000,
-            query_name=None) -> 'TrafficQuery':
+            query_name: str = None) -> 'TrafficQuery':
+        """Constructs a TrafficQuery object based on the provided parameters.
+
+        Empty include values indicate that all sources/destinations/services
+        should be included, while empty exclude values indicate that none
+        should be excluded.
+
+        Args:
+            start_date (Optional[Union[str, int, float]]): starting datetime of
+                the search. Can be provided as a datetime string, or a Unix
+                timestamp integer or float in either seconds or milliseconds.
+            end_date (Optional[Union[str, int, float]]): ending datetime of
+                the search. Can be provided as a datetime string, or a Unix
+                timestamp integer or float in either seconds or milliseconds.
+            include_sources (list, optional): sources to include in the search.
+                Provided as a list of Reference objects or strings representing
+                label, IP list, or workload HREFs, FQDNs, IP addresses, or
+                transmission values. Defaults to [].
+            exclude_sources (list, optional): sources to exclude from the search.
+                Provided as a list of Reference objects or strings representing
+                label, IP list, or workload HREFs, FQDNs, IP addresses, or
+                transmission values. Defaults to [].
+            include_destinations (list, optional): destinations to include in
+                the search. Provided as a list of Reference objects or strings
+                representing label, IP list, or workload HREFs, FQDNs, IP
+                addresses, or transmission values. Defaults to [].
+            exclude_destinations (list, optional): destinations to exclude from
+                the search. Provided as a list of Reference objects or strings
+                representing label, IP list, or workload HREFs, FQDNs, IP
+                addresses, or transmission values. Defaults to [].
+            include_services (list, optional): traffic flow ``ServicePort``
+                objects to include in the search. Defaults to [].
+            exclude_services (list, optional): traffic flow ``ServicePort``
+                objects to exclude from the search. Defaults to [].
+            policy_decisions (list, optional): filters the search based on flow
+                policy decision. List elements must be one of ``allowed``,
+                ``blocked``, ``potentially_blocked``, or ``unknown``.
+                Defaults to [].
+            exclude_workloads_from_ip_list_query (bool, optional): if True,
+                exclude workload traffic when an IP list is included as a source
+                or destination. Defaults to True.
+            max_results (int, optional): maximum number of results to return
+                from the search. Defaults to 100000.
+            query_name (str, optional): query name. Required for async queries.
+                Defaults to None.
+
+        Returns:
+            TrafficQuery: the constructed traffic query.
+        """
         return TrafficQuery(
             start_date=start_date, end_date=end_date,
             sources=TrafficQueryFilterBlock(
@@ -189,6 +245,7 @@ class TrafficQuery(JsonObject):
 
 @dataclass
 class TrafficNode(JsonObject):
+    """Identifies a source or destination node in a traffic flow."""
     ip: str = None
     label: Label = None
     workload: Workload = None
@@ -205,6 +262,12 @@ class TimestampRange(JsonObject):
 
 @dataclass
 class TrafficFlow(JsonObject):
+    """Represents a traffic flow to a workload in the PCE.
+
+    Raises:
+        IllumioException: if invalid flow_direction, policy_decision, state, or
+            transmission values are provided.
+    """
     src: TrafficNode
     dst: TrafficNode
     service: ServicePort = None
