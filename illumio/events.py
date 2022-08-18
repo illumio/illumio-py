@@ -13,34 +13,13 @@ from typing import List
 
 from .exceptions import IllumioException
 from .util import (
-    JsonObject,
     Reference,
     Error,
     ChangeType,
     EventStatus,
     EventSeverity,
-    pce_api
+    pce_api,
 )
-
-
-@dataclass
-class EventCreatedBy(JsonObject):
-    @dataclass
-    class _EventCreatedByAgent(Reference):
-        hostname: str = None
-
-    @dataclass
-    class _EventCreatedByContainerCluster(Reference):
-        name: str = None
-
-    @dataclass
-    class _EventCreatedByUser(Reference):
-        username: str = None
-
-    agent: _EventCreatedByAgent = None
-    container_cluster: _EventCreatedByContainerCluster = None
-    user: _EventCreatedByUser = None
-    system: dict = None
 
 
 @dataclass
@@ -52,7 +31,7 @@ class BaseEvent(Reference):
     pce_fqdn: str = None
     severity: str = None
     status: str = None
-    created_by: EventCreatedBy = None
+    created_by: dict = None
     info: dict = None
 
     def _validate(self):
@@ -93,16 +72,39 @@ class ActionEvent(BaseEvent):
 
 
 @dataclass
-@pce_api("events")
+@pce_api('events')
 class Event(BaseEvent):
     """Represents an event object in the PCE.
 
-    Events are read-only via the PCE API.
+    **NOTE:** Events are read-only via the PCE API.
 
     See https://docs.illumio.com/core/21.5/Content/Guides/rest-api/pce-management/events.htm
 
     Usage:
-        >>> pce.events.get(params={'max_results': 5, 'severity': EventSeverity.CRITICAL.value})
+        >>> import illumio
+        >>> pce = illumio.PolicyComputeEngine('pce.company.com', port=443, org_id=1)
+        >>> pce.set_credentials('api_key', 'api_secret')
+        >>> events = pce.events.get(params={'max_results': 5})
+        >>> events
+        [
+            Event(
+                href="/orgs/1/events/3764a636-4846-492f-a090-ae96cf33bddf",
+                event_type="system_task.expire_service_account_api_keys",
+                timestamp="2022-08-17T22:12:37.410Z",
+                pce_fqdn="pce.company.com",
+                severity="critical",
+                status="success",
+                created_by={"system": {}},
+                action=ActionEvent(
+                    uuid="1ebad14e-bd87-42b1-ae9a-22433951fbd3",
+                    src_ip="FILTERED",
+                    ...
+                ),
+                resource_changes=[],
+                notifications=[],
+            ),
+            ...
+        ]
     """
     status: str = None
     action: ActionEvent = None
