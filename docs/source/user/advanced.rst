@@ -184,7 +184,10 @@ they can be referenced in rules, as we'll show in the next section.
 
 .. note::
     Virtual services must be :ref:`provisioned to active state <provisioning>`
-    before service bindings can be applied.
+    before service bindings can be applied. The example below shows two ways of
+    referencing the active HREF, first using a :class:`Reference <illumio.util.Reference>`
+    object, and second by updating the virtual service object's ``href`` field
+    directly.
 
 We'll extend the example above by binding the RabbitMQ server workload to both
 virtual services::
@@ -196,20 +199,29 @@ virtual services::
     ...     change_description="Create RabbitMQ virtual services",
     ...     hrefs=[rabbitmq_svc.href, notifier_virtual_service.href, newsfeed_virtual_service.href]
     ... )
+    >>> notifier_vs_active_ref = Reference(
+    ...     href=convert_draft_href_to_active(notifier_virtual_service.href)
+    ... )
     >>> notifier_binding = ServiceBinding(
-    ...     virtual_service=notifier_virtual_service,
+    ...     virtual_service=notifier_vs_active_ref,
     ...     workload=rmq_workload,
     ...     port_overrides=[
-    ...         PortOverride(port=5672, new_port=5674, proto='tcp')
+    ...         PortOverride(
+    ...             port=5671, new_port=5673, new_to_port=5674, proto='tcp'
+    ...         )
     ...     ]
     ... )
+    >>> newsfeed_virtual_service.href = convert_draft_href_to_active(newsfeed_virtual_service.href)
     >>> newsfeed_binding = ServiceBinding(
     ...     virtual_service=newsfeed_virtual_service,
     ...     workload=rmq_workload,
     ...     port_overrides=[
-    ...         PortOverride(port=5672, new_port=5676, proto='tcp')
+    ...         PortOverride(
+    ...             port=5671, new_port=5675, new_to_port=5676, proto='tcp'
+    ...         )
     ...     ]
     ... )
+    >>> pce.service_bindings.create([notifier_binding, newsfeed_binding])
 
 Writing Rules for Virtual Services
 ##################################
