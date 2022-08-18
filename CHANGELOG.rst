@@ -1,7 +1,7 @@
 Changelog
 =========
 
-Version 1.1.0 (TBD)
+Version 1.1.0 (2022-08-18)
 -------------------
 
 .. rubric:: NEW FEATURES
