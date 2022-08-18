@@ -24,7 +24,7 @@ from .actor import Actor
 
 
 @dataclass
-class BaseRule(JsonObject):
+class BaseRule(Reference):
     ingress_services: List[Union[Service, ServicePort]] = None
     providers: List[Actor] = None
     consumers: List[Actor] = None
@@ -79,30 +79,30 @@ class Rule(BaseRule, MutableObject):
     See https://docs.illumio.com/core/21.5/Content/Guides/security-policy/create-security-policy/rules.htm
 
     Usage:
-        >>> from illumio import PolicyComputeEngine, Rule, RuleSet, LabelSet
+        >>> import illumio
+        >>> pce = illumio.PolicyComputeEngine('pce.company.com', port=443, org_id=1)
+        >>> pce.set_credentials('api_key', 'api_secret')
         >>> any_ip_list = pce.get_default_ip_list()
-        >>> role_label = pce.labels.create({'key': 'role', 'value': 'Web'})
-        >>> app_label = pce.labels.create({'key': 'app', 'value': 'App'})
-        >>> env_label = pce.labels.create({'key': 'env', 'value': 'Production'})
-        >>> loc_label = pce.labels.create({'key': 'loc', 'value': 'AWS'})
-        >>> ruleset = RuleSet(
+        >>> role_label = pce.labels.create({'key': 'role', 'value': 'R-Web'})
+        >>> app_label = pce.labels.create({'key': 'app', 'value': 'A-App'})
+        >>> env_label = pce.labels.create({'key': 'env', 'value': 'E-Prod'})
+        >>> loc_label = pce.labels.create({'key': 'loc', 'value': 'L-AWS'})
+        >>> ruleset = illumio.RuleSet(
         ...     name='RS-LAB-ALLOWLIST',
         ...     scopes=[
-        ...         LabelSet(
+        ...         illumio.LabelSet(
         ...             labels=[app_label, env_label, loc_label]
         ...         )
         ...     ]
         ... )
         >>> ruleset = pce.rule_sets.create(ruleset)
-        >>> rule = Rule.build(
+        >>> rule = illumio.Rule.build(
         ...     providers=[role_label],
         ...     consumers=[any_ip_list],
         ...     ingress_services=[
         ...         {'port': 80, 'proto': 'tcp'},
         ...         {'port': 443, 'proto': 'tcp'}
         ...     ],
-        ...     resolve_providers_as=['workloads'],
-        ...     resolve_consumers_as=['workloads'],
         ...     unscoped_consumers=True  # creates an extra-scope rule
         ... )
         >>> rule = pce.rules.create(rule, parent=ruleset)
