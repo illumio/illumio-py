@@ -11,11 +11,16 @@ License:
 from dataclasses import dataclass
 from typing import List
 
+from illumio import IllumioException
 from illumio.util import (
     JsonObject,
     MutableObject,
+    ICMP_CODE_MAX,
+    ICMP_TYPE_MAX,
+    PORT_MAX,
     pce_api,
-    convert_protocol
+    convert_protocol,
+    validate_int
 )
 
 
@@ -26,12 +31,18 @@ class BaseService(JsonObject):
 
     def __post_init__(self):
         if type(self.proto) is str:
-            self.proto = convert_protocol(self.proto)
+            self.proto = int(self.proto) if self.proto.isnumeric() else convert_protocol(self.proto)
         super().__post_init__()
+
+    def _validate(self):
+        if self.port:
+            validate_int(self.port, maximum=PORT_MAX)
+        super()._validate()
 
 
 @dataclass
 class ServicePort(BaseService):
+    """Represents a port, port range, Windows service, or traffic flow service."""
     to_port: int = None
     icmp_type: int = None
     icmp_code: int = None
@@ -39,6 +50,17 @@ class ServicePort(BaseService):
     process_name: str = None
     windows_service_name: str = None
     user_name: str = None
+
+    def _validate(self):
+        if self.to_port:
+            validate_int(self.to_port, maximum=PORT_MAX)
+            if self.to_port <= self.port:
+                raise IllumioException("Invalid port range: to_port must be higher than port")
+        if self.icmp_type:
+            validate_int(self.icmp_type, maximum=ICMP_TYPE_MAX)
+        if self.icmp_code:
+            validate_int(self.icmp_code, maximum=ICMP_CODE_MAX)
+        super()._validate()
 
 
 @dataclass
@@ -57,14 +79,14 @@ class Service(MutableObject):
     See https://docs.illumio.com/core/21.5/Content/Guides/security-policy/security-policy-objects/services.htm
 
     Usage:
-        >>> from illumio import PolicyComputeEngine, Service, ServicePort
-        >>> pce = PolicyComputeEngine('my.pce.com')
-        >>> pce.set_credentials('api_key_username', 'api_key_secret')
-        >>> service = Service(
+        >>> import illumio
+        >>> pce = illumio.PolicyComputeEngine('pce.company.com', port=443, org_id=1)
+        >>> pce.set_credentials('api_key', 'api_secret')
+        >>> service = illumio.Service(
         ...     name='S-HTTP',
         ...     service_ports=[
-        ...         ServicePort(port=80, proto='tcp'),
-        ...         ServicePort(port=443, proto='tcp')
+        ...         illumio.ServicePort(port=80, proto='tcp'),
+        ...         illumio.ServicePort(port=443, proto='tcp')
         ...     ]
         ... )
         >>> service = pce.services.create(service)
@@ -83,7 +105,10 @@ class Service(MutableObject):
             ...
         )
     """
+    process_name: str = None
     service_ports: List[ServicePort] = None
+    windows_services: List[ServicePort] = None
+    windows_egress_services: List[ServicePort] = None
 
 
 __all__ = [
