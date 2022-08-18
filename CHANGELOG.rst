@@ -16,9 +16,11 @@ Version 1.1.0 (TBD)
     * adds `/events` PCE API endpoint
 * add `PolicyComputeEngine.get_default_service` function
 * added constant values to `illumio.util.constants`
-* `ALL_SERVICES_NAME` - default `All Services` Service object name
-* `RESOLVE_AS_WORKLOADS` - rule label resolution as workloads
-* `RESOLVE_AS_VIRTUAL_SERVICES` - rule label resolution as workloads
+    * `ALL_SERVICES_NAME` - default `All Services` Service object name
+    * `RESOLVE_AS_WORKLOADS` - rule label resolution as workloads
+    * `RESOLVE_AS_VIRTUAL_SERVICES` - rule label resolution as virtual services
+    * `ICMP_CODE_MAX` - ICMP Code max value
+    * `ICMP_TYPE_MAX` - ICMP Type max value
 * add enumerations to `illumio.util.constants`
     * `ApplyTo` - enum in place of Virtual Service module constants
     * `VENType` - enum for `VEN.ven_type` field

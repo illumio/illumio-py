@@ -38,6 +38,14 @@ ALL_SERVICES_NAME = 'All Services'
 #: Max port number.
 PORT_MAX = 65535
 
+#: Max value for the ICMP header Code field.
+#: See https://www.iana.org/assignments/icmp-parameters/icmp-parameters.xhtml#icmp-parameters-codes
+ICMP_CODE_MAX = 15
+
+#: Max value for the ICMP header Type field.
+#: See https://www.iana.org/assignments/icmp-parameters/icmp-parameters.xhtml#icmp-parameters-types
+ICMP_TYPE_MAX = 255
+
 FQDN_REGEX = re.compile('(?=^.{4,253}$)(^((?!-)[a-zA-Z0-9-]{1,63}(?<!-)\.)+[a-zA-Z]{2,63}$)')
 HREF_REGEX = re.compile('^\/orgs\/\d+\/(?:sec_policy\/(?:active|draft)\/)?(?P<type>[a-zA-Z_]+)\/(?P<uid>[a-zA-Z0-9-]+)$')
 
@@ -151,6 +159,8 @@ __all__ = [
     'ANY_IP_LIST_NAME',
     'ALL_SERVICES_NAME',
     'PORT_MAX',
+    'ICMP_CODE_MAX',
+    'ICMP_TYPE_MAX',
     'FQDN_REGEX',
     'HREF_REGEX',
     'BULK_CHANGE_LIMIT',
