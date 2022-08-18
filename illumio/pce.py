@@ -60,6 +60,22 @@ class PolicyComputeEngine:
 
     Contains request logic for API calls and handles the HTTP(S) connection to the PCE.
 
+    Usage:
+        >>> import illumio
+        >>> pce = illumio.PolicyComputeEngine('pce.company.com', port=8443, org_id=12)
+        >>> pce.set_credentials('api_key', 'api_secret')
+        >>> workloads = pce.workloads.get(
+        ...     params={
+        ...         'managed': True,
+        ...         'enforcement_mode': 'visibility_only'
+        ...     }
+        ... )
+        >>> workloads
+        [
+            Workload(href='/orgs/12/workloads/c754a713-2bde-4427-af1f-bff145be509b', ...),
+            ...
+        ]
+
     Args:
         url (str): PCE URL. May include http:// or https:// as the scheme.
         port (str, optional): PCE http(s) port. Defaults to '443'.
@@ -245,7 +261,7 @@ class PolicyComputeEngine:
     def get_collection(self, endpoint: str, **kwargs) -> Response:
         """Uses the PCE's asynchronous job logic to retrieve a collection of objects.
 
-        NOTE: for large collections (surpassing 10,000 objects), this function will be extremely
+        **NOTE:** for large collections (surpassing 10,000 objects), this function will be extremely
         slow - it is recommended that callers use query filters or the max_results parameter to limit
         the number of results in the collection.
 
@@ -593,7 +609,7 @@ class PolicyComputeEngine:
         def bulk_update(self, objects_to_update: List[IllumioObject], **kwargs) -> List[dict]:
             """Updates a set of objects in the PCE.
 
-            NOTE: Bulk updates can currently only be applied for Virtual Services and Workloads.
+            **NOTE:** Bulk updates can currently only be applied for Virtual Services and Workloads.
 
             Args:
                 objects_to_update (List[IllumioObject]): list of objects to update.
@@ -620,7 +636,7 @@ class PolicyComputeEngine:
         def bulk_delete(self, refs: List[Union[str, Reference, dict]], **kwargs) -> List[dict]:
             """Deletes a set of objects in the PCE.
 
-            NOTE: Bulk updates can currently only be applied for Workloads.
+            **NOTE:** Bulk updates can currently only be applied for Workloads.
 
             Args:
                 hrefs (List[Union[str, Reference, dict]]): list of references to objects to delete.
@@ -701,7 +717,7 @@ class PolicyComputeEngine:
 
         Retrieves Explorer traffic flows using the provided query.
 
-        NOTE: this function is deprecated in the Illumio REST API, and is
+        **NOTE:** this function is deprecated in the Illumio REST API, and is
         only provided for compatibility. The Illumio Explorer REST API
         documentation recommends using the async traffic flow query instead,
         provided here as `PolicyComputeEngine.get_traffic_flows_async`.
