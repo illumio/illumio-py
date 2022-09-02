@@ -498,7 +498,7 @@ list.
 
     # do a partial name lookup to find the tracking server workload
     # and update its labels with a normal update call
-    mlflow_server = pce.workloads.get(params={'name': 'MLFlow Tracking'})[0]
+    mlflow_server = pce.workloads.get_by_name('MLFlow Tracking')
     pce.workloads.update(mlflow_server, Workload(labels=[
         value_to_label_map['R-MLFlowServer'],
         value_to_label_map['A-MLFlow'],
