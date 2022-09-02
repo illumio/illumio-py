@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-"""This module provides the core PolicyComputeEngine class for communicating with the PCE.
+"""This module provides the PolicyComputeEngine client for communicating with the PCE.
 
 Usage:
     >>> import illumio
@@ -43,7 +43,6 @@ from .util import (
     href_from,
     validate_int,
     Reference,
-    IllumioObject,
     IllumioEncoder,
     ACTIVE,
     DRAFT,
@@ -81,6 +80,10 @@ class PolicyComputeEngine:
         port (str, optional): PCE http(s) port. Defaults to '443'.
         version (str, optional): The PCE API version to use. Defaults to 'v2'.
         org_id (str, optional): The PCE organization ID. Defaults to '1'.
+        retry_count (int, optional): Number of times to retry on failure.
+            Defaults to 5.
+        request_timeout (int, optional): HTTP request timeout in seconds.
+            Defaults to 30.
 
     Attributes:
         base_url: DEPRECATED in v1.0.3. The base URL for API calls to the PCE.
@@ -89,7 +92,8 @@ class PolicyComputeEngine:
             to request endpoints by default. Defaults to True.
         org_id: the PCE organization ID.
     """
-    def __init__(self, url: str, port: str = '443', version: str = 'v2', org_id: str = '1') -> None:
+    def __init__(self, url: str, port: str = '443', version: str = 'v2', org_id: str = '1',
+                    retry_count: int = 5, request_timeout: int = 30) -> None:
         self._apis = {}
         self._encoder = IllumioEncoder()
         self._session = Session()
@@ -97,6 +101,7 @@ class PolicyComputeEngine:
         self._scheme, self._hostname = parse_url(url)
         self._port = port
         self._version = version
+        self._timeout = request_timeout
         # leaving this in for backwards compatibility
         self.base_url = "{}://{}:{}/api/{}".format(
             self._scheme, self._hostname, port, version
@@ -104,17 +109,17 @@ class PolicyComputeEngine:
         self.include_org = True
         self.org_id = org_id
         self._validate()
-        self._setup_retry()
+        self._setup_retry(retry_count)
 
     def _validate(self):
         """Validates configuration values, raising an error on failure"""
         validate_int(self._port, minimum=1, maximum=PORT_MAX)
         validate_int(self.org_id, minimum=1)
 
-    def _setup_retry(self):
+    def _setup_retry(self, retries: int) -> None:
         """Configures `requests.Session` retry defaults"""
         retry_strategy = Retry(
-            total=5,  # retry up to 5 times
+            total=retries,
             # {backoff} * (2 ** ({retry count} - 1))
             # 1, 2, 4, 8, 16 (seconds)
             backoff_factor=2,
@@ -127,7 +132,8 @@ class PolicyComputeEngine:
     def set_credentials(self, username: str, password: str) -> None:
         """Sets username and password values to authenticate with the PCE.
 
-        The provided credentials can be either user credentials or an API key/secret pair.
+        The provided credentials can be either user credentials or an API
+        key/secret pair.
 
         Args:
             username (str): username or API key.
@@ -136,7 +142,7 @@ class PolicyComputeEngine:
         self._session.auth = (username, password)
 
     def set_proxies(self, http_proxy: str = None, https_proxy: str = None) -> None:
-        """Sets proxy information in the request session.
+        """Sets HTTP proxies to use when connecting to the PCE.
 
         Args:
             http_proxy (str, optional): HTTP proxy URI. Defaults to None.
@@ -144,14 +150,24 @@ class PolicyComputeEngine:
         """
         self._session.proxies.update({'http': http_proxy, 'https': https_proxy})
 
+    def set_timeout(self, timeout: int) -> None:
+        """Sets the HTTP request timeout for PCE connections.
+
+        Args:
+            timeout (int): the new request timeout in seconds.
+        """
+        self._timeout = timeout
+
     def _request(self, method: str, endpoint: str, include_org: bool = None, **kwargs) -> Response:
         """Makes an API call to the PCE.
 
         Args:
-            method (str): the HTTP request method. Supports the same verbs as `requests.request`.
+            method (str): the HTTP request method. Supports the same verbs as
+                `requests.request`.
             endpoint (str): the API endpoint to call.
-            include_org (bool, optional): whether or not to include /orgs/{org_id} in the API call.
-                Defaults to the value of the `include_org` class attribute.
+            include_org (bool, optional): whether or not to include /orgs/{org_id}
+                in the API call. Defaults to the value of the `include_org` class
+                attribute.
 
         Raises:
             IllumioApiException: if the response is unsuccessful (status code >399).
@@ -161,16 +177,19 @@ class PolicyComputeEngine:
         """
         try:
             include_org = self.include_org if include_org is None else include_org
-            response = None  # avoid reference before assignment errors in case of cxn failure
+            # avoid reference before assignment errors in case of cxn failure
+            response = None
             url = self._build_url(endpoint, include_org)
             self._encode_body(kwargs)
+            kwargs['timeout'] = kwargs.get('timeout', self._timeout)
             response = self._session.request(method, url, **kwargs)
             response.raise_for_status()
             return response
         except Exception as e:
             message = str(e)
+            content_type = response.headers.get('Content-Type', '')
             # Response objects are falsy if the request failed so do a null check
-            if response is not None and response.headers.get('Content-Type', '') == 'application/json':
+            if response is not None and content_type == 'application/json':
                 message = self._get_error_message_from_response(response)
             raise IllumioApiException(message) from e
 
@@ -261,9 +280,9 @@ class PolicyComputeEngine:
     def get_collection(self, endpoint: str, **kwargs) -> Response:
         """Uses the PCE's asynchronous job logic to retrieve a collection of objects.
 
-        **NOTE:** for large collections (surpassing 10,000 objects), this function will be extremely
-        slow - it is recommended that callers use query filters or the max_results parameter to limit
-        the number of results in the collection.
+        **NOTE:** for large collections (surpassing 10,000 objects), this function
+        will be extremely slow - it is recommended that callers use query filters
+        or the max_results parameter to limit the number of results in the collection.
 
         Args:
             endpoint (str): the PCE endpoint to call.
@@ -293,12 +312,13 @@ class PolicyComputeEngine:
     def _async_poll(self, job_location: str, retry_time: Union[int, float] = 1.) -> str:
         """Polls the PCE for an async job's status until it completes or times out.
 
-        The poll-wait loop uses the Retry-After time from the job submission  request
+        The poll-wait loop uses the Retry-After time from the job submission request
         or a default of 1 second, with a 1.5x backoff.
 
         Args:
             job_location (str): URL of the job to poll.
-            retry_time (Union[int, float], optional): base Retry-After time. Defaults to 1 second.
+            retry_time (Union[int, float], optional): base Retry-After time.
+                Defaults to 1 second.
 
         Raises:
             Exception: if the job returns a 'failed' status.
@@ -371,7 +391,7 @@ class PolicyComputeEngine:
                     endpoint = '/orgs/{}/{}'.format(self.pce.org_id, endpoint)
             return endpoint.replace('//', '/')
 
-        def get_by_reference(self, reference: Union[str, Reference, dict], **kwargs) -> IllumioObject:
+        def get_by_reference(self, reference: Union[str, Reference, dict], **kwargs) -> Reference:
             """Retrieves an object from the PCE using its HREF.
 
             Usage:
@@ -386,13 +406,30 @@ class PolicyComputeEngine:
                 href (str): the HREF of the object to fetch.
 
             Returns:
-                IllumioObject: the object json, decoded to its IllumioObject equivalent.
+                Reference: the object json, decoded to its python equivalent.
             """
             kwargs['include_org'] = False
             response = self.pce.get(href_from(reference), **kwargs)
             return self.object_cls.from_json(response.json())
 
-        def get(self, policy_version: str = DRAFT, parent: Union[str, Reference, dict] = None, **kwargs) -> List[IllumioObject]:
+        def get_by_name(self, name: str, policy_version: str = DRAFT, **kwargs) -> Reference:
+            """Retrieves the object from the PCE with the given name.
+
+            Args:
+                name (str): the exact name of the object to retrieve.
+
+            Returns:
+                Reference: the decoded object, or None if an object with the
+                    given name wasn't found.
+            """
+            kwargs['params'] = {'name': name}
+            endpoint = self._build_endpoint(policy_version, None)
+            response = self.pce.get(endpoint, **kwargs)
+            for o in response.json():
+                if 'name' in o and o['name'] == name:
+                    return self.object_cls.from_json(o)
+
+        def get(self, policy_version: str = DRAFT, parent: Union[str, Reference, dict] = None, **kwargs) -> List[Reference]:
             """Retrieves objects from the PCE based on the given parameters.
 
             Keyword arguments to this function are passed to the `requests.get` call.
@@ -425,13 +462,13 @@ class PolicyComputeEngine:
                     existing RuleSets.
 
             Returns:
-                List[IllumioObject]: the returned list of decoded objects.
+                List[Reference]: the returned list of decoded objects.
             """
             endpoint = self._build_endpoint(policy_version, parent)
             response = self.pce.get(endpoint, **{**kwargs, **{'include_org': False}})
             return [self.object_cls.from_json(o) for o in response.json()]
 
-        def get_all(self, policy_version: str = DRAFT, parent: Union[str, Reference, dict] = None, **kwargs) -> List[IllumioObject]:
+        def get_all(self, policy_version: str = DRAFT, parent: Union[str, Reference, dict] = None, **kwargs) -> List[Reference]:
             """Retrieves all objects of a given type from the PCE.
 
             This function makes two requests, using the `X-Total-Count` header
@@ -447,7 +484,7 @@ class PolicyComputeEngine:
                     existing RuleSets.
 
             Returns:
-                List[IllumioObject]: the returned list of decoded objects.
+                List[Reference]: the returned list of decoded objects.
             """
             kwargs['include_org'] = False
             params = kwargs.get('params', {})
@@ -464,7 +501,7 @@ class PolicyComputeEngine:
             response = self.pce.get(endpoint, **kwargs)
             return [self.object_cls.from_json(o) for o in response.json()]
 
-        def get_async(self, policy_version: str = DRAFT, parent: Union[str, Reference, dict] = None, **kwargs) -> List[IllumioObject]:
+        def get_async(self, policy_version: str = DRAFT, parent: Union[str, Reference, dict] = None, **kwargs) -> List[Reference]:
             """Retrieves objects asynchronously from the PCE based on the given parameters.
 
             Args:
@@ -476,14 +513,14 @@ class PolicyComputeEngine:
                     existing Rule Sets.
 
             Returns:
-                List[IllumioObject]: the returned list of decoded objects.
+                List[Reference]: the returned list of decoded objects.
             """
             kwargs['include_org'] = False
             endpoint = self._build_endpoint(policy_version, parent)
             response = self.pce.get_collection(endpoint, **kwargs)
             return [self.object_cls.from_json(o) for o in response.json()]
 
-        def create(self, body: Any, parent: Union[str, Reference, dict] = None, **kwargs) -> IllumioObject:
+        def create(self, body: Any, parent: Union[str, Reference, dict] = None, **kwargs) -> Reference:
             """Creates an object in the PCE.
 
             See https://docs.illumio.com/core/21.5/API-Reference/index.html
@@ -508,7 +545,7 @@ class PolicyComputeEngine:
                     existing RuleSets.
 
             Returns:
-                IllumioObject: the created object.
+                Reference: the created object.
             """
             kwargs = {**kwargs, **{'json': body, 'include_org': False}}
             endpoint = self._build_endpoint(DRAFT, parent)
@@ -535,9 +572,7 @@ class PolicyComputeEngine:
             Successful PUT requests return a 204 No Content response.
 
             Usage:
-                >>> pairing_profiles = pce.pairing_profile.get(
-                ...     params={'name': 'PP-DATABASE', 'max_results': 1}
-                ... )
+                >>> pairing_profiles = pce.pairing_profile.get_by_name('PP-Database')
                 >>> existing_profile = pairing_profiles[0]
                 >>> update = PairingProfile(
                 ...     name='PP-DATABASE-VENS',
@@ -546,7 +581,8 @@ class PolicyComputeEngine:
                 >>> pce.pairing_profile.update(existing_profile['href'], update)
 
             Args:
-                reference (Union[str, Reference, dict]): the HREF of the pairing profile to update.
+                reference (Union[str, Reference, dict]): the HREF of the pairing
+                    profile to update.
                 body (Any): the update data.
             """
             kwargs['json'] = body
@@ -563,7 +599,7 @@ class PolicyComputeEngine:
             """
             self.pce.delete(href_from(reference), **{**kwargs, **{'include_org': False}})
 
-        def _bulk_change(self, objects: List[IllumioObject], method: str, success_status: str, **kwargs) -> List[dict]:
+        def _bulk_change(self, objects: List[Reference], method: str, success_status: str, **kwargs) -> List[dict]:
             results = []
             kwargs['include_org'] = False
             while objects:
@@ -578,14 +614,14 @@ class PolicyComputeEngine:
                     results.append({'href': result['href'], 'errors': errors})
             return results
 
-        def bulk_create(self, objects_to_create: List[IllumioObject], **kwargs) -> List[dict]:
+        def bulk_create(self, objects_to_create: List[Reference], **kwargs) -> List[dict]:
             """Creates a set of objects in the PCE.
 
             **NOTE:** Bulk creation can currently only be applied for Security Principals,
                 Virtual Services and Workloads.
 
             Args:
-                objects_to_create (List[IllumioObject]): list of objects to update.
+                objects_to_create (List[Reference]): list of objects to update.
 
             Returns:
                 List[dict]: a list containing HREFs of created objects
@@ -606,13 +642,13 @@ class PolicyComputeEngine:
             """
             return self._bulk_change(objects_to_create, method='bulk_create', success_status='created', **kwargs)
 
-        def bulk_update(self, objects_to_update: List[IllumioObject], **kwargs) -> List[dict]:
+        def bulk_update(self, objects_to_update: List[Reference], **kwargs) -> List[dict]:
             """Updates a set of objects in the PCE.
 
             **NOTE:** Bulk updates can currently only be applied for Virtual Services and Workloads.
 
             Args:
-                objects_to_update (List[IllumioObject]): list of objects to update.
+                objects_to_update (List[Reference]): list of objects to update.
 
             Returns:
                 List[dict]: a list containing HREFs of updated objects
@@ -839,7 +875,10 @@ class PolicyComputeEngine:
             traffic_query.query_name = query_name
             kwargs['json'] = traffic_query
             headers = kwargs.get('headers', {})
-            kwargs['headers'] = {**headers, **{'Content-Type': 'application/json', 'Prefer': 'respond-async'}}
+            kwargs['headers'] = {**headers, **{
+                'Content-Type': 'application/json',
+                'Prefer': 'respond-async'
+            }}
             kwargs['include_org'] = True
             response = self.post('/traffic_flows/async_queries', **kwargs)
             response.raise_for_status()
@@ -889,7 +928,10 @@ class PolicyComputeEngine:
             PolicyVersion: the decoded policy version object including the changeset.
         """
         policy_changeset = PolicyChangeset.build(hrefs)
-        kwargs['json'] = {'update_description': change_description, 'change_subset': policy_changeset}
+        kwargs['json'] = {
+            'update_description': change_description,
+            'change_subset': policy_changeset
+        }
         response = self.post('/sec_policy', **{**kwargs, **{'include_org': True}})
         return PolicyVersion.from_json(response.json())
 
