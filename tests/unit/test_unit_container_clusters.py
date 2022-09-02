@@ -38,9 +38,14 @@ def mock_requests(requests_mock, get_callback, post_callback, put_callback, dele
     requests_mock.register_uri('DELETE', pattern, json=delete_callback)
 
 
-def test_get_cluster_by_name(pce):
+def test_get_cluster_by_partial_name(pce):
     container_clusters = pce.container_clusters.get(params={'name': 'CC-'})
     assert len(container_clusters) == 2
+
+
+def test_get_by_name(pce):
+    container_cluster = pce.container_clusters.get_by_name('CC-EKS-PROD')
+    assert container_cluster
 
 
 def test_container_cluster_create(pce, container_cluster):

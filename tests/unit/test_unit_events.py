@@ -32,6 +32,6 @@ def mock_event(pce) -> Event:
     yield pce.events.get_by_reference("/orgs/1/events/a066c6ec-4d4a-4c51-bf46-9a20add3bcac")
 
 
-def test_get_by_hostname(pce, mock_event):
+def test_get_by_event_type(pce, mock_event):
     event = pce.events.get(params={'event_type': 'user.login'})[0]
     assert event == mock_event

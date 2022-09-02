@@ -54,11 +54,16 @@ def test_get_by_reference(pce):
     assert any_ip_list.name == ANY_IP_LIST_NAME
 
 
-def test_get_by_name(pce):
+def test_get_by_partial_name(pce):
     ip_lists = pce.ip_lists.get(params={"name": "IPL-"}, policy_version=DRAFT)
     repeated_ip_lists = [ip_list for ip_list in ip_lists if ip_list.name == "IPL-4"]
     assert len(repeated_ip_lists) == 1
     assert '/draft/' in repeated_ip_lists[0].href
+
+
+def test_get_by_name(pce):
+    ip_list = pce.ip_lists.get_by_name('IPL-4')
+    assert ip_list
 
 
 def test_get_active_ip_list(pce):

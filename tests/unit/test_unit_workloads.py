@@ -61,6 +61,12 @@ def test_get_by_enforcement_mode(pce):
     assert len(workloads) == 1
 
 
+def test_get_by_name(pce, new_workload):
+    pce.workloads.create(new_workload)
+    workload = pce.workloads.get_by_name('db0.internal.labs.io')
+    assert workload
+
+
 def test_create_workload(pce, new_workload):
     created_workload = pce.workloads.create(new_workload)
     assert created_workload.href != ''
