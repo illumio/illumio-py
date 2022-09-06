@@ -356,7 +356,7 @@ class PolicyComputeEngine:
         """
         try:
             self.get('/health', **{**kwargs, **{'include_org': False}})
-            self.get('/settings/events', **{**kwargs, **{'include_org': True}})
+            self.get('/sec_policy/1', **{**kwargs, **{'include_org': True}})
             return True
         except IllumioApiException:
             return False

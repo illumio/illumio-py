@@ -1,8 +1,15 @@
 Changelog
 =========
 
+Version 1.1.1 (2022-09-02)
+--------------------------
+
+.. rubric:: BUG FIXES
+
+* fix check_connection call to work with SaaS PCEs
+
 Version 1.1.0 (2022-08-18)
--------------------
+--------------------------
 
 .. rubric:: NEW FEATURES
 
