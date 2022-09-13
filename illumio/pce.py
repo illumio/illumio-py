@@ -111,7 +111,7 @@ class PolicyComputeEngine:
         self._validate()
         self._setup_retry(retry_count)
 
-    def _validate(self):
+    def _validate(self) -> None:
         """Validates configuration values, raising an error on failure"""
         validate_int(self._port, minimum=1, maximum=PORT_MAX)
         validate_int(self.org_id, minimum=1)
