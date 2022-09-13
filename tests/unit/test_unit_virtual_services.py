@@ -78,9 +78,14 @@ def test_invalid_apply_to_value():
         VirtualService(href='/test/href', name='VS-TEST', apply_to='invalid_value')
 
 
-def test_get_by_name(pce):
+def test_get_by_partial_name(pce):
     virtual_services = pce.virtual_services.get(params={'name': 'VS-'})
     assert len(virtual_services) == 1
+
+
+def test_get_by_name(pce):
+    virtual_service = pce.virtual_services.get_by_name('VS-INTERNAL')
+    assert virtual_service
 
 
 def test_get_draft_virtual_services(pce, mock_virtual_service):

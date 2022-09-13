@@ -63,9 +63,14 @@ def test_compare_unordered_scopes(mock_rule_set):
     assert mock_rule_set.scopes == scopes
 
 
-def test_get_by_name(pce):
+def test_get_by_partial_name(pce):
     rule_sets = pce.rule_sets.get(params={'name': 'RS-'}, policy_version=DRAFT)
     assert len(rule_sets) == 2
+
+
+def test_get_by_name(pce):
+    rule_set = pce.rule_sets.get_by_name('RS-RINGFENCE')
+    assert rule_set
 
 
 def test_get_active_rule_sets(pce, mock_rule_set):

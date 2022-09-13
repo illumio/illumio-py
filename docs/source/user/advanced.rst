@@ -270,7 +270,7 @@ feature in the PCE.
 
 ::
 
-    >>> blocked_rdp_traffic = TrafficQuery.build(
+    >>> traffic_query = TrafficQuery.build(
     ...     start_date="2022-07-01T00:00:00Z",
     ...     end_date="2022-08-01T00:00:00Z",
     ...     include_services=[
@@ -279,7 +279,7 @@ feature in the PCE.
     ...     ],
     ...     policy_decisions=['blocked', 'potentially_blocked', 'unknown']
     ... )
-    >>> traffic_flows = pce.get_traffic_flows_async(
+    >>> blocked_rdp_traffic = pce.get_traffic_flows_async(
     ...     query_name='blocked-rdp-traffic-july-22',
     ...     traffic_query=traffic_query
     ... )

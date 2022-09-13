@@ -66,9 +66,14 @@ def test_get_by_reference(pce):
     assert any_service.name == DEFAULT_SERVICE_NAME
 
 
-def test_get_by_name(pce):
+def test_get_by_partial_name(pce):
     services = pce.services.get(params={'name': 'S-'}, policy_version=DRAFT)
     assert len(services) == 2
+
+
+def test_get_by_name(pce):
+    service = pce.services.get_by_name('S-HTTP')
+    assert service
 
 
 def test_get_active_service(pce):

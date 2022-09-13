@@ -82,9 +82,14 @@ def test_encoded_enum_values():
     assert type(encoded_profile['visibility_level']) is str
 
 
-def test_get_profiles_by_name(pce):
+def test_get_profiles_by_partial_name(pce):
     pairing_profiles = pce.pairing_profiles.get(params={'name': 'PP-'})
     assert len(pairing_profiles) == 2
+
+
+def test_get_by_name(pce):
+    pairing_profile = pce.pairing_profiles.get_by_name('PP-DATABASE-VENS')
+    assert pairing_profile
 
 
 def test_get_by_labels(pce):

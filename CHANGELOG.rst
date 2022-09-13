@@ -1,6 +1,15 @@
 Changelog
 =========
 
+Version 1.1.2 (TBD)
+-------------------
+
+.. rubric:: NEW FEATURES
+
+* add default timeout to `PolicyComputeEngine` requests session
+    * add `PolicyComputeEngine.set_timeout` function to update timeout
+* add `_PCEAPIObject.get_by_name` function as a convenience method for finding an exact name match
+
 Version 1.1.1 (2022-09-02)
 --------------------------
 
