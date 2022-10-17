@@ -1,8 +1,12 @@
 Changelog
 =========
 
-Version 1.1.2 (TBD)
--------------------
+Version 1.1.2 (2022-10-17)
+--------------------------
+
+.. rubric:: BUG FIXES
+
+* fix check_connection call to avoid 404s on some PCEs
 
 .. rubric:: NEW FEATURES
 
