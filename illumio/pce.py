@@ -356,7 +356,9 @@ class PolicyComputeEngine:
         """
         try:
             self.get('/health', **{**kwargs, **{'include_org': False}})
-            self.get('/sec_policy/1', **{**kwargs, **{'include_org': True}})
+            # make an /orgs/{org_id} call to validate the org ID as well
+            # /settings/workloads is a relatively quick call that will work on SaaS PCEs
+            self.get('/settings/workloads', **{**kwargs, **{'include_org': True}})
             return True
         except IllumioApiException:
             return False
