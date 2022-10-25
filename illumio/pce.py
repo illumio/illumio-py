@@ -187,10 +187,10 @@ class PolicyComputeEngine:
             return response
         except Exception as e:
             message = str(e)
-            content_type = response.headers.get('Content-Type', '')
             # Response objects are falsy if the request failed so do a null check
-            if response is not None and content_type == 'application/json':
-                message = self._get_error_message_from_response(response)
+            if response is not None:
+                if response.headers.get('Content-Type', '') == 'application/json':
+                    message = self._get_error_message_from_response(response)
             raise IllumioApiException(message) from e
 
     def _build_url(self, endpoint: str, include_org: bool):

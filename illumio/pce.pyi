@@ -19,7 +19,8 @@ class PolicyComputeEngine:
     base_url: str
     org_id: str
 
-    def __init__(self, url: str, port: str, version: str, org_id: str) -> None: ...
+    def __init__(self, url: str, port: str, version: str, org_id: str,
+                    retry_count: int = 5, request_timeout: int = 30) -> None: ...
 
     def _validate(self) -> None: ...
 

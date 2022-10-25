@@ -1,6 +1,13 @@
 Changelog
 =========
 
+Version 1.1.3 (TBD)
+-------------------
+
+.. rubric:: BUG FIXES
+
+* fix issue where PCE request could throw NoneType exception if incorrectly configured
+
 Version 1.1.2 (2022-10-17)
 --------------------------
 
