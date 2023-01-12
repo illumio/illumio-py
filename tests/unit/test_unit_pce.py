@@ -1,3 +1,4 @@
+import os
 import re
 from collections import namedtuple
 from dataclasses import fields
@@ -13,6 +14,8 @@ from illumio.rules import Rule
 from illumio.util import PCE_APIS, DRAFT, ACTIVE
 
 from mocks import MockResponse
+
+TLS_DIR = os.path.join(pytest.DATA_DIR, 'tls')
 
 
 def test_custom_protocol():
@@ -194,6 +197,21 @@ def test_set_include_org_default(endpoint, expected):
 
 def test_ignore_include_org(pce):
     assert pce.check_connection(include_org=True)
+
+
+@pytest.mark.parametrize(
+    "verify,cert",
+    [
+        (True, None),
+        (False, None),
+        (os.path.join(TLS_DIR, "rootca"), None),
+        (True, os.path.join(TLS_DIR, "client.pem")),
+        (True, (os.path.join(TLS_DIR, "client.crt"), os.path.join(TLS_DIR, "client.key")))
+    ]
+)
+def test_tls_settings(verify, cert, pce):
+    pce.set_tls_settings(verify=verify, cert=cert)
+    assert pce.check_connection()
 
 
 @pytest.mark.parametrize(
