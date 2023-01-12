@@ -158,6 +158,22 @@ class PolicyComputeEngine:
         """
         self._timeout = timeout
 
+    def set_tls_settings(self, verify: Union[bool, str] = True, cert: Union[str, tuple] = None):
+        """Sets TLS settings for PCE connections.
+
+        Args:
+            verify (Union[bool, str], optional): set TLS verification. A value
+                of True or False will enable/disable verification respectively.
+                A string value with a path to a CA bundle can also be provided.
+                Defaults to True.
+            cert (Union[str, tuple], optional): set client-side certificate
+                paths. The value can be a string with a path to a PEM containing
+                both the certificate and private key, or a tuple of strings with
+                paths to both files. Defaults to None.
+        """
+        self._session.verify = verify
+        self._session.cert = cert
+
     def _request(self, method: str, endpoint: str, include_org: bool = None, **kwargs) -> Response:
         """Makes an API call to the PCE.
 

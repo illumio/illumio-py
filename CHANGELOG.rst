@@ -4,6 +4,10 @@ Changelog
 Version 1.1.3 (TBD)
 -------------------
 
+.. rubric:: NEW FEATURES
+
+* add `PolicyComputeEngine.set_tls_settings` function to update verify and cert values for PCE requests session
+
 .. rubric:: BUG FIXES
 
 * fix issue where PCE request could throw NoneType exception if incorrectly configured
