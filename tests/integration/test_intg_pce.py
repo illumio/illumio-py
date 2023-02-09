@@ -2,21 +2,35 @@ import pytest
 
 from illumio import PolicyComputeEngine, IllumioApiException
 
+from helpers import pce_from_env
 
-def test_pce_connection(pce: PolicyComputeEngine):
-    assert pce.check_connection()
+INVALID_PCE_HOSTNAME = 'invalid.url.comxyz'
 
 
-def test_invalid_url():
-    pce = PolicyComputeEngine('https://invalid.url.comxyz', retry_count=0)
+# use a local test fixture so we don't manipulate the session-scoped PCE
+@pytest.fixture
+def test_pce() -> PolicyComputeEngine:
+    pce = pce_from_env(retry_count=0)
+    yield pce
+
+
+def test_invalid_hostname(test_pce: PolicyComputeEngine):
+    test_pce._hostname = INVALID_PCE_HOSTNAME
     with pytest.raises(IllumioApiException):
-        pce.get('/invalid_endpoint')
+        test_pce.get('/health')
 
 
-def test_invalid_org_id(pce: PolicyComputeEngine):
-    # since pce is a session fixture, store the original id
-    # to reset after we test the failed connection request
-    configured_org_id = pce.org_id
-    pce.org_id = 999
-    assert not pce.check_connection()
-    pce.org_id = configured_org_id
+def test_invalid_endpoint(test_pce: PolicyComputeEngine):
+    with pytest.raises(IllumioApiException):
+        test_pce.get('/invalid_endpoint')
+
+
+def test_invalid_org_id(test_pce: PolicyComputeEngine):
+    test_pce.org_id = 0
+    assert not test_pce.check_connection()
+
+
+def test_must_connect(test_pce: PolicyComputeEngine):
+    test_pce._hostname = INVALID_PCE_HOSTNAME
+    with pytest.raises(IllumioApiException):
+        test_pce.must_connect()
