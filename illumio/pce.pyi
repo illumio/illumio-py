@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 """Stub for PCE interface function definitions"""
-from typing import Any, List, overload
+from typing import Any, List, Union, overload
 
 from requests import Response
 
@@ -32,6 +32,8 @@ class PolicyComputeEngine:
 
     def set_timeout(self, timeout: int) -> None: ...
 
+    def set_tls_settings(self, verify: Union[bool, str] = True, cert: Union[str, tuple] = None) -> None: ...
+
     def _request(self, method: str, endpoint: str, include_org: bool, **kwargs) -> Response: ...
 
     def _build_url(self, endpoint: str, include_org: bool): ...
@@ -56,6 +58,8 @@ class PolicyComputeEngine:
     def _async_poll(self, job_location: str, retry_time: float) -> str: ...
 
     def check_connection(self, **kwargs) -> bool: ...
+
+    def must_connect(self, **kwargs) -> None: ...
 
     class _PCEObjectAPI:
         def __init__(self, pce: 'PolicyComputeEngine', api_data: object) -> None: ...

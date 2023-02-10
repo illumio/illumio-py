@@ -7,6 +7,7 @@ Version 1.1.3 (TBD)
 .. rubric:: NEW FEATURES
 
 * add `PolicyComputeEngine.set_tls_settings` function to update verify and cert values for PCE requests session
+* add `PolicyComputeEngine.must_connect` function to complement `check_connection`, raising the exception on failure rather than suppressing it
 
 .. rubric:: BUG FIXES
 

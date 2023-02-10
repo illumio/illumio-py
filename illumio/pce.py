@@ -362,8 +362,18 @@ class PolicyComputeEngine:
                 break
         return collection_href
 
+    def must_connect(self, **kwargs) -> None:
+        """Checks the connection to the PCE.
+
+        Additional keyword arguments are passed to the requests call.
+
+        Raises:
+            IllumioApiException: if the connection fails.
+        """
+        self._check_pce_connection(**kwargs)
+
     def check_connection(self, **kwargs) -> bool:
-        """Makes a GET request to the PCE /health endpoint.
+        """Checks the connection to the PCE.
 
         Additional keyword arguments are passed to the requests call.
 
@@ -371,13 +381,16 @@ class PolicyComputeEngine:
             bool: True if the call is successful, otherwise False.
         """
         try:
-            self.get('/health', **{**kwargs, **{'include_org': False}})
-            # make an /orgs/{org_id} call to validate the org ID as well
-            # /settings/workloads is a relatively quick call that will work on SaaS PCEs
-            self.get('/settings/workloads', **{**kwargs, **{'include_org': True}})
+            self._check_pce_connection(**kwargs)
             return True
         except IllumioApiException:
             return False
+
+    def _check_pce_connection(self, **kwargs):
+        self.get('/health', **{**kwargs, **{'include_org': False}})
+        # make an /orgs/{org_id} call to validate the org ID as well
+        # /settings/workloads is a relatively quick call that will work on SaaS PCEs
+        self.get('/settings/workloads', **{**kwargs, **{'include_org': True}})
 
     class _PCEObjectAPI:
         """Generic API for registered PCE objects.
