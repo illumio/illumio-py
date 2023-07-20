@@ -5,8 +5,6 @@ from typing import List
 
 import pytest
 
-from illumio.policyobjects import IPList, IPRange
-
 LABEL_GROUPS = os.path.join(pytest.DATA_DIR, 'label_groups.json')
 
 
@@ -14,18 +12,6 @@ LABEL_GROUPS = os.path.join(pytest.DATA_DIR, 'label_groups.json')
 def label_groups() -> List[dict]:
     with open(LABEL_GROUPS, 'r') as f:
         yield json.loads(f.read())
-
-
-@pytest.fixture(scope='module')
-def new_label_group() -> IPList:
-    return IPList(
-        name="IPL-INTERNAL",
-        ip_ranges=[
-            IPRange(from_ip='10.0.0.0/8'),
-            IPRange(from_ip='172.16.0.0/12'),
-            IPRange(from_ip='192.168.0.0', to_ip='192.168.255.255')
-        ]
-    )
 
 
 @pytest.fixture(autouse=True)
