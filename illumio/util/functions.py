@@ -15,7 +15,6 @@ import sys
 import typing
 import warnings
 from dataclasses import dataclass
-from typing import Any
 from urllib.parse import urlparse
 
 from illumio._version import version
@@ -179,7 +178,7 @@ def convert_protocol(protocol: str) -> int:
         raise IllumioException('Invalid protocol name: {}'.format(protocol))
 
 
-def validate_int(val: Any, minimum: int=0, maximum: int=sys.maxsize) -> None:
+def validate_int(val: typing.Any, minimum: int=0, maximum: int=sys.maxsize) -> None:
     """Validates a given value is an integer and is within min <= val <= max.
 
     Args:
