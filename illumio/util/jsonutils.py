@@ -47,42 +47,7 @@ class JsonObject(ABC):
         self._validate()
 
     def _validate(self):
-        """Validates all dataclass fields against their indicated types."""
-        for field in fields(self):
-            value = getattr(self, field.name)
-            if not self._validate_field(field.type, value):
-                raise AttributeError("Invalid value for {}: {}. Must be of type {}".format(field.name, value, field.type))
-
-    def _validate_field(self, expected_type, value) -> bool:
-        if value is None:
-            return True
-        elif expected_type is object:
-            return True
-        elif type(value) == expected_type:
-            return True
-        elif isunion(expected_type):
-            return any(self._validate_field(type_, value) for type_ in expected_type.__args__)
-        elif isinstance(type(value), IllumioEnumMeta):
-            # validate enum values if they are passed as enum consts
-            return self._validate_field(expected_type, value.value)
-        elif isclass(expected_type) and issubclass(expected_type, JsonObject):
-            # if the object is already decoded, determine whether it's
-            # a subtype of what the field expects
-            if isinstance(value, JsonObject):
-                return isinstance(value, expected_type)
-            try:
-                # XXX: otherwise, expand objects to run their own validation.
-                #   this is *slow*, but needed to validate deeply nested types
-                expected_type.from_json(value)
-            except:
-                return False
-            return True
-        elif islist(expected_type) and isinstance(value, list):
-            if not value:
-                return True  # empty lists are always valid
-            expected_type = expected_type.__args__[0]
-            return all(self._validate_field(expected_type, o) for o in value)
-        return False
+        """Provides optional validation for dataclass fields."""
 
     def to_json(self) -> Any:
         """Converts the object to a JSON-compatible copy of itself.

@@ -1,0 +1,51 @@
+[
+    {
+        "href": "/orgs/1/sec_policy/draft/label_groups/22016906-613a-4f87-9f6c-70e753868be0",
+        "created_at": "2023-07-20T16:12:35.882Z",
+        "updated_at": "2023-07-20T16:13:16.862Z",
+        "deleted_at": null,
+        "created_by": {
+            "href": "/users/3"
+        },
+        "updated_by": {
+            "href": "/users/3"
+        },
+        "deleted_by": null,
+        "update_type": null,
+        "name": "LG-L-Datacenters",
+        "description": "",
+        "key": "loc",
+        "labels": [],
+        "sub_groups": [
+            {
+                "href": "/orgs/1/sec_policy/draft/label_groups/21380320-6635-4f4c-8276-e98038f156cd",
+                "name": "LG-L-US-Datacenters"
+            }
+        ]
+    },
+    {
+        "href": "/orgs/1/sec_policy/draft/label_groups/21380320-6635-4f4c-8276-e98038f156cd",
+        "created_at": "2023-07-20T16:12:51.465Z",
+        "updated_at": "2023-07-20T16:13:05.772Z",
+        "deleted_at": null,
+        "created_by": {
+            "href": "/users/3"
+        },
+        "updated_by": {
+            "href": "/users/3"
+        },
+        "deleted_by": null,
+        "update_type": null,
+        "name": "LG-L-US-Datacenters",
+        "description": "",
+        "key": "loc",
+        "labels": [
+            {
+                "href": "/orgs/1/labels/13",
+                "key": "loc",
+                "value": "Rackspace"
+            }
+        ],
+        "sub_groups": []
+    }
+]
