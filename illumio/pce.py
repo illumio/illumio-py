@@ -640,16 +640,36 @@ class PolicyComputeEngine:
         def _bulk_change(self, objects: List[Reference], method: str, success_status: str, **kwargs) -> List[dict]:
             results = []
             kwargs['include_org'] = False
+
             while objects:
                 kwargs['json'] = objects[:BULK_CHANGE_LIMIT]
                 objects = objects[BULK_CHANGE_LIMIT:]
                 endpoint = self._build_endpoint(DRAFT, None)
                 response = self.pce.put('{}/{}'.format(endpoint, method), **kwargs)
-                for result in response.json():
+                results += self._collect_bulk_results(response, success_status)
+
+            return results
+
+        def _collect_bulk_results(self, resp: Response, success_status: str) -> List[dict]:
+            results = []
+            response_json = resp.json()
+
+            if not islist(type(response_json)):
+                response_json = [response_json]
+
+            for result in response_json:
+                if isinstance(result, dict):
                     errors = result.get('errors', [])
-                    if success_status and result['status'] != success_status:
-                        errors.append({'token': result['token'], 'message': result['message']})
-                    results.append({'href': result['href'], 'errors': errors})
+                    if not errors and success_status and result.get('status') != success_status:
+                        errors.append({
+                            'token': result.get('token', 'bulk_change_error'),
+                            'message': result.get('message', json.dumps(result))
+                        })
+                    results.append({'href': result.get('href'), 'errors': errors})
+                else:
+                    errors = [{'token': 'bulk_change_error', 'message': json.dumps(result)}]
+                    results.append({'href': None, 'errors': errors})
+
             return results
 
         def bulk_create(self, objects_to_create: List[Reference], **kwargs) -> List[dict]:
@@ -670,7 +690,7 @@ class PolicyComputeEngine:
                     ...     {
                     ...         'href': {object_href},
                     ...         'errors': [
-                    ...              {
+                    ...             {
                     ...                 'token': {error_type},
                     ...                 'message': {error_message}
                     ...             }
@@ -713,7 +733,7 @@ class PolicyComputeEngine:
             **NOTE:** Bulk updates can currently only be applied for Workloads.
 
             Args:
-                hrefs (List[Union[str, Reference, dict]]): list of references to objects to delete.
+                refs (List[Union[str, Reference, dict]]): list of references to objects to delete.
 
             Returns:
                 List[dict]: a list containing any errors that occurred during

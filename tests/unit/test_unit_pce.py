@@ -281,3 +281,146 @@ def test_error_handling(status_code, error_resp, messages, requests_mock, pce):
 
     for message in messages:
         assert message in str(exc_info.value)
+
+
+@pytest.mark.parametrize(
+    "objs,responses,expected_results", [
+        (
+            [
+                {
+                    "href": "/orgs/1/workloads/e84e57ff-39ee-475d-9e20-4ec6734b48ec"
+                },
+                {
+                    "href": "/orgs/1/workloads/f0a18d81-6bc3-41f5-86ad-e395919a73e5"
+                }
+            ],
+            [
+                {
+                    "href": "/orgs/1/workloads/e84e57ff-39ee-475d-9e20-4ec6734b48ec",
+                    "status": "updated"
+                },
+                {
+                    "href": "/orgs/1/workloads/f0a18d81-6bc3-41f5-86ad-e395919a73e5",
+                    "status": "updated"
+                }
+            ],
+            [
+                {
+                    "href": "/orgs/1/workloads/e84e57ff-39ee-475d-9e20-4ec6734b48ec",
+                    "errors": []
+                },
+                {
+                    "href": "/orgs/1/workloads/f0a18d81-6bc3-41f5-86ad-e395919a73e5",
+                    "errors": []
+                },
+            ]
+        ),
+        (
+            [
+                {
+                    "href": "/orgs/1/workloads/43f93186-b415-4934-aaf6-e8206ff1f12c"
+                }
+            ],
+            [
+                {
+                    "href": "/orgs/1/workloads/43f93186-b415-4934-aaf6-e8206ff1f12c",
+                    "status": "failed",
+                    "token": "invalid_uri",
+                    "message": "Invalid URI: {/orgs/1/workloads/43f93186-b415-4934-aaf6-e8206ff1f12c}"
+                }
+            ],
+            [
+                {
+                    "href": "/orgs/1/workloads/43f93186-b415-4934-aaf6-e8206ff1f12c",
+                    "errors": [
+                        {
+                            "token": "invalid_uri",
+                            "message": "Invalid URI: {/orgs/1/workloads/43f93186-b415-4934-aaf6-e8206ff1f12c}"
+                        }
+                    ]
+                }
+            ]
+        ),
+        (
+            [
+                {
+                    "href": "/orgs/1/workloads/27920c5b-8b27-423e-bda8-83ec955a2e13"
+                },
+                {
+                    "href": "/orgs/1/workloads/b35ea3f2-458f-42f3-b2d5-957e771c1cfc"
+                }
+            ],
+            [
+                {
+                    "href": "/orgs/1/workloads/27920c5b-8b27-423e-bda8-83ec955a2e13",
+                    "status": "failed",
+                    "error": "server_error"
+                },
+                {
+                    "error": "server_error"
+                }
+            ],
+            [
+                {
+                    "href": "/orgs/1/workloads/27920c5b-8b27-423e-bda8-83ec955a2e13",
+                    "errors": [
+                        {
+                            "token": "bulk_change_error",
+                            "message": "{\"href\": \"/orgs/1/workloads/27920c5b-8b27-423e-bda8-83ec955a2e13\", \"status\": \"failed\", \"error\": \"server_error\"}"
+                        }
+                    ]
+                },
+                {
+                    "href": None,
+                    "errors": [{"token": "bulk_change_error", "message": "{\"error\": \"server_error\"}"}]
+                }
+            ]
+        ),
+        (
+            [
+                {
+                    "href": "/orgs/1/workloads/1313d3f8-3ecd-44b2-adfe-bf23f5752513"
+                }
+            ],
+            [
+                {
+                    "href": "/orgs/1/workloads/1313d3f8-3ecd-44b2-adfe-bf23f5752513",
+                    "status": "failed",
+                    "errors": [
+                        {
+                            "token": "method_not_allowed_error",
+                            "message": "Not allowed"
+                        },
+                        {
+                            "token": "not_found_error",
+                            "message": "Not found"
+                        }
+                    ]
+                }
+            ],
+            [
+                {
+                    "href": "/orgs/1/workloads/1313d3f8-3ecd-44b2-adfe-bf23f5752513",
+                    "errors": [
+                        {
+                            "token": "method_not_allowed_error",
+                            "message": "Not allowed"
+                        },
+                        {
+                            "token": "not_found_error",
+                            "message": "Not found"
+                        }
+                    ]
+                }
+            ]
+        ),
+    ]
+)
+def test_bulk_error_handling(objs, responses, expected_results, requests_mock, pce):
+    requests_mock.register_uri(
+        ANY, ANY, json=responses,
+        headers={"Content-Type": "application/json"}
+    )
+
+    results = pce.workloads.bulk_update(objs)
+    assert results == expected_results
