@@ -24,8 +24,13 @@ jobs:
       matrix:
         python-version: ["3.6", "3.7", "3.8", "3.9", "3.10"]
         os: [ubuntu-latest, macOS-latest, windows-latest]
+        exclude:
+          - python-version: "3.6"
+            os: ubuntu-latest
         include:
-          - python-version: 3.11-dev
+          - python-version: "3.6"
+            os: ubuntu-20.04
+          - python-version: "3.11-dev"
             os: ubuntu-latest
             experimental: true
 
