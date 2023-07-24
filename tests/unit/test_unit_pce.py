@@ -1,13 +1,18 @@
 import os
 import re
 from collections import namedtuple
+from contextlib import suppress as does_not_raise
 from dataclasses import fields
 
 import pytest
+from requests_mock import ANY
 
 from illumio import PolicyComputeEngine
 from illumio.accessmanagement import User
-from illumio.exceptions import IllumioIntegerValidationException
+from illumio.exceptions import (
+    IllumioApiException,
+    IllumioIntegerValidationException,
+)
 from illumio.infrastructure import ContainerWorkloadProfile
 from illumio.policyobjects import Label
 from illumio.rules import Rule
@@ -18,54 +23,44 @@ from mocks import MockResponse
 TLS_DIR = os.path.join(pytest.DATA_DIR, 'tls')
 
 
-def test_custom_protocol():
-    pce = PolicyComputeEngine('http://my.pce.com')
-    assert pce.base_url == 'http://my.pce.com:443/api/v2'
+@pytest.mark.parametrize(
+    "url,expected_base_url", [
+        ("http://my.pce.com", "http://my.pce.com:443/api/v2"),
+        ("ftp://my.pce.com", "https://my.pce.com:443/api/v2"),
+        ("httpslab.pce.com", "https://httpslab.pce.com:443/api/v2"),
+        ("my.pce.com/api/v2", "https://my.pce.com:443/api/v2"),
+    ]
+)
+def test_url_parsing(url, expected_base_url):
+    pce = PolicyComputeEngine(url)
+    assert pce.base_url == expected_base_url
 
 
-def test_invalid_protocol():
-    pce = PolicyComputeEngine('ftp://my.pce.com')
-    assert pce.base_url == 'https://my.pce.com:443/api/v2'
+@pytest.mark.parametrize(
+    "org_id,expected", [
+        (1, does_not_raise()),
+        ("1", does_not_raise()),
+        ("invalid", pytest.raises(IllumioIntegerValidationException)),
+        (0, pytest.raises(IllumioIntegerValidationException)),
+    ]
+)
+def test_org_id_values(org_id, expected):
+    with expected:
+        PolicyComputeEngine('my.pce.com', org_id=org_id)
 
 
-def test_protocol_parsing():
-    pce = PolicyComputeEngine('httpslab.pce.com')
-    assert pce.base_url == 'https://httpslab.pce.com:443/api/v2'
-
-
-def test_path_parsing():
-    pce = PolicyComputeEngine('my.pce.com/api/v2')
-    assert pce.base_url == 'https://my.pce.com:443/api/v2'
-
-
-def test_int_org_id():
-    pce = PolicyComputeEngine('my.pce.com', org_id=1)
-    assert pce.base_url == 'https://my.pce.com:443/api/v2'
-
-
-def test_invalid_org_id():
-    with pytest.raises(IllumioIntegerValidationException):
-        PolicyComputeEngine('my.pce.com', org_id='invalid')
-
-
-def test_org_id_lower_bound():
-    with pytest.raises(IllumioIntegerValidationException):
-        PolicyComputeEngine('my.pce.com', org_id=0)
-
-
-def test_invalid_port():
-    with pytest.raises(IllumioIntegerValidationException):
-        PolicyComputeEngine('my.pce.com', port='invalid')
-
-
-def test_port_lower_bound():
-    with pytest.raises(IllumioIntegerValidationException):
-        PolicyComputeEngine('my.pce.com', port=-1)
-
-
-def test_port_upper_bound():
-    with pytest.raises(IllumioIntegerValidationException):
-        PolicyComputeEngine('my.pce.com', port=65536)
+@pytest.mark.parametrize(
+    "port,expected", [
+        (443, does_not_raise()),
+        (65535, does_not_raise()),
+        ("invalid", pytest.raises(IllumioIntegerValidationException)),
+        (-1, pytest.raises(IllumioIntegerValidationException)),
+        (65536, pytest.raises(IllumioIntegerValidationException)),
+    ]
+)
+def test_port_values(port, expected):
+    with expected:
+        PolicyComputeEngine('my.pce.com', port=port)
 
 
 _API = namedtuple('API', [
@@ -252,3 +247,37 @@ def test_pce_apis(api_name, endpoint, ObjectClass, is_sec_policy, pce,
     api.delete(obj.href)
     objs = api.get(policy_version=policy_version)
     assert len(objs) == 0
+
+
+@pytest.mark.parametrize(
+    "status_code,error_resp,messages", [
+        (410, 410, ["410"]),
+        (
+            400,
+            [{"token": "invalid_argument", "message": "No such argument: 'foo'"}],
+            ["invalid_argument: No such argument: 'foo'"]
+        ),
+        (
+            500,
+            [{"error": "server error"}, {"error": "server busy"}],
+            ["server error", "server busy"]
+        ),
+        (
+            500,
+            [{"exception": "server error"}],
+            ["{'exception': 'server error'}"]
+        ),
+    ]
+)
+def test_error_handling(status_code, error_resp, messages, requests_mock, pce):
+    requests_mock.register_uri(
+        ANY, ANY,
+        status_code=status_code, json=error_resp,
+        headers={"Content-Type": "application/json"}
+    )
+
+    with pytest.raises(IllumioApiException) as exc_info:
+        pce.labels.get()
+
+    for message in messages:
+        assert message in str(exc_info.value)

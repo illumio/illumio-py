@@ -42,6 +42,7 @@ from .util import (
     parse_url,
     href_from,
     validate_int,
+    islist,
     Reference,
     IllumioEncoder,
     ACTIVE,
@@ -228,11 +229,17 @@ class PolicyComputeEngine:
 
     def _get_error_message_from_response(self, response: Response) -> str:
         message = "API call returned error code {}. Errors:".format(response.status_code)
-        for error in response.json():
-            if error and 'token' in error and 'message' in error:
-                message += '\n{}: {}'.format(error['token'], error['message'])
-            elif error and 'error' in error:
-                message += '\n{}'.format(error['error'])
+        error_response = response.json()
+        if islist(type(error_response)):
+            for error in error_response:
+                if error and 'token' in error and 'message' in error:
+                    message += '\n{}: {}'.format(error['token'], error['message'])
+                elif error and 'error' in error:
+                    message += '\n{}'.format(error['error'])
+                else:
+                    message += '\n{}'.format(error)
+        else:
+            message += '\n{}'.format(error_response)
         return message
 
     def get(self, endpoint: str, **kwargs) -> Response:
