@@ -1,13 +1,18 @@
 import os
 import re
 from collections import namedtuple
+from contextlib import suppress as does_not_raise
 from dataclasses import fields
 
 import pytest
+from requests_mock import ANY
 
 from illumio import PolicyComputeEngine
 from illumio.accessmanagement import User
-from illumio.exceptions import IllumioIntegerValidationException
+from illumio.exceptions import (
+    IllumioApiException,
+    IllumioIntegerValidationException,
+)
 from illumio.infrastructure import ContainerWorkloadProfile
 from illumio.policyobjects import Label
 from illumio.rules import Rule
@@ -18,54 +23,44 @@ from mocks import MockResponse
 TLS_DIR = os.path.join(pytest.DATA_DIR, 'tls')
 
 
-def test_custom_protocol():
-    pce = PolicyComputeEngine('http://my.pce.com')
-    assert pce.base_url == 'http://my.pce.com:443/api/v2'
+@pytest.mark.parametrize(
+    "url,expected_base_url", [
+        ("http://my.pce.com", "http://my.pce.com:443/api/v2"),
+        ("ftp://my.pce.com", "https://my.pce.com:443/api/v2"),
+        ("httpslab.pce.com", "https://httpslab.pce.com:443/api/v2"),
+        ("my.pce.com/api/v2", "https://my.pce.com:443/api/v2"),
+    ]
+)
+def test_url_parsing(url, expected_base_url):
+    pce = PolicyComputeEngine(url)
+    assert pce.base_url == expected_base_url
 
 
-def test_invalid_protocol():
-    pce = PolicyComputeEngine('ftp://my.pce.com')
-    assert pce.base_url == 'https://my.pce.com:443/api/v2'
+@pytest.mark.parametrize(
+    "org_id,expected", [
+        (1, does_not_raise()),
+        ("1", does_not_raise()),
+        ("invalid", pytest.raises(IllumioIntegerValidationException)),
+        (0, pytest.raises(IllumioIntegerValidationException)),
+    ]
+)
+def test_org_id_values(org_id, expected):
+    with expected:
+        PolicyComputeEngine('my.pce.com', org_id=org_id)
 
 
-def test_protocol_parsing():
-    pce = PolicyComputeEngine('httpslab.pce.com')
-    assert pce.base_url == 'https://httpslab.pce.com:443/api/v2'
-
-
-def test_path_parsing():
-    pce = PolicyComputeEngine('my.pce.com/api/v2')
-    assert pce.base_url == 'https://my.pce.com:443/api/v2'
-
-
-def test_int_org_id():
-    pce = PolicyComputeEngine('my.pce.com', org_id=1)
-    assert pce.base_url == 'https://my.pce.com:443/api/v2'
-
-
-def test_invalid_org_id():
-    with pytest.raises(IllumioIntegerValidationException):
-        PolicyComputeEngine('my.pce.com', org_id='invalid')
-
-
-def test_org_id_lower_bound():
-    with pytest.raises(IllumioIntegerValidationException):
-        PolicyComputeEngine('my.pce.com', org_id=0)
-
-
-def test_invalid_port():
-    with pytest.raises(IllumioIntegerValidationException):
-        PolicyComputeEngine('my.pce.com', port='invalid')
-
-
-def test_port_lower_bound():
-    with pytest.raises(IllumioIntegerValidationException):
-        PolicyComputeEngine('my.pce.com', port=-1)
-
-
-def test_port_upper_bound():
-    with pytest.raises(IllumioIntegerValidationException):
-        PolicyComputeEngine('my.pce.com', port=65536)
+@pytest.mark.parametrize(
+    "port,expected", [
+        (443, does_not_raise()),
+        (65535, does_not_raise()),
+        ("invalid", pytest.raises(IllumioIntegerValidationException)),
+        (-1, pytest.raises(IllumioIntegerValidationException)),
+        (65536, pytest.raises(IllumioIntegerValidationException)),
+    ]
+)
+def test_port_values(port, expected):
+    with expected:
+        PolicyComputeEngine('my.pce.com', port=port)
 
 
 _API = namedtuple('API', [
@@ -252,3 +247,180 @@ def test_pce_apis(api_name, endpoint, ObjectClass, is_sec_policy, pce,
     api.delete(obj.href)
     objs = api.get(policy_version=policy_version)
     assert len(objs) == 0
+
+
+@pytest.mark.parametrize(
+    "status_code,error_resp,messages", [
+        (410, 410, ["410"]),
+        (
+            400,
+            [{"token": "invalid_argument", "message": "No such argument: 'foo'"}],
+            ["invalid_argument: No such argument: 'foo'"]
+        ),
+        (
+            500,
+            [{"error": "server error"}, {"error": "server busy"}],
+            ["server error", "server busy"]
+        ),
+        (
+            500,
+            [{"exception": "server error"}],
+            ["{'exception': 'server error'}"]
+        ),
+    ]
+)
+def test_error_handling(status_code, error_resp, messages, requests_mock, pce):
+    requests_mock.register_uri(
+        ANY, ANY,
+        status_code=status_code, json=error_resp,
+        headers={"Content-Type": "application/json"}
+    )
+
+    with pytest.raises(IllumioApiException) as exc_info:
+        pce.labels.get()
+
+    for message in messages:
+        assert message in str(exc_info.value)
+
+
+@pytest.mark.parametrize(
+    "objs,responses,expected_results", [
+        (
+            [
+                {
+                    "href": "/orgs/1/workloads/e84e57ff-39ee-475d-9e20-4ec6734b48ec"
+                },
+                {
+                    "href": "/orgs/1/workloads/f0a18d81-6bc3-41f5-86ad-e395919a73e5"
+                }
+            ],
+            [
+                {
+                    "href": "/orgs/1/workloads/e84e57ff-39ee-475d-9e20-4ec6734b48ec",
+                    "status": "updated"
+                },
+                {
+                    "href": "/orgs/1/workloads/f0a18d81-6bc3-41f5-86ad-e395919a73e5",
+                    "status": "updated"
+                }
+            ],
+            [
+                {
+                    "href": "/orgs/1/workloads/e84e57ff-39ee-475d-9e20-4ec6734b48ec",
+                    "errors": []
+                },
+                {
+                    "href": "/orgs/1/workloads/f0a18d81-6bc3-41f5-86ad-e395919a73e5",
+                    "errors": []
+                },
+            ]
+        ),
+        (
+            [
+                {
+                    "href": "/orgs/1/workloads/43f93186-b415-4934-aaf6-e8206ff1f12c"
+                }
+            ],
+            [
+                {
+                    "href": "/orgs/1/workloads/43f93186-b415-4934-aaf6-e8206ff1f12c",
+                    "status": "failed",
+                    "token": "invalid_uri",
+                    "message": "Invalid URI: {/orgs/1/workloads/43f93186-b415-4934-aaf6-e8206ff1f12c}"
+                }
+            ],
+            [
+                {
+                    "href": "/orgs/1/workloads/43f93186-b415-4934-aaf6-e8206ff1f12c",
+                    "errors": [
+                        {
+                            "token": "invalid_uri",
+                            "message": "Invalid URI: {/orgs/1/workloads/43f93186-b415-4934-aaf6-e8206ff1f12c}"
+                        }
+                    ]
+                }
+            ]
+        ),
+        (
+            [
+                {
+                    "href": "/orgs/1/workloads/27920c5b-8b27-423e-bda8-83ec955a2e13"
+                },
+                {
+                    "href": "/orgs/1/workloads/b35ea3f2-458f-42f3-b2d5-957e771c1cfc"
+                }
+            ],
+            [
+                {
+                    "href": "/orgs/1/workloads/27920c5b-8b27-423e-bda8-83ec955a2e13",
+                    "status": "failed",
+                    "error": "server_error"
+                },
+                {
+                    "error": "server_error"
+                }
+            ],
+            [
+                {
+                    "href": "/orgs/1/workloads/27920c5b-8b27-423e-bda8-83ec955a2e13",
+                    "errors": [
+                        {
+                            "token": "bulk_change_error",
+                            "message": "{\"href\": \"/orgs/1/workloads/27920c5b-8b27-423e-bda8-83ec955a2e13\", \"status\": \"failed\", \"error\": \"server_error\"}"
+                        }
+                    ]
+                },
+                {
+                    "href": None,
+                    "errors": [{"token": "bulk_change_error", "message": "{\"error\": \"server_error\"}"}]
+                }
+            ]
+        ),
+        (
+            [
+                {
+                    "href": "/orgs/1/workloads/1313d3f8-3ecd-44b2-adfe-bf23f5752513"
+                }
+            ],
+            [
+                {
+                    "href": "/orgs/1/workloads/1313d3f8-3ecd-44b2-adfe-bf23f5752513",
+                    "status": "failed",
+                    "errors": [
+                        {
+                            "token": "method_not_allowed_error",
+                            "message": "Not allowed"
+                        },
+                        {
+                            "token": "not_found_error",
+                            "message": "Not found"
+                        }
+                    ]
+                }
+            ],
+            [
+                {
+                    "href": "/orgs/1/workloads/1313d3f8-3ecd-44b2-adfe-bf23f5752513",
+                    "errors": [
+                        {
+                            "token": "method_not_allowed_error",
+                            "message": "Not allowed"
+                        },
+                        {
+                            "token": "not_found_error",
+                            "message": "Not found"
+                        }
+                    ]
+                }
+            ]
+        ),
+    ]
+)
+def test_bulk_error_handling(objs, responses, expected_results, requests_mock, pce):
+    requests_mock.register_uri(
+        ANY, ANY, json=responses,
+        headers={"Content-Type": "application/json"}
+    )
+
+    results = pce.workloads.bulk_update(objs)
+    assert results == expected_results
