@@ -4,7 +4,6 @@ import re
 from typing import List
 
 import pytest
-from requests_mock import ANY
 
 from illumio.rules import Rule
 

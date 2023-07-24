@@ -5,7 +5,6 @@ from datetime import datetime, timezone
 from typing import List
 
 import pytest
-from requests_mock import ANY
 
 from illumio import IllumioException
 from illumio.explorer import TrafficQuery, TrafficQueryFilterBlock, TrafficFlow
