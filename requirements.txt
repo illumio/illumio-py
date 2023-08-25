@@ -4,5 +4,3 @@ pytest
 pytest-cov
 requests>=2.26.0
 requests-mock
-
-tqdm~=4.66.1
