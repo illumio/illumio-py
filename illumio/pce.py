@@ -27,7 +27,6 @@ License:
 import json
 import time
 from typing import Any, List, Union
-
 from requests import Session, Response
 from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
@@ -942,12 +941,14 @@ class PolicyComputeEngine:
             response.raise_for_status()
             query_status = response.json()
             location = query_status['href']
-
             collection_href = self._async_poll(location)
-
             response = self.get(collection_href)
             response.raise_for_status()
-            return [TrafficFlow.from_json(flow) for flow in response.json()]
+            raw_flow_data = response.json()
+            if len(raw_flow_data) > 10000:
+                return TrafficFlow.from_json_mp(raw_flow_data)
+            else:
+                return [TrafficFlow.from_json(flow) for flow in raw_flow_data]
         except Exception as e:
             raise IllumioApiException from e
 
