@@ -24,9 +24,7 @@ Copyright:
 License:
     Apache2, see LICENSE for more details.
 """
-import concurrent.futures
 import json
-import multiprocessing
 import time
 from typing import Any, List, Union
 from requests import Session, Response
