@@ -947,7 +947,7 @@ class PolicyComputeEngine:
             response = self.get(collection_href)
             response.raise_for_status()
             raw_flow_data = response.json()
-            if len(response.json()) > 10000:
+            if len(raw_flow_data) > 10000:
                 return TrafficFlow.from_json_mp(raw_flow_data)
             else:
                 return [TrafficFlow.from_json(flow) for flow in raw_flow_data]
