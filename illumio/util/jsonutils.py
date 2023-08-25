@@ -18,6 +18,7 @@ from abc import ABC
 from dataclasses import Field, dataclass, fields
 from inspect import signature, isclass
 from typing import List, Any, Union
+from multiprocessing import Pool, cpu_count
 
 from illumio.exceptions import IllumioException
 
@@ -99,6 +100,19 @@ class JsonObject(ABC):
 
         o._decode_complex_types()
         return o
+
+    @classmethod
+    def from_json_mp(cls, data_list: List[Any], max_workers=None) -> List['JsonObject']:
+        """
+        Multi-process wrapper for from_json to process multiple JSON objects.
+        """
+        max_workers = max_workers or (cpu_count() // 2)
+        chunksize = int(len(data_list) / (10 * cpu_count))
+
+        with Pool(max_workers) as pool:
+            results = pool.map(cls.from_json, data_list, chunksize=chunksize)
+
+        return results
 
     def _decode_complex_types(self) -> None:
         for field in fields(self):

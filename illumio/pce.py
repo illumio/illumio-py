@@ -946,19 +946,10 @@ class PolicyComputeEngine:
             collection_href = self._async_poll(location)
             response = self.get(collection_href)
             response.raise_for_status()
-            raw_flow_data = response.json()
-            rfd_len = len(raw_flow_data)
-            if rfd_len == 0:
-                return []
+            if len(response.json()) > 10000:
+                return TrafficFlow.from_json_mp(raw_flow_data)
             else:
-                if rfd_len > 10000:
-                    cpu_count = multiprocessing.cpu_count()
-                    chunksize = int(rfd_len / (10 * cpu_count))
-                    with concurrent.futures.ProcessPoolExecutor(max_workers=cpu_count/2) as executor:
-                        return list(executor.map(TrafficFlow.from_json, raw_flow_data, chunksize=chunksize))
-                else:
-                    results = [TrafficFlow.from_json(flow) for flow in raw_flow_data]
-            return results
+                return [TrafficFlow.from_json(flow) for flow in raw_flow_data]
         except Exception as e:
             raise IllumioApiException from e
 
