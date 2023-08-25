@@ -946,6 +946,7 @@ class PolicyComputeEngine:
             collection_href = self._async_poll(location)
             response = self.get(collection_href)
             response.raise_for_status()
+            raw_flow_data = response.json()
             if len(response.json()) > 10000:
                 return TrafficFlow.from_json_mp(raw_flow_data)
             else:
