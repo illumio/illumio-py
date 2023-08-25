@@ -29,8 +29,6 @@ import json
 import multiprocessing
 import time
 from typing import Any, List, Union
-
-from tqdm import tqdm
 from requests import Session, Response
 from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
@@ -943,29 +941,26 @@ class PolicyComputeEngine:
             kwargs['include_org'] = True
             response = self.post('/traffic_flows/async_queries', **kwargs)
             response.raise_for_status()
-            print(f"Transforming Json data into TrafficFlow Objects...")
+            query_status = response.json()
+            location = query_status['href']
+            collection_href = self._async_poll(location)
+            response = self.get(collection_href)
+            response.raise_for_status()
             raw_flow_data = response.json()
             rfd_len = len(raw_flow_data)
             if rfd_len == 0:
                 return []
-            if rfd_len > 10000:
-                print(f"Traffic Search Returned: {rfd_len} flows, using multiprocessing...")
-                cpu_count = multiprocessing.cpu_count()
-                chunksize = int(len(raw_flow_data) / (10 * cpu_count))
-                with concurrent.futures.ProcessPoolExecutor(max_workers=cpu_count/2) as executor:
-                    results = list(
-                        tqdm(executor.map(self._transform_traffic_flows, raw_flow_data, chunksize=chunksize), total=len(raw_flow_data), desc="Loading Traffic Search Results",
-                             unit="flows"))
             else:
-                print(f"Traffic Search Returned: {len(raw_flow_data)} flows, using single process...")
-                results = [TrafficFlow.from_json(flow) for flow in raw_flow_data]
+                if rfd_len > 10000:
+                    cpu_count = multiprocessing.cpu_count()
+                    chunksize = int(rfd_len / (10 * cpu_count))
+                    with concurrent.futures.ProcessPoolExecutor(max_workers=cpu_count/2) as executor:
+                        return list(executor.map(TrafficFlow.from_json, raw_flow_data, chunksize=chunksize))
+                else:
+                    results = [TrafficFlow.from_json(flow) for flow in raw_flow_data]
             return results
         except Exception as e:
             raise IllumioApiException from e
-
-    @staticmethod
-    def _transform_traffic_flows(flow):
-        return TrafficFlow.from_json(flow)
 
     def provision_policy_changes(self, change_description: str, hrefs: List[str], **kwargs) -> PolicyVersion:
         """Provisions policy changes for draft objects with the given HREFs.
