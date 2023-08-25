@@ -1,6 +1,9 @@
 -e .
 dataclasses>=0.8; python_version == '3.6'
-pytest
+pytest~=7.2.2
 pytest-cov
 requests>=2.26.0
 requests-mock
+
+tqdm~=4.66.1
+urllib3~=1.26.15
