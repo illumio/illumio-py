@@ -132,6 +132,12 @@ class JsonObject(ABC):
             # if the value is a list, expect the field type to be List[T]
             type_ = type_.__args__[0]
             return list(self._decode_field(type_, o) for o in value)
+        elif isinstance(value, dict):
+            if hasattr(type_, '__args__') and len(type_.__args__) == 2:
+                return {k: self._decode_field(type_.__args__[1], v) for k, v in value.items()}
+            else:
+                return {k: v for k, v in value.items()}
+            # return {k: self._decode_field(type_.__args__[1], v) for k, v in value.items()}
         return value
 
 

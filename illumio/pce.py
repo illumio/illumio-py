@@ -503,7 +503,10 @@ class PolicyComputeEngine:
             """
             endpoint = self._build_endpoint(policy_version, parent)
             response = self.pce.get(endpoint, **{**kwargs, **{'include_org': False}})
-            return [self.object_cls.from_json(o) for o in response.json()]
+            if islist(response.json()):
+                return [self.object_cls.from_json(o) for o in response.json()]
+            elif type(response.json()) is dict:
+                return self.object_cls.from_json(response.json())
 
         def get_all(self, policy_version: str = DRAFT, parent: Union[str, Reference, dict] = None, **kwargs) -> List[Reference]:
             """Retrieves all objects of a given type from the PCE.
