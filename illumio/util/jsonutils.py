@@ -137,7 +137,6 @@ class JsonObject(ABC):
                 return {k: self._decode_field(type_.__args__[1], v) for k, v in value.items()}
             else:
                 return {k: v for k, v in value.items()}
-            # return {k: self._decode_field(type_.__args__[1], v) for k, v in value.items()}
         return value
 
 

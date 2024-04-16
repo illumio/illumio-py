@@ -10,12 +10,12 @@ License:
 
 """
 
-from enum import Enum
-from dataclasses import dataclass, field
-from typing import List
+from dataclasses import dataclass
 from datetime import datetime
+from enum import Enum
+from typing import List
 
-from illumio.util import Reference, pce_api, JsonObject, MutableObject, ImmutableObject
+from illumio.util import pce_api, JsonObject
 
 
 class visibility_level_key_types(Enum):
@@ -70,7 +70,6 @@ class AppGroupSummary(JsonObject):
     App groups can contain labels in an Array representing the label hrefs that constitute the AppGroup
     """
     nodes: List[AppGroup] = None
-    # labels: dict[str, AppGroupLabelData] = field(default_factory=dict)
     labels: dict[str, AppGroupLabel] = None
     mode_key: List[mode_key_types] = None
     visibility_level_key: List[visibility_level_key_types] = None
