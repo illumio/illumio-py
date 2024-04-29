@@ -34,6 +34,7 @@ def _gen_int_id():
 
 
 OBJECT_TYPE_REF_MAP = {
+    'app_group_summary': _gen_uuid,
     'container_clusters': _gen_uuid,
     'container_workload_profiles': _gen_uuid,
     'enforcement_boundaries': _gen_int_id,
