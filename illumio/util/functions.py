@@ -152,7 +152,7 @@ def parse_url(url: str) -> tuple:
     Returns:
         tuple: parsed (scheme, hostname)
     """
-    pattern = re.compile('^\w+://')
+    pattern = re.compile(r'^\w+://')
     if not re.match(pattern, url):
         url = 'https://{}'.format(url)
     parsed = urlparse(url)

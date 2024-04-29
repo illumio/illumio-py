@@ -46,8 +46,8 @@ ICMP_CODE_MAX = 15
 #: See https://www.iana.org/assignments/icmp-parameters/icmp-parameters.xhtml#icmp-parameters-types
 ICMP_TYPE_MAX = 255
 
-FQDN_REGEX = re.compile('(?=^.{4,253}$)(^((?!-)[a-zA-Z0-9-]{1,63}(?<!-)\.)+[a-zA-Z]{2,63}$)')
-HREF_REGEX = re.compile('^\/orgs\/\d+\/(?:sec_policy\/(?:active|draft)\/)?(?P<type>[a-zA-Z_]+)\/(?P<uid>[a-zA-Z0-9-]+)$')
+FQDN_REGEX = re.compile(r'(?=^.{4,253}$)(^((?!-)[a-zA-Z0-9-]{1,63}(?<!-)\.)+[a-zA-Z]{2,63}$)')
+HREF_REGEX = re.compile(r'^/orgs/\d+/(?:sec_policy/(?:active|draft)/)?(?P<type>[a-zA-Z_]+)/(?P<uid>[a-zA-Z0-9-]+)$')
 
 #: Upper limit on the number of objects that can be sent to PCE bulk change
 #: endpoints in a single request.
