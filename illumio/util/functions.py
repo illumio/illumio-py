@@ -189,8 +189,8 @@ def validate_int(val: typing.Any, minimum: int = 0, maximum: int = sys.maxsize) 
 
     Args:
         val (Any): value to validate.
-        min (int, optional): validation lower bound. Defaults to 0.
-        max (int, optional): validation upper bound. Defaults to sys.maxsize.
+        minimum (int, optional): validation lower bound. Defaults to 0.
+        maximum (int, optional): validation upper bound. Defaults to sys.maxsize.
 
     Raises:
         IllumioIntegerValidationException: if an invalid value is provided.
