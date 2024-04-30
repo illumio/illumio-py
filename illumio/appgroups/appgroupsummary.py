@@ -18,13 +18,13 @@ from typing import List, Dict, Optional
 from illumio.util import pce_api, JsonObject
 
 
-class visibility_level_key_types(Enum):
+class VisibilityLevelKeyTypes(Enum):
     BLOCKED = "blocked"
     OFF = "off"
     ALL = "all"
 
 
-class mode_key_types(Enum):
+class ModeKeyTypes(Enum):
     VISIBILITY = "visibility"
     ENFORCED = "enforced"
     IDLE = "idle"
@@ -71,8 +71,8 @@ class AppGroupSummary(JsonObject):
     """
     nodes: List[AppGroup] = None
     labels: Optional[Dict[str, AppGroupLabel]] = None
-    mode_key: List[mode_key_types] = None
-    visibility_level_key: List[visibility_level_key_types] = None
+    mode_key: List[ModeKeyTypes] = None
+    visibility_level_key: List[VisibilityLevelKeyTypes] = None
     signature: str = None
     updated_at: datetime = None
     version: int = None
