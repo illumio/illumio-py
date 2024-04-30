@@ -28,5 +28,5 @@ from types import ModuleType
 # `from illumio import *` by excluding them here
 __all__ = [
     export for export, o in globals().items()
-    if not (export.startswith('_') or isinstance(o, ModuleType))
+        if not (export.startswith('_') or isinstance(o, ModuleType))
 ]

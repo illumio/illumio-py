@@ -63,7 +63,6 @@ def deprecated(deprecated_in, message=None):
     Deprecation decorator, adapted from https://stackoverflow.com/a/30253848
     Will emit a warning when the decorated function is called.
     """
-
     def _deprecated(func):
         @functools.wraps(func)
         def wrapper(*args, **kwargs):
@@ -73,9 +72,7 @@ def deprecated(deprecated_in, message=None):
             warning_message = message or default_message
             warnings.warn(warning_message, category=DeprecationWarning, stacklevel=2)
             return func(*args, **kwargs)
-
         return wrapper
-
     return _deprecated
 
 
@@ -92,7 +89,6 @@ def pce_api(name: str, endpoint: str = None, is_sec_policy=False, is_global=Fals
     specified in the decorator function call.
 
     For example:
-
     >>> @pce_api('labels', endpoint='/labels')
     >>> class Label(IllumioObject):
     ...     ...
@@ -121,7 +117,6 @@ def pce_api(name: str, endpoint: str = None, is_sec_policy=False, is_global=Fals
             such as /health or /users. These APIs operate on the entire PCE rather
             than a single tenant, and don't need the /orgs/{org_id} prefix.
     """
-
     def _decorator(cls):
         @dataclass
         class __PCEApi:
@@ -130,7 +125,6 @@ def pce_api(name: str, endpoint: str = None, is_sec_policy=False, is_global=Fals
             object_class: object
             is_sec_policy: bool
             is_global: bool
-
         PCE_APIS[name] = __PCEApi(
             name=name,
             endpoint=endpoint or '/{}'.format(name),
@@ -139,13 +133,11 @@ def pce_api(name: str, endpoint: str = None, is_sec_policy=False, is_global=Fals
             is_global=is_global
         )
         return cls
-
     return _decorator
 
 
 def parse_url(url: str) -> tuple:
     """Parses given URL into its scheme and hostname, stripping port and path.
-
     Args:
         url (str): URL to parse.
 
@@ -164,7 +156,6 @@ def parse_url(url: str) -> tuple:
 
 def convert_protocol(protocol: str) -> int:
     """Given a protocol name, returns the integer ID of that protocol.
-
     Usage:
         >>> convert_protocol('tcp')
         6
@@ -186,7 +177,6 @@ def convert_protocol(protocol: str) -> int:
 
 def validate_int(val: typing.Any, minimum: int = 0, maximum: int = sys.maxsize) -> None:
     """Validates a given value is an integer and is within min <= val <= max.
-
     Args:
         val (Any): value to validate.
         minimum (int, optional): validation lower bound. Defaults to 0.
@@ -196,54 +186,35 @@ def validate_int(val: typing.Any, minimum: int = 0, maximum: int = sys.maxsize) 
         IllumioIntegerValidationException: if an invalid value is provided.
     """
     try:
-        valid = minimum <= int(val) <= maximum
-    except:  # catch the ValueError for invalid values
-        valid = False
-    if not valid:
+        if not minimum <= int(val) <= maximum:
+            raise IllumioIntegerValidationException(val, minimum, maximum)
+    except ValueError:
         raise IllumioIntegerValidationException(val, minimum, maximum)
 
 
 if hasattr(typing, 'get_origin'):
-    # python 3.8+ - introduces the get_origin function
+    # Python 3.8+
     def isunion(type_):
         return typing.get_origin(type_) is typing.Union
 
-
     def islist(type_):
-        if type_ is list:
-            return True
-        return typing.get_origin(type_) is list
+        return type_ is list or typing.get_origin(type_) is list
 
 elif hasattr(typing, '_GenericAlias'):
-    # python 3.7 - changes meta types to be based off the
-    # _GenericAlias supertype. __extra__ is now __origin__
+    # Python 3.7
     def isunion(type_):
-        if isinstance(type_, typing._GenericAlias):
-            return type_.__origin__ is typing.Union
-        return False
-
+        return isinstance(type_, getattr(typing, '_GenericAlias')) and getattr(type_, '__origin__', None) is typing.Union
 
     def islist(type_):
-        if type_ is list:
-            return True
-        if isinstance(type_, typing._GenericAlias):
-            return type_.__origin__ is list
-        return False
+        return type_ is list or (isinstance(type_, getattr(typing, '_GenericAlias')) and getattr(type_, '__origin__', None) is list)
 
 else:
-    # python 3.6
+    # Python 3.6
     def isunion(type_):
-        return isinstance(type_, typing._Union)
-
+        return isinstance(type_, getattr(typing, '_Union'))
 
     def islist(type_):
-        if type_ is list:
-            return True
-        # in 3.6, List's type is GenericMeta, so we
-        # instead check the __extra__ param
-        if hasattr(type_, '__extra__'):
-            return type_.__extra__ is list
-        return False
+        return type_ is list or (hasattr(type_, '__extra__') and type_.__extra__ is list)
 
 __all__ = [
     'ignore_empty_keys',

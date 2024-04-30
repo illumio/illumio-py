@@ -508,6 +508,8 @@ class PolicyComputeEngine:
             elif type(response.json()) is dict:
                 return self.object_cls.from_json(response.json())
 
+            return response.json()
+
         def get_all(self, policy_version: str = DRAFT, parent: Union[str, Reference, dict] = None, **kwargs) -> List[Reference]:
             """Retrieves all objects of a given type from the PCE.
 
