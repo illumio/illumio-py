@@ -162,6 +162,20 @@ class EventStatus(str, Enum, metaclass=IllumioEnumMeta):
     SUCCESS = 'success'
     FAILURE = 'failure'
 
+class VisibilityLevelKeyTypes(str, Enum, metaclass=IllumioEnumMeta):
+    BLOCKED = "blocked"
+    OFF = "off"
+    ALL = "all"
+
+
+class ModeKeyTypes(str, Enum, metaclass=IllumioEnumMeta):
+    VISIBILITY = "visibility"
+    ENFORCED = "enforced"
+    IDLE = "idle"
+    UNMANAGED = "unmanaged"
+    UNKNOWN = "unknown"
+    SELECTIVE = "selective"
+
 
 __all__ = [
     'ACTIVE',
@@ -191,4 +205,6 @@ __all__ = [
     'ChangeType',
     'EventSeverity',
     'EventStatus',
+    'VisibilityLevelKeyTypes',
+    'ModeKeyTypes'
 ]

@@ -12,25 +12,9 @@ License:
 
 from dataclasses import dataclass
 from datetime import datetime
-from enum import Enum
 from typing import List, Dict, Optional
 
-from illumio.util import pce_api, JsonObject
-
-
-class VisibilityLevelKeyTypes(Enum):
-    BLOCKED = "blocked"
-    OFF = "off"
-    ALL = "all"
-
-
-class ModeKeyTypes(Enum):
-    VISIBILITY = "visibility"
-    ENFORCED = "enforced"
-    IDLE = "idle"
-    UNMANAGED = "unmanaged"
-    UNKNOWN = "unknown"
-    SELECTIVE = "selective"
+from illumio.util import pce_api, JsonObject, ModeKeyTypes, VisibilityLevelKeyTypes
 
 
 @dataclass
