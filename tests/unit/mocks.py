@@ -25,13 +25,16 @@ def _id_seq_generator():
         yield next_id
         next_id += 1
 
+
 _id_sequence = _id_seq_generator()
 
 
 def _gen_int_id():
     return next(_id_sequence)
 
+
 OBJECT_TYPE_REF_MAP = {
+    'app_group_summary': _gen_uuid,
     'container_clusters': _gen_uuid,
     'container_workload_profiles': _gen_uuid,
     'enforcement_boundaries': _gen_int_id,
@@ -56,8 +59,8 @@ class PCEObjectMock(object):
     """
     Base class for PCE object mocks
     """
-    base_pattern = '^/api/v2(?:/orgs/\d+)?(?:/sec_policy/(?:draft|active))?/([a-zA-Z_\-]+)'
-    href_pattern = '^/api/v2((?:/orgs/\d+)?(?:/sec_policy/(?:draft|active))?(?:/[a-zA-Z_\-]+/[a-zA-Z0-9\-]+)+)$'
+    base_pattern = r'^/api/v2(?:/orgs/\d+)?(?:/sec_policy/(?:draft|active))?/([a-zA-Z_\-]+)'
+    href_pattern = r'^/api/v2((?:/orgs/\d+)?(?:/sec_policy/(?:draft|active))?(?:/[a-zA-Z_\-]+/[a-zA-Z0-9\-]+)+)$'
 
     def __init__(self) -> None:
         self.mock_objects = []
@@ -89,7 +92,7 @@ class PCEObjectMock(object):
         matching_objects = []
         for o in self._object_sieve(path):
             match = True
-            query_pattern = re.compile('([a-zA-Z0-9_\-\+%]+)=([a-zA-Z0-9_\-\+%\.\\\/~]+)')
+            query_pattern = re.compile(r'([a-zA-Z0-9_\-+%]+)=([a-zA-Z0-9_\-+%.\\/~]+)')
             for param_match in re.finditer(query_pattern, path):
                 key, value = param_match.group(1), unquote_plus(param_match.group(2), encoding='utf-8')
                 if key not in o:
@@ -172,4 +175,5 @@ class MockResponse():
     headers = {'X-Total-Count': 0}
 
     def raise_for_status(self): pass
+
     def json(self): return {}

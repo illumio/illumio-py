@@ -63,6 +63,7 @@ def deprecated(deprecated_in, message=None):
     Deprecation decorator, adapted from https://stackoverflow.com/a/30253848
     Will emit a warning when the decorated function is called.
     """
+
     def _deprecated(func):
         @functools.wraps(func)
         def wrapper(*args, **kwargs):
@@ -72,7 +73,9 @@ def deprecated(deprecated_in, message=None):
             warning_message = message or default_message
             warnings.warn(warning_message, category=DeprecationWarning, stacklevel=2)
             return func(*args, **kwargs)
+
         return wrapper
+
     return _deprecated
 
 
@@ -90,14 +93,14 @@ def pce_api(name: str, endpoint: str = None, is_sec_policy=False, is_global=Fals
 
     For example:
 
-    >>> @pce_api('labels', endpoint='/labels')
-    >>> class Label(IllumioObject):
-    ...     ...
-    >>> pce = PolicyComputeEngine(...)
-    >>> # the 'labels' name is registered, and so we can
-    >>> # call /labels endpoints through the _PCEObjectAPI interface
-    >>> labels = pce.labels.get()
-    >>> labels
+        >>> @pce_api('labels', endpoint='/labels')
+        >>> class Label(IllumioObject):
+        ...     ...
+        >>> pce = PolicyComputeEngine(...)
+        >>> # the 'labels' name is registered, and so we can
+        >>> # call /labels endpoints through the _PCEObjectAPI interface
+        >>> labels = pce.labels.get()
+        >>> labels
     [
         Label(
             href='/orgs/1/labels/1',
@@ -118,6 +121,7 @@ def pce_api(name: str, endpoint: str = None, is_sec_policy=False, is_global=Fals
             such as /health or /users. These APIs operate on the entire PCE rather
             than a single tenant, and don't need the /orgs/{org_id} prefix.
     """
+
     def _decorator(cls):
         @dataclass
         class __PCEApi:
@@ -126,6 +130,7 @@ def pce_api(name: str, endpoint: str = None, is_sec_policy=False, is_global=Fals
             object_class: object
             is_sec_policy: bool
             is_global: bool
+
         PCE_APIS[name] = __PCEApi(
             name=name,
             endpoint=endpoint or '/{}'.format(name),
@@ -134,6 +139,7 @@ def pce_api(name: str, endpoint: str = None, is_sec_policy=False, is_global=Fals
             is_global=is_global
         )
         return cls
+
     return _decorator
 
 
@@ -146,13 +152,13 @@ def parse_url(url: str) -> tuple:
     Returns:
         tuple: parsed (scheme, hostname)
     """
-    pattern = re.compile('^\w+://')
+    pattern = re.compile(r'^\w+://')
     if not re.match(pattern, url):
         url = 'https://{}'.format(url)
     parsed = urlparse(url)
     scheme = parsed.scheme
     if scheme not in ('http', 'https'):
-        scheme = 'https'     # only support http(s)
+        scheme = 'https'  # only support http(s)
     return scheme, parsed.hostname
 
 
@@ -178,13 +184,13 @@ def convert_protocol(protocol: str) -> int:
         raise IllumioException('Invalid protocol name: {}'.format(protocol))
 
 
-def validate_int(val: typing.Any, minimum: int=0, maximum: int=sys.maxsize) -> None:
+def validate_int(val: typing.Any, minimum: int = 0, maximum: int = sys.maxsize) -> None:
     """Validates a given value is an integer and is within min <= val <= max.
 
     Args:
         val (Any): value to validate.
-        min (int, optional): validation lower bound. Defaults to 0.
-        max (int, optional): validation upper bound. Defaults to sys.maxsize.
+        minimum (int, optional): validation lower bound. Defaults to 0.
+        maximum (int, optional): validation upper bound. Defaults to sys.maxsize.
 
     Raises:
         IllumioIntegerValidationException: if an invalid value is provided.
@@ -195,6 +201,7 @@ def validate_int(val: typing.Any, minimum: int=0, maximum: int=sys.maxsize) -> N
         valid = False
     if not valid:
         raise IllumioIntegerValidationException(val, minimum, maximum)
+
 
 if hasattr(typing, 'get_origin'):
     # python 3.8+ - introduces the get_origin function
@@ -234,7 +241,6 @@ else:
         if hasattr(type_, '__extra__'):
             return type_.__extra__ is list
         return False
-
 
 __all__ = [
     'ignore_empty_keys',

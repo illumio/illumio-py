@@ -20,6 +20,7 @@ from .workloads import *
 from .rules import *
 from .explorer import *
 from .pce import *
+from .appgroups import *
 
 from types import ModuleType
 
