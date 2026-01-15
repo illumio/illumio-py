@@ -107,7 +107,7 @@ class JsonObject(ABC):
         Multi-process wrapper for from_json to process multiple JSON objects.
         """
         max_workers = max_workers or (cpu_count() // 2)
-        chunksize = int(len(data_list) / (10 * cpu_count))
+        chunksize = int(len(data_list) / (10 * cpu_count()))
 
         with Pool(max_workers) as pool:
             results = pool.map(cls.from_json, data_list, chunksize=chunksize)

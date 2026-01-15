@@ -92,8 +92,11 @@ def _parse_traffic_filters(refs: List[Any], include=False) -> List[object]:
                 o = {'ip_address': ref}
             except socket.error:
                 raise IllumioException('Invalid traffic filter type: {}'.format(ref))
-        traffic_objects.append([o] if include else o)
-    return traffic_objects
+        traffic_objects.append(o)
+    if include:
+        return [traffic_objects]
+    else:
+        return traffic_objects
 
 
 @dataclass
@@ -143,8 +146,8 @@ class TrafficQuery(JsonObject):
     @staticmethod
     def build(start_date: Optional[Union[str, int, float]],
             end_date: Optional[Union[str, int, float]],
-            include_sources=[[]], exclude_sources=[],
-            include_destinations=[[]], exclude_destinations=[],
+            include_sources=[], exclude_sources=[],
+            include_destinations=[], exclude_destinations=[],
             include_services=[], exclude_services=[], policy_decisions=[],
             exclude_workloads_from_ip_list_query=True, max_results=100000,
             query_name: str = None) -> 'TrafficQuery':
