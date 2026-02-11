@@ -23,8 +23,12 @@ class LabelUsage(JsonObject):
     rule: bool = None
     static_policy_scopes: bool = None
     containers_inherit_host_policy_scopes: bool = None
-    blocked_connection_reject_scope: bool = None
+    blocked_connection_reject_scopes: bool = None
     enforcement_boundary: bool = None
+    loopback_interfaces_in_policy_scopes: bool = None
+    ip_forwarding_enabled_scopes: bool = None
+    rule_hit_count_enabled_scopes: bool = None
+    protection_schema: bool = None
 
 
 @dataclass

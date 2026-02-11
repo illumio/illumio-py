@@ -14,6 +14,8 @@ License:
 """
 import copy
 import json
+import sys
+import typing
 from abc import ABC
 from dataclasses import Field, dataclass, fields
 from inspect import signature, isclass
@@ -54,6 +56,7 @@ class JsonObject(ABC):
                 raise AttributeError("Invalid value for {}: {}. Must be of type {}".format(field.name, value, field.type))
 
     def _validate_field(self, expected_type, value) -> bool:
+        expected_type = self._resolve_type(expected_type)
         if value is None:
             return True
         elif expected_type is object:
@@ -147,13 +150,25 @@ class JsonObject(ABC):
         if isinstance(value, JsonObject):
             # if the value has already been decoded, return it
             return value
-        elif isclass(type_) and issubclass(type_, JsonObject):
+        # elif isclass(type_) and issubclass(type_, JsonObject):
+        type_ = self._resolve_type(type_)
+        if isclass(type_) and issubclass(type_, JsonObject):
             return type_.from_json(value)
         elif isinstance(value, list):
             # if the value is a list, expect the field type to be List[T]
             type_ = type_.__args__[0]
             return list(self._decode_field(type_, o) for o in value)
         return value
+
+    def _resolve_type(self, type_):
+        if isinstance(type_, str):
+            module = sys.modules[self.__module__]
+            return getattr(module, type_, type_)
+        if hasattr(typing, 'ForwardRef') and isinstance(type_, typing.ForwardRef):
+            return self._resolve_type(type_.__forward_arg__)
+        if hasattr(typing, '_ForwardRef') and isinstance(type_, typing._ForwardRef):
+            return self._resolve_type(type_.__forward_arg__)
+        return type_
 
 
 def flatten_ref(type_, value):
