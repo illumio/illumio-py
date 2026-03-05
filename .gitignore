@@ -33,3 +33,5 @@ _version.py
 
 # local environment
 *.env
+
+dev/
