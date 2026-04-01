@@ -1,45 +1,176 @@
 [
     {
-        "href": "/orgs/1/sec_policy/draft/label_groups/84866624-ba4a-418f-918c-10399b1f07ac",
-        "created_at": "2026-02-10T13:25:14.611Z",
-        "updated_at": "2026-02-10T13:27:16.900Z",
+        "href": "/orgs/65567/sec_policy/draft/label_groups/e39227fe-d584-49a2-9393-c2d3bf249659",
+        "created_at": "2026-04-01T03:54:20.799Z",
+        "updated_at": "2026-04-01T03:54:37.625Z",
         "deleted_at": null,
         "created_by": {
-            "href": "/users/1"
+            "href": "/users/56294995342151520"
         },
         "updated_by": {
-            "href": "/users/1"
+            "href": "/users/56294995342151520"
         },
         "deleted_by": null,
-        "update_type": "create",
-        "name": "WindowsApplications",
+        "update_type": null,
+        "name": "KCLG5",
+        "description": "Description for KCLG5",
+        "key": "servicecategory",
+        "labels": [
+            {
+                "href": "/orgs/65567/labels/281474976712794",
+                "key": "servicecategory",
+                "value": "App Service"
+            },
+            {
+                "href": "/orgs/65567/labels/281474976712721",
+                "key": "servicecategory",
+                "value": "Compute"
+            }
+        ],
+        "sub_groups": []
+    },
+    {
+        "href": "/orgs/65567/sec_policy/draft/label_groups/aace9701-e71b-4e00-bca6-0afb878dad63",
+        "created_at": "2026-04-01T03:37:04.513Z",
+        "updated_at": "2026-04-01T03:37:26.580Z",
+        "deleted_at": null,
+        "created_by": {
+            "href": "/users/56294995342151520"
+        },
+        "updated_by": {
+            "href": "/users/56294995342151520"
+        },
+        "deleted_by": null,
+        "update_type": null,
+        "name": "KCLG3",
+        "description": "Description for KCLG3",
+        "key": "servicerole",
+        "labels": [
+            {
+                "href": "/orgs/65567/labels/281474976712748",
+                "key": "servicerole",
+                "value": "AgentPoolMachines"
+            },
+            {
+                "href": "/orgs/65567/labels/281474976712751",
+                "key": "servicerole",
+                "value": "AgentPools"
+            },
+            {
+                "href": "/orgs/65567/labels/281474976712733",
+                "key": "servicerole",
+                "value": "ComputeVirtualMachines"
+            }
+        ],
+        "sub_groups": []
+    },
+    {
+        "href": "/orgs/65567/sec_policy/draft/label_groups/f125dcef-a3f0-48c1-ad37-e5c2ada756e7",
+        "created_at": "2026-04-01T03:38:13.218Z",
+        "updated_at": "2026-04-01T03:38:33.734Z",
+        "deleted_at": null,
+        "created_by": {
+            "href": "/users/56294995342151520"
+        },
+        "updated_by": {
+            "href": "/users/56294995342151520"
+        },
+        "deleted_by": null,
+        "update_type": null,
+        "name": "KCLG4",
+        "description": "Description for LCLG4",
+        "key": "servicecategory",
+        "labels": [
+            {
+                "href": "/orgs/65567/labels/281474976712721",
+                "key": "servicecategory",
+                "value": "Compute"
+            },
+            {
+                "href": "/orgs/65567/labels/281474976712747",
+                "key": "servicecategory",
+                "value": "Containers"
+            }
+        ],
+        "sub_groups": []
+    },
+    {
+        "href": "/orgs/65567/sec_policy/draft/label_groups/917de8cc-9bfd-4fc3-b289-d1476d89c3de",
+        "created_at": "2026-04-01T03:33:38.051Z",
+        "updated_at": "2026-04-01T03:55:19.326Z",
+        "deleted_at": null,
+        "created_by": {
+            "href": "/users/56294995342151520"
+        },
+        "updated_by": {
+            "href": "/users/56294995342151520"
+        },
+        "deleted_by": null,
+        "update_type": null,
+        "name": "KCLG1",
         "description": "",
-        "key": "app",
-        "labels": [],
+        "key": "servicecategory",
+        "labels": [
+            {
+                "href": "/orgs/65567/labels/281474976712794",
+                "key": "servicecategory",
+                "value": "App Service"
+            },
+            {
+                "href": "/orgs/65567/labels/281474976712721",
+                "key": "servicecategory",
+                "value": "Compute"
+            },
+            {
+                "href": "/orgs/65567/labels/281474976712788",
+                "key": "servicecategory",
+                "value": "Databases"
+            }
+        ],
         "sub_groups": [
             {
-                "href": "/orgs/1/sec_policy/draft/label_groups/77ae18f5-b4cf-4404-a606-925114dec0f1",
-                "name": "WindowsAppsFromMicrosoft"
+                "href": "/orgs/65567/sec_policy/draft/label_groups/f125dcef-a3f0-48c1-ad37-e5c2ada756e7",
+                "name": "KCLG4"
+            },
+            {
+                "href": "/orgs/65567/sec_policy/draft/label_groups/e39227fe-d584-49a2-9393-c2d3bf249659",
+                "name": "KCLG5"
             }
         ]
     },
     {
-        "href": "/orgs/1/sec_policy/draft/label_groups/77ae18f5-b4cf-4404-a606-925114dec0f1",
-        "created_at": "2026-02-10T13:26:35.556Z",
-        "updated_at": "2026-02-10T13:26:35.556Z",
+        "href": "/orgs/65567/sec_policy/draft/label_groups/3c9185ac-a893-4935-b69f-c37de59980e0",
+        "created_at": "2026-04-01T03:34:50.014Z",
+        "updated_at": "2026-04-01T03:35:25.701Z",
         "deleted_at": null,
         "created_by": {
-            "href": "/users/1"
+            "href": "/users/56294995342151520"
         },
         "updated_by": {
-            "href": "/users/1"
+            "href": "/users/56294995342151520"
         },
         "deleted_by": null,
-        "update_type": "create",
-        "name": "WindowsAppsFromMicrosoft",
-        "description": "",
-        "key": "app",
-        "labels": [],
+        "update_type": null,
+        "name": "KCLG2",
+        "description": "description for KGLG2",
+        "key": "type",
+        "labels": [
+            {
+                "href": "/orgs/65567/labels/281474976712535",
+                "key": "type",
+                "value": "server"
+            },
+            {
+                "href": "/orgs/65567/labels/281474976712523",
+                "key": "type",
+                "value": "k8s-wkld"
+            },
+            {
+                "href": "/orgs/65567/labels/281474976712524",
+                "key": "type",
+                "value": "k8s-node"
+            }
+        ],
         "sub_groups": []
     }
 ]
