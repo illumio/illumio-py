@@ -74,3 +74,14 @@ def test_builder():
 def test_get_rules(pce):
     rules = pce.rules.get(parent=MOCK_RULE_SET_HREF)
     assert len(rules) > 0
+
+
+def test_get_all_empty_ruleset(pce, requests_mock):
+    def empty_callback(request, context):
+        return []
+
+    pattern = re.compile('/sec_rules')
+    requests_mock.register_uri('GET', pattern, json=empty_callback)
+
+    rules = pce.rules.get_all(parent=MOCK_RULE_SET_HREF)
+    assert rules == []
