@@ -537,7 +537,9 @@ class PolicyComputeEngine:
                 response = self.pce.get(endpoint, **kwargs)
                 if len(response.json()) > 0:  # for endpoints that don't support max_results
                     return [self.object_cls.from_json(o) for o in response.json()]
-                filtered_object_count = response.headers['X-Total-Count']
+                filtered_object_count = response.headers.get('X-Total-Count')
+                if not filtered_object_count:
+                    return []
                 kwargs['params'] = {**params, **{'max_results': int(filtered_object_count)}}
 
             response = self.pce.get(endpoint, **kwargs)
