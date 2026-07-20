@@ -35,6 +35,11 @@ def test_get_by_href(pce, rule):
     assert r.href == rule.href
 
 
+def test_get_all_empty_ruleset(pce, rule_set):
+    rules = pce.rules.get_all(parent=rule_set.href)
+    assert rules == []
+
+
 def test_get_from_rule_set(pce, rule_set, rule):
     rules = pce.rules.get(parent=rule_set.href)
     assert len(rules) == 1
